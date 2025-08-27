@@ -75,6 +75,29 @@
     </ol>
   </div>
 
+  <div class="section">
+  <h2>🎮 Coin Farm Bot</h2>
+  <label>Room Type:</label>
+  <select id="roomType">
+    <option value="QUICK_GAME">QUICK_GAME</option>
+    <option value="CUSTOM_GAME">CUSTOM_GAME</option>
+  </select>
+  <label>Delay:</label>
+  <select id="delaySelect">
+    <option value="10">10 minutes</option>
+    <option value="5">5 minutes</option>
+    <option value="2">2 minutes</option>
+  </select><br>
+  <input type="text" id="playerId1" placeholder="Player ID 1">
+  <input type="text" id="playerId2" placeholder="Player ID 2">
+  <input type="text" id="playerId3" placeholder="Player ID 3">
+  <input type="text" id="playerId4" placeholder="Player ID 4">
+  <input type="text" id="playerId5" placeholder="Player ID 5">
+  <input type="text" id="playerId6" placeholder="Player ID 6"><br>
+  <button onclick="toggleCoinFarmBot()">Start/Stop Coin Farm Bot</button>
+  <div id="cloudOutput" class="output">Bot output will appear here...</div>
+</div>
+
   <script>
     const titleId = "bdff1";
     let sessionTicket = null;
@@ -205,38 +228,81 @@
       document.getElementById("playerIdOutput").textContent = output;
 
       <script>
-  async function executeCloudScript(functionName) {
-    if (!sessionTicket) return alert("Please set your SessionTicket first.");
+  <script>
+  const titleId = "bdff1";
+  let sessionTicket = null;
+  let coinFarmBotRunning = false;
+  let coinFarmIntervalId = null;
 
-    const roomType = document.getElementById("roomType").value;
-    const playerIds = [
-      document.getElementById("playerId1").value.trim(),
-      document.getElementById("playerId2").value.trim(),
-      document.getElementById("playerId3").value.trim(),
-      document.getElementById("playerId4").value.trim(),
-      document.getElementById("playerId5").value.trim(),
-      document.getElementById("playerId6").value.trim()
-    ].filter(id => id);
-
-    const res = await fetch(`https://${titleId}.playfabapi.com/Client/ExecuteCloudScript`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Authorization": sessionTicket
-      },
-      body: JSON.stringify({
-        FunctionName: functionName,
-        FunctionParameter: {
-          roomType,
-          playerIds
-        },
-        GeneratePlayStreamEvent: true
-      })
-    });
-
-    const data = await res.json();
-    document.getElementById("cloudOutput").textContent = JSON.stringify(data, null, 2);
+  function setSessionTicket() {
+    sessionTicket = document.getElementById("sessionTicketInput").value.trim();
+    alert("SessionTicket set successfully!");
   }
+
+  function toggleCoinFarmBot() {
+    if (coinFarmBotRunning) {
+      clearInterval(coinFarmIntervalId);
+      coinFarmBotRunning = false;
+      alert("Coin Farm Bot stopped.");
+      return;
+    }
+
+    const delayMinutes = parseInt(document.getElementById("delaySelect").value);
+    const delayMs = delayMinutes * 60 * 1000;
+
+    coinFarmBotRunning = true;
+    alert(`Coin Farm Bot started with ${delayMinutes} minute delay.`);
+
+    async function runCoinFarmCycle() {
+      if (!sessionTicket) {
+        alert("Please set your SessionTicket first.");
+        return;
+      }
+
+      const roomType = document.getElementById("roomType").value;
+      const playerIds = [
+        document.getElementById("playerId1").value.trim(),
+        document.getElementById("playerId2").value.trim(),
+        document.getElementById("playerId3").value.trim(),
+        document.getElementById("playerId4").value.trim(),
+        document.getElementById("playerId5").value.trim(),
+        document.getElementById("playerId6").value.trim()
+      ].filter(id => id);
+
+      const functions = ["startNewMatch", "decideSpecialRole", "finishMatch"];
+      let output = `🕒 Cycle started at ${new Date().toLocaleTimeString()}\nRoom Type: ${roomType}\nPlayers: ${playerIds.join(", ")}\n`;
+
+      for (const fn of functions) {
+        try {
+          const res = await fetch(`https://${titleId}.playfabapi.com/Client/ExecuteCloudScript`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Authorization": sessionTicket
+            },
+            body: JSON.stringify({
+              FunctionName: fn,
+              FunctionParameter: { roomType, playerIds },
+              GeneratePlayStreamEvent: true
+            })
+          });
+
+          const data = await res.json();
+          const result = data.data?.FunctionResult || "No result returned.";
+          output += `✅ ${fn}: ${typeof result === "object" ? JSON.stringify(result) : result}\n`;
+        } catch (err) {
+          output += `❌ ${fn}: Error occurred.\n`;
+        }
+      }
+
+      output += `🌀 Waiting ${delayMinutes} minutes for next cycle...\n\n`;
+      document.getElementById("cloudOutput").textContent = output;
+    }
+
+    runCoinFarmCycle(); // Run immediately
+    coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs); // Repeat
+  }
+</script>
 </script>
     }
   </script>
