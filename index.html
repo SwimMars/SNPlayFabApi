@@ -753,61 +753,61 @@
       output.textContent = JSON.stringify(data, null, 2);
     }
 
-   async function grantCoupons() {
-      const output = document.getElementById("couponOutput");
-      output.textContent = "Starting coupon grant process...";
-      
-      try {
-        // Start purchase
-        output.textContent += "Starting purchase...\n";
-        const startData = await makeApiCall("Client/StartPurchase", "POST", {
-          StoreId: "steam_Shop_Currency",
-          Items: [{
-            ItemId: "Currency_Bundle_PileOfCoupons",
-            Quantity: 1
-          }]
-        });
+ async function grantCoupons() {
+  const output = document.getElementById("couponOutput");
+  output.textContent = "Starting coupon grant process...";
+  
+  try {
+    // Start purchase
+    output.textContent += "\nStarting purchase...";
+    const startData = await makeApiCall("Client/StartPurchase", "POST", {
+      StoreId: "steam_Shop_Currency",
+      Items: [{
+        ItemId: "Currency_Bundle_PileOfCoupons",
+        Quantity: 1
+      }]
+    });
 
-        if (startData.error) {
-          output.textContent += `Error in StartPurchase: ${JSON.stringify(startData.error, null, 2)}\n`;
-          return;
-        }
-
-        const orderId = startData.data?.OrderId;
-        if (!orderId) {
-          output.textContent += "StartPurchase failed. No OrderId returned.\n";
-          return;
-        }
-
-        output.textContent += `Order ID: ${orderId}\n`;
-        
-        // Pay for purchase
-        output.textContent += "Paying for purchase...\n";
-        const payData = await makeApiCall("Client/PayForPurchase", "POST", {
-          OrderId: orderId,
-          Currency: "RM",
-          ProviderName: "Steam"
-        });
-
-        if (payData.error) {
-          output.textContent += `Error in PayForPurchase: ${JSON.stringify(payData.error, null, 2)}\n`;
-          return;
-        }
-
-        output.textContent += "Payment successful. Confirming purchase...\n";
-        
-        // Confirm purchase
-        const confirmData = await makeApiCall("Client/ConfirmPurchase", "POST", {
-          OrderId: orderId
-        });
-
-        output.textContent += "Coupon process completed:\n" + 
-          JSON.stringify(confirmData, null, 2);
-          
-      } catch (error) {
-        output.textContent += `Unexpected error: ${error.message}\n`;
-      }
+    if (startData.error) {
+      output.textContent += `\nError in StartPurchase: ${JSON.stringify(startData.error, null, 2)}`;
+      return;
     }
+
+    const orderId = startData.data?.OrderId;
+    if (!orderId) {
+      output.textContent += "\nStartPurchase failed. No OrderId returned.";
+      return;
+    }
+
+    output.textContent += `\nOrder ID: ${orderId}`;
+    
+    // Pay for purchase
+    output.textContent += "\nPaying for purchase...";
+    const payData = await makeApiCall("Client/PayForPurchase", "POST", {
+      OrderId: orderId,
+      Currency: "RM",
+      ProviderName: "Steam"
+    });
+
+    // Always try to confirm purchase regardless of payment result
+    output.textContent += "\nConfirming purchase...";
+    
+    // Confirm purchase
+    const confirmData = await makeApiCall("Client/ConfirmPurchase", "POST", {
+      OrderId: orderId
+    });
+
+    if (confirmData.error) {
+      output.textContent += `\nError in ConfirmPurchase: ${JSON.stringify(confirmData.error, null, 2)}`;
+    } else {
+      output.textContent += "\nCoupon process completed:\n" + 
+        JSON.stringify(confirmData, null, 2);
+    }
+      
+  } catch (error) {
+    output.textContent += `\nUnexpected error: ${error.message}`;
+  }
+}
 
     
       
