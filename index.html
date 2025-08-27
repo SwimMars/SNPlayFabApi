@@ -501,8 +501,8 @@
       if (profileData.data) {
         const profile = profileData.data.PlayerProfile;
         resultText += "\n=== PROFILE INFO ===\n";
-        resultText += `Last Login: ${PlayerProfile?.LastLogin || "N/A"}\n`;
-        resultText += `Banned Until: ${PlayerProfile?.BannedUntil || "Not banned"}\n`;
+        resultText += `Last Login: ${profileData?.LastLogin || "N/A"}\n`;
+        resultText += `Banned Until: ${profileData?.BannedUntil || "Not banned"}\n`;
       }
 
       if (combinedData.error || profileData.error) {
