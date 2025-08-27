@@ -205,7 +205,7 @@
     });
 
     const data = await res.json();
-    const match = data.data?.SteamIdMappings?.[0];
+    const match = data.data?.Data?.[0];
     const output = match
       ? `PlayFabId for "${steamUsername}": ${match.PlayFabId}`
       : "No matching PlayFab ID found.";
