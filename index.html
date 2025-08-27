@@ -76,31 +76,34 @@
   </div>
 
   <div class="section">
-  <h2>🎮 Coin Farm Bot</h2>
-  <label>Room Type:</label>
-  <select id="roomType">
-    <option value="QUICK_GAME">QUICK_GAME</option>
-    <option value="CUSTOM_GAME">CUSTOM_GAME</option>
-  </select>
-  <label>Delay:</label>
-  <select id="delaySelect">
-    <option value="10">10 minutes</option>
-    <option value="5">5 minutes</option>
-    <option value="2">2 minutes</option>
-  </select><br>
-  <input type="text" id="playerId1" placeholder="Player ID 1">
-  <input type="text" id="playerId2" placeholder="Player ID 2">
-  <input type="text" id="playerId3" placeholder="Player ID 3">
-  <input type="text" id="playerId4" placeholder="Player ID 4">
-  <input type="text" id="playerId5" placeholder="Player ID 5">
-  <input type="text" id="playerId6" placeholder="Player ID 6"><br>
-  <button onclick="toggleCoinFarmBot()">Start/Stop Coin Farm Bot</button>
-  <div id="cloudOutput" class="output">Bot output will appear here...</div>
-</div>
+    <h2>🎮 Coin Farm Bot</h2>
+    <label>Room Type:</label>
+    <select id="roomType">
+      <option value="QUICK_GAME">QUICK_GAME</option>
+      <option value="CUSTOM_GAME">CUSTOM_GAME</option>
+    </select>
+    <label>Delay:</label>
+    <select id="delaySelect">
+      <option value="10">10 minutes</option>
+      <option value="5">5 minutes</option>
+      <option value="2">2 minutes</option>
+    </select><br>
+    <input type="text" id="playerId1" placeholder="Player ID 1">
+    <input type="text" id="playerId2" placeholder="Player ID 2">
+    <input type="text" id="playerId3" placeholder="Player ID 3">
+    <input type="text" id="playerId4" placeholder="Player ID 4">
+    <input type="text" id="playerId5" placeholder="Player ID 5">
+    <input type="text" id="playerId6" placeholder="Player ID 6"><br>
+    <button onclick="toggleCoinFarmBot()">Start/Stop Coin Farm Bot</button>
+    <div id="cloudOutput" class="output">Bot output will appear here...</div>
+  </div>
 
   <script>
     const titleId = "bdff1";
     let sessionTicket = null;
+    let coinFarmBotRunning = false;
+    let coinFarmIntervalId = null;
+
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -226,9 +229,8 @@
       const match = data.data?.SteamIdMappings?.[0];
       const output = match ? `PlayFabId for "${steamUsername}": ${match.PlayFabId}` : "No matching PlayFab ID found.";
       document.getElementById("playerIdOutput").textContent = output;
-      <script>
-  let coinFarmBotRunning = false;
-  let coinFarmIntervalId = null;
+      
+  
 
   function setSessionTicket() {
     sessionTicket = document.getElementById("sessionTicketInput").value.trim();
