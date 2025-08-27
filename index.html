@@ -2,540 +2,589 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secret Neighbor Exploits</title>
   <style>
-  body {
-  margin: 0;
-  padding: 0;
-  background-image: url('https://wallpaperaccess.com/full/9331537.jpg');
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  min-height: 100vh; /* ✅ FIXED */
-  font-family: Arial, sans-serif;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-y: auto;
-}
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url('https://wallpaperaccess.com/full/9331537.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+    }
 
     h1 {
       margin-top: 40px;
       text-shadow: 2px 2px 4px #000;
     }
 
+    .container {
+      width: 95%;
+      max-width: 1200px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding-bottom: 40px;
+    }
+
     .section {
       background-color: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(4px);
       padding: 20px;
-      margin: 20px;
       border-radius: 10px;
-      width: 90%;
-      max-width: 700px;
+      width: 100%;
+      max-width: 600px;
       text-align: center;
     }
 
+    .section h2 {
+      margin-top: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 10px;
+    }
+
     input, button, select {
-      margin: 5px;
-      padding: 8px;
+      margin: 8px 5px;
+      padding: 10px;
       font-size: 16px;
       width: 90%;
       max-width: 400px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
     }
 
     .output {
-      margin-top: 10px;
-      padding: 10px;
-      background: #f4f4f4;
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 5px;
       border: 1px solid #ccc;
       white-space: pre-wrap;
       color: black;
+      text-align: left;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .player-id-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    ol {
+      text-align: left;
+      padding-left: 20px;
+    }
+
+    a {
+      color: #4da6ff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-active {
+      background-color: #4CAF50;
+    }
+
+    .status-inactive {
+      background-color: #f44336;
+    }
+
+    .warning {
+      color: #ffcc00;
+      font-weight: bold;
+      margin: 10px 0;
     }
   </style>
 </head>
 <body>
   <h1>🎮 Secret Neighbor Exploits</h1>
 
-  <div class="section">
-    <h2>🔐 SessionTicket</h2>
-    <input id="sessionTicketInput" placeholder="Paste your SessionTicket here" type="text">
-    <button onclick="setSessionTicket()">Set Token</button>
+  <div class="container">
+    <div class="section">
+      <h2>🔐 Session Ticket</h2>
+      <input id="sessionTicketInput" placeholder="Paste your SessionTicket here" type="text">
+      <button onclick="setSessionTicket()">Set Token</button>
+      <div id="tokenStatus" class="output" style="display: none;">No token set</div>
+    </div>
+
+    <div class="section">
+      <h2>🛍️ Buy Skin/Emote</h2>
+      <input id="itemId" placeholder="ItemId" type="text">
+      <input id="price" placeholder="Price" type="number">
+      <input id="currency" placeholder="VirtualCurrency" type="text">
+      <button onclick="buySkinEmote()">Buy Skin/Emote</button>
+      <div class="output" id="purchaseOutput">Purchase results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🎁 Grant Coupons</h2>
+      <button onclick="grantCoupons()">Grant Coupons</button>
+      <div class="output" id="couponOutput">Coupon results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>📊 View Statistics</h2>
+      <button onclick="viewStatistics()">View Statistics</button>
+      <div class="output" id="statsOutput">Statistics will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🧑‍💻 Obtain Player ID With Username</h2>
+      <input id="steamUsername" placeholder="Steam Username" type="text">
+      <button onclick="getPlayFabId()">Obtain Player ID</button>
+      <div class="output" id="playerIdOutput">Player ID will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>💰 Add Coin (Call it In-Game)</h2>
+      <p class="warning">Warning: Do not use more than 30 coins per match!</p>
+      <button onclick="AddCoin()">Add Coin</button>
+      <div class="output" id="usefulDeedOutput">Coin results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🤖 Coin Farm Bot <span id="botStatus" class="status-indicator status-inactive"></span></h2>
+      <div class="grid-2">
+        <div>
+          <label>Room Type:</label>
+          <select id="roomType">
+            <option value="QUICK_GAME">QUICK_GAME</option>
+            <option value="CUSTOM_GAME">CUSTOM_GAME</option>
+          </select>
+        </div>
+        <div>
+          <label>Delay:</label>
+          <select id="delaySelect">
+            <option value="10">10 minutes</option>
+            <option value="5">5 minutes</option>
+            <option value="2">2 minutes</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="player-id-inputs">
+        <input id="playerId1" placeholder="Player ID 1" type="text">
+        <input id="playerId2" placeholder="Player ID 2" type="text">
+        <input id="playerId3" placeholder="Player ID 3" type="text">
+        <input id="playerId4" placeholder="Player ID 4" type="text">
+        <input id="playerId5" placeholder="Player ID 5" type="text">
+        <input id="playerId6" placeholder="Player ID 6" type="text">
+      </div>
+      
+      <button onclick="toggleCoinFarmBot()" id="botToggleButton">Start Coin Farm Bot</button>
+      <div class="output" id="cloudOutput">Bot output will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🧪 Level Editor</h2>
+      <input type="text" id="classIdInput" placeholder="Class ID">
+      <input type="number" id="receivedXPInput" placeholder="Received XP">
+      <input type="number" id="xpInput" placeholder="XP">
+      <input type="number" id="xpToNextLevelInput" placeholder="XP to Next Level">
+      <input type="number" id="levelInput" placeholder="Level">
+      <input type="number" id="perkSlotsInput" placeholder="Available Perk Slots (max 3)" max="3" min="0">
+      <input type="number" id="playerLevelInput" placeholder="Player Level">
+      <button onclick="submitLevelProgression()">Submit</button>
+      <div class="output" id="levelProgressionOutput">Level progression results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🔍 PlayFab Info Lookup</h2>
+      <input type="text" id="playfabId" placeholder="Enter PlayFab ID">
+      <button onclick="getPlayFabInfo()">Get Info</button>
+      <div class="output" id="playfabInfoOutput">Results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>📄 How to Get Your SessionTicket with Requestly</h2>
+      <ol>
+        <li>Download the Requestly desktop app from <a href="https://docs.requestly.com/general/sessions/record-api-sessions" target="_blank">here</a>.</li>
+        <li>Open Requestly and start recording network traffic.</li>
+        <li>Log into your game or app using PlayFab.</li>
+        <li>Find the request to <code>/Client/LoginWithSteam</code> or similar.</li>
+        <li>Copy the <code>SessionTicket</code> or <code>X-Authorization</code> from the response body.</li>
+        <li>Paste it into the field above and click "Set Token".</li>
+      </ol>
+    </div>
   </div>
-  <div id="statsOutput"></div>
-<div id="result"></div>
-<div id="playerIdOutput"></div>
-
-
-  <div class="section">
-    <h2>🛍️ Buy Skin/Emote</h2>
-    <input id="itemId" placeholder="ItemId" type="text">
-    <input id="price" placeholder="Price" type="number">
-    <input id="currency" placeholder="VirtualCurrency" type="text">
-    <button onclick="buySkinEmote()">Buy Skin/Emote</button>
-  </div>
-
-  <div class="section">
-    <h2>🎁 Grant Coupons</h2>
-    <button onclick="grantCoupons()">Grant Coupons</button>
-  </div>
-
-  <div class="section">
-    <h2>📊 View Statistics</h2>
-    <button onclick="viewStatistics()">View Statistics</button>
-    <div class="output" id="statsOutput"></div>
-  </div>
-
-  <div class="section">
-    <h2>🧑‍💻 Obtain Player ID With Username</h2>
-    <input id="steamUsername" placeholder="Steam Username" type="text">
-    <button onclick="getPlayFabId()">Obtain Player ID</button>
-    <div class="output" id="playerIdOutput"></div>
-  </div>
-
-  <div class="section">
-    <h2>📄 How to Get Your SessionTicket with Requestly</h2>
-    <ol>
-      <li>Download the Requestly desktop app from <a href="https://docs.requestly.com/general/sessions/record-api-sessions" target="_blank">here</a>.</li>
-      <li>Open Requestly and start recording network traffic.</li>
-      <li>Log into your game or app using PlayFab.</li>
-      <li>Find the request to <code>/Client/LoginWithSteam</code> or similar.</li>
-      <li>Copy the <code>SessionTicket</code> or <code>X-Authorization</code> from the response body.</li>
-      <li>Paste it into the field above and click "Set Token".</li>
-    </ol>
-  </div>
-
-  <div class="section">
-    <h2>💰 Add Coin (Call it In-Game)</h2>
-    <button onclick="AddCoin()">Add Coin (No more than 30 per match)</button>
-    <div class="output" id="usefulDeedOutput"></div>
-  </div>
-
-  <div class="section">
-    <h2>🤖 Coin Farm Bot</h2>
-    <label>Room Type:</label>
-    <select id="roomType">
-      <option value="QUICK_GAME">QUICK_GAME</option>
-      <option value="CUSTOM_GAME">CUSTOM_GAME</option>
-    </select>
-    <label>Delay:</label>
-    <select id="delaySelect">
-      <option value="10">10 minutes</option>
-      <option value="5">5 minutes</option>
-      <option value="2">2 minutes</option>
-    </select><br>
-    <input id="playerId1" placeholder="Player ID 1" type="text">
-    <input id="playerId2" placeholder="Player ID 2" type="text">
-    <input id="playerId3" placeholder="Player ID 3" type="text">
-    <input id="playerId4" placeholder="Player ID 4" type="text">
-    <input id="playerId5" placeholder="Player ID 5" type="text">
-    <input id="playerId6" placeholder="Player ID 6" type="text"><br>
-    <button onclick="toggleCoinFarmBot()">Start/Stop Coin Farm Bot</button>
-    <div class="output" id="cloudOutput">Bot output will appear here...</div>
-  </div>
-
-  <div class="section">
-    <h2>🧪 Level Editor</h2>
-    <input type="text" id="classIdInput" placeholder="Class ID"><br>
-    <input type="number" id="receivedXPInput" placeholder="Received XP"><br>
-    <input type="number" id="xpInput" placeholder="XP"><br>
-    <input type="number" id="xpToNextLevelInput" placeholder="XP to Next Level"><br>
-    <input type="number" id="levelInput" placeholder="Level"><br>
-    <input type="number" id="perkSlotsInput" placeholder="Available Perk Slots (max 3)" max="3"><br>
-    <input type="number" id="playerLevelInput" placeholder="Player Level"><br>
-    <button onclick="submitLevelProgression()">Submit</button>
-    <div class="output" id="levelProgressionOutput"></div>
-  </div>
-
-  <body>
-  <h2>🔍 PlayFab Info Lookup</h2>
-
-  <!-- Text field for PlayFab ID -->
-  <label for="playfabId">PlayFab ID:</label>
-  <input type="text" id="playfabId" placeholder="Enter PlayFab ID" />
-
-  <!-- Button to trigger the API calls -->
-  <button onclick="getPlayFabInfo()">Get Info</button>
-
-  <!-- Result display box -->
-  <pre id="result">Results will appear here...</pre>
-</body>
 
   <script>
-    // Your JavaScript functions go here
-    // Example: setSessionTicket(), buySkinEmote(), grantCoupons(), etc.
+    const titleId = "bdff1";
+    let sessionTicket = null;
+    let coinFarmBotRunning = false;
+    let coinFarmIntervalId = null;
+
+    function setSessionTicket() {
+      sessionTicket = document.getElementById("sessionTicketInput").value.trim();
+      const tokenStatus = document.getElementById("tokenStatus");
+      
+      if (sessionTicket) {
+        tokenStatus.textContent = "✅ Token set successfully!";
+        tokenStatus.style.display = "block";
+        tokenStatus.style.color = "green";
+        console.log("SessionTicket set:", sessionTicket);
+      } else {
+        tokenStatus.textContent = "❌ Please enter a valid token";
+        tokenStatus.style.display = "block";
+        tokenStatus.style.color = "red";
+      }
+    }
+
+    async function makeApiCall(endpoint, method, body) {
+      if (!sessionTicket) {
+        alert("Please set your SessionTicket first.");
+        return null;
+      }
+
+      try {
+        const res = await fetch(`https://${titleId}.playfabapi.com/${endpoint}`, {
+          method: method,
+          headers: {
+            "Content-Type": "application/json",
+            "X-Authorization": sessionTicket
+          },
+          body: JSON.stringify(body)
+        });
+        
+        return await res.json();
+      } catch (error) {
+        console.error("API call failed:", error);
+        return { error: error.message };
+      }
+    }
+
+    async function buySkinEmote() {
+      const ItemId = document.getElementById("itemId").value.trim();
+      const Price = parseInt(document.getElementById("price").value);
+      const VirtualCurrency = document.getElementById("currency").value.trim();
+      
+      if (!ItemId || isNaN(Price) || !VirtualCurrency) {
+        document.getElementById("purchaseOutput").textContent = "Please fill all fields correctly.";
+        return;
+      }
+
+      const data = await makeApiCall("Client/PurchaseItem", "POST", {
+        ItemId,
+        Price,
+        VirtualCurrency
+      });
+
+      const output = document.getElementById("purchaseOutput");
+      output.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function grantCoupons() {
+      const output = document.getElementById("couponOutput");
+      output.textContent = "Starting coupon grant process...";
+      
+      // Start purchase
+      const startData = await makeApiCall("Client/StartPurchase", "POST", {
+        StoreId: "steam_Shop_Currency",
+        Items: [{
+          ItemId: "Currency_Bundle_PileOfCoupons",
+          Quantity: 1
+        }]
+      });
+
+      if (startData.error) {
+        output.textContent = "Error in StartPurchase: " + startData.error;
+        return;
+      }
+
+      const orderId = startData.data?.OrderId;
+      if (!orderId) {
+        output.textContent = "StartPurchase failed. No OrderId returned.";
+        return;
+      }
+
+      // Pay for purchase
+      const payData = await makeApiCall("Client/PayForPurchase", "POST", {
+        OrderId: orderId,
+        Currency: "RM",
+        ProviderName: "Steam"
+      });
+
+      if (payData.error) {
+        output.textContent = "Error in PayForPurchase: " + payData.error;
+        return;
+      }
+
+      // Confirm purchase
+      const confirmData = await makeApiCall("Client/ConfirmPurchase", "POST", {
+        OrderId: orderId
+      });
+
+      output.textContent = "Coupon process completed:\n" + 
+        JSON.stringify(confirmData, null, 2);
+    }
+
+    async function viewStatistics() {
+      const data = await makeApiCall("Client/GetPlayerStatistics", "POST", {});
+      const output = document.getElementById("statsOutput");
+      
+      if (data.data?.Statistics) {
+        const stats = data.data.Statistics.map(stat => 
+          `${stat.StatisticName}: ${stat.Value}`
+        ).join("\n");
+        output.textContent = stats || "No statistics found.";
+      } else {
+        output.textContent = "Error retrieving statistics: " + 
+          (data.error || "Unknown error");
+      }
+    }
+
+    async function getPlayFabId() {
+      const steamUsername = document.getElementById("steamUsername").value.trim();
+      if (!steamUsername) {
+        alert("Please enter a Steam username.");
+        return;
+      }
+
+      const data = await makeApiCall("Client/GetPlayFabIDsFromSteamNames", "POST", {
+        SteamNames: [steamUsername]
+      });
+
+      const output = document.getElementById("playerIdOutput");
+      if (data.data?.Data?.[0]) {
+        const match = data.data.Data[0];
+        output.textContent = `PlayFabId for "${steamUsername}": ${match.PlayFabId}`;
+      } else {
+        output.textContent = "No matching PlayFab ID found.";
+      }
+    }
+
+    async function AddCoin() {
+      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+        FunctionName: "usefulDeed",
+        FunctionParameter: {},
+        GeneratePlayStreamEvent: true
+      });
+
+      const output = document.getElementById("usefulDeedOutput");
+      if (data.data?.FunctionResult) {
+        const result = data.data.FunctionResult;
+        const formatted = typeof result === "object" ? 
+          Object.entries(result).map(([key, val]) => `- ${key}: ${val}`).join("\n") : 
+          result;
+        output.textContent = `✅ usefulDeed Result:\n${formatted}`;
+      } else {
+        output.textContent = "Error: " + (data.error || "Unknown error");
+      }
+    }
+
+    async function submitLevelProgression() {
+      const classId = document.getElementById("classIdInput").value.trim();
+      const receivedXP = parseInt(document.getElementById("receivedXPInput").value);
+      const XP = parseInt(document.getElementById("xpInput").value);
+      const XpToNextLevel = parseInt(document.getElementById("xpToNextLevelInput").value);
+      const level = parseInt(document.getElementById("levelInput").value);
+      const availablePerkSlotsCount = Math.min(parseInt(document.getElementById("perkSlotsInput").value), 3);
+      const playerLevel = parseInt(document.getElementById("playerLevelInput").value);
+
+      if (!classId || isNaN(receivedXP) || isNaN(XP) || isNaN(XpToNextLevel) || 
+          isNaN(level) || isNaN(availablePerkSlotsCount) || isNaN(playerLevel)) {
+        alert("Please fill in all fields correctly.");
+        return;
+      }
+
+      const currentLevelProgression = {
+        playerLevel,
+        classLevel: [{
+          classId,
+          XP,
+          XpToNextLevel,
+          level,
+          availablePerkSlotsCount
+        }]
+      };
+
+      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+        FunctionName: "setLevelProgressionForClass",
+        FunctionParameter: {
+          classId,
+          receivedXP,
+          currentLevelProgression: JSON.stringify(currentLevelProgression)
+        },
+        GeneratePlayStreamEvent: true
+      });
+
+      const output = document.getElementById("levelProgressionOutput");
+      output.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function getPlayFabInfo() {
+      const playfabId = document.getElementById("playfabId").value.trim();
+      const output = document.getElementById("playfabInfoOutput");
+      
+      if (!playfabId) {
+        output.textContent = "Please enter a PlayFab ID.";
+        return;
+      }
+
+      output.textContent = "Fetching data...";
+
+      // Get combined info
+      const combinedData = await makeApiCall("Client/GetPlayerCombinedInfo", "POST", {
+        PlayFabId: playfabId,
+        InfoRequestParameters: {
+          GetUserAccountInfo: true,
+          GetPlayerStatistics: true,
+          GetUserInventory: true
+        }
+      });
+
+      // Get profile info
+      const profileData = await makeApiCall("Client/GetPlayerProfile", "POST", {
+        PlayFabId: playfabId,
+        ProfileConstraints: {
+          ShowLastLogin: true,
+          ShowBannedUntil: true
+        }
+      });
+
+      let resultText = "";
+      
+      if (combinedData.data) {
+        const info = combinedData.data;
+        resultText += "=== ACCOUNT INFO ===\n";
+        resultText += `Username: ${info.AccountInfo?.Username || "N/A"}\n`;
+        resultText += `Created: ${info.AccountInfo?.Created || "N/A"}\n`;
+        
+        if (info.PlayerStatistics) {
+          resultText += "\n=== STATISTICS ===\n";
+          info.PlayerStatistics.forEach(stat => {
+            resultText += `${stat.StatisticName}: ${stat.Value}\n`;
+          });
+        }
+      }
+
+      if (profileData.data) {
+        const profile = profileData.data.PlayerProfile;
+        resultText += "\n=== PROFILE INFO ===\n";
+        resultText += `Last Login: ${profile?.LastLogin || "N/A"}\n`;
+        resultText += `Banned Until: ${profile?.BannedUntil || "Not banned"}\n`;
+      }
+
+      if (combinedData.error || profileData.error) {
+        resultText += "\n=== ERRORS ===\n";
+        if (combinedData.error) resultText += `Combined Info Error: ${combinedData.error}\n`;
+        if (profileData.error) resultText += `Profile Error: ${profileData.error}\n`;
+      }
+
+      output.textContent = resultText || "No data received.";
+    }
+
+    function toggleCoinFarmBot() {
+      if (coinFarmBotRunning) {
+        clearInterval(coinFarmIntervalId);
+        coinFarmBotRunning = false;
+        document.getElementById("botStatus").className = "status-indicator status-inactive";
+        document.getElementById("botToggleButton").textContent = "Start Coin Farm Bot";
+        document.getElementById("cloudOutput").textContent += "\nBot stopped manually.";
+        return;
+      }
+
+      const delayMinutes = parseInt(document.getElementById("delaySelect").value);
+      const delayMs = delayMinutes * 60 * 1000;
+
+      coinFarmBotRunning = true;
+      document.getElementById("botStatus").className = "status-indicator status-active";
+      document.getElementById("botToggleButton").textContent = "Stop Coin Farm Bot";
+
+      document.getElementById("cloudOutput").textContent = 
+        `Starting Coin Farm Bot with ${delayMinutes} minute interval...\n`;
+
+      async function runCoinFarmCycle() {
+        const roomType = document.getElementById("roomType").value;
+        const playerIds = [
+          document.getElementById("playerId1").value.trim(),
+          document.getElementById("playerId2").value.trim(),
+          document.getElementById("playerId3").value.trim(),
+          document.getElementById("playerId4").value.trim(),
+          document.getElementById("playerId5").value.trim(),
+          document.getElementById("playerId6").value.trim()
+        ].filter(id => id);
+
+        const functions = ["startNewMatch", "decideSpecialRole", "finishMatch"];
+        let output = `\n=== Cycle started at ${new Date().toLocaleTimeString()} ===\n`;
+        output += `Room Type: ${roomType}\nPlayers: ${playerIds.join(", ") || "None"}\n`;
+
+        for (const fn of functions) {
+          try {
+            const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+              FunctionName: fn,
+              FunctionParameter: { roomType, playerIds },
+              GeneratePlayStreamEvent: true
+            });
+
+            if (data.error) {
+              output += `❌ ${fn}: Error - ${data.error}\n`;
+            } else {
+              const result = data.data?.FunctionResult;
+              output += `✅ ${fn}: ${typeof result === "object" ? JSON.stringify(result) : result}\n`;
+            }
+          } catch (err) {
+            output += `❌ ${fn}: Exception - ${err.message}\n`;
+          }
+        }
+
+        output += `Waiting ${delayMinutes} minutes for next cycle...\n`;
+        const cloudOutput = document.getElementById("cloudOutput");
+        cloudOutput.textContent += output;
+        cloudOutput.scrollTop = cloudOutput.scrollHeight;
+      }
+
+      // Run first cycle immediately
+      runCoinFarmCycle();
+      
+      // Set up interval for subsequent cycles
+      coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs);
+    }
+
+    // Initialize page
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log("Secret Neighbor Exploits page loaded");
+    });
   </script>
 </body>
 </html>
-    </div>
-    <script>
-        const titleId = "bdff1";
-        let sessionTicket = null;
-        let coinFarmBotRunning = false;
-        let coinFarmIntervalId = null;
-
-        function setSessionTicket() {
-            sessionTicket = document.getElementById("sessionTicketInput").value.trim();
-            console.log("SessionTicket set:", sessionTicket);
-            alert("SessionTicket set successfully!");
-        }
-
-        async function buySkinEmote() {
-            if (!sessionTicket) return alert("Please set your SessionTicket first.");
-
-            const ItemId = document.getElementById("itemId").value.trim();
-            const Price = parseInt(document.getElementById("price").value);
-            const VirtualCurrency = document.getElementById("currency").value.trim();
-
-            const res = await fetch(`https://${titleId}.playfabapi.com/Client/PurchaseItem`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Authorization": sessionTicket
-                },
-                body: JSON.stringify({
-                    ItemId,
-                    Price,
-                    VirtualCurrency
-                })
-            });
-
-            const data = await res.json();
-            console.log("PurchaseItem response:", data);
-            alert("PurchaseItem response logged to console.");
-        }
-
-        async function submitLevelProgression() {
-            const classId = document.getElementById("classIdInput").value.trim();
-            const receivedXP = parseInt(document.getElementById("receivedXPInput").value);
-            const XP = parseInt(document.getElementById("xpInput").value);
-            const XpToNextLevel = parseInt(document.getElementById("xpToNextLevelInput").value);
-            const level = parseInt(document.getElementById("levelInput").value);
-            const availablePerkSlotsCount = Math.min(parseInt(document.getElementById("perkSlotsInput").value), 3);
-            const playerLevel = parseInt(document.getElementById("playerLevelInput").value);
-
-            if (!classId || isNaN(receivedXP) || isNaN(XP) || isNaN(XpToNextLevel) || isNaN(level) || isNaN(availablePerkSlotsCount) || isNaN(playerLevel)) {
-                return alert("Please fill in all fields correctly.");
-            }
-
-            const currentLevelProgression = {
-                playerLevel,
-                classLevel: [{
-                    classId,
-                    XP,
-                    XpToNextLevel,
-                    level,
-                    availablePerkSlotsCount
-                }]
-            };
-
-            try {
-                const res = await fetch("https://bdff1.playfabapi.com/Client/ExecuteCloudScript", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Authorization": sessionTicket // Make sure this is set
-                    },
-                    body: JSON.stringify({
-                        FunctionName: "setLevelProgressionForClass",
-                        FunctionParameter: {
-                            classId,
-                            receivedXP,
-                            currentLevelProgression: JSON.stringify(currentLevelProgression)
-                        },
-                        GeneratePlayStreamEvent: true
-                    })
-                });
-
-                const data = await res.json();
-                const result = data.data?.FunctionResult || "No result returned.";
-                document.getElementById("levelProgressionOutput").textContent = `&#9989; Response:\n${JSON.stringify(result, null, 2)}`;
-                console.log("API response:", data);
-            } catch (err) {
-                document.getElementById("levelProgressionOutput").textContent = "&#10060; Error occurred.";
-                console.error("Error:", err);
-            }
-        }
-
-        async function grantCoupons() {
-            if (!sessionTicket) return alert("Please set your SessionTicket first.");
-
-            const startRes = await fetch(`https://${titleId}.playfabapi.com/Client/StartPurchase`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Authorization": sessionTicket
-                },
-                body: JSON.stringify({
-                    StoreId: "steam_Shop_Currency",
-                    Items: [{
-                        ItemId: "Currency_Bundle_PileOfCoupons",
-                        Quantity: 1
-                    }]
-                })
-            });
-
-            const startData = await startRes.json();
-            const orderId = startData.data?.OrderId;
-            if (!orderId) return alert("StartPurchase failed.");
-
-            await fetch(`https://${titleId}.playfabapi.com/Client/PayForPurchase`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Authorization": sessionTicket
-                },
-                body: JSON.stringify({
-                    OrderId: orderId,
-                    Currency: "RM",
-                    ProviderName: "Steam"
-                })
-            });
-
-            await fetch(`https://${titleId}.playfabapi.com/Client/ConfirmPurchase`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Authorization": sessionTicket
-                },
-                body: JSON.stringify({
-                    OrderId: orderId
-                })
-            });
-
-            alert("GrantCoupons flow completed. Check console for details.");
-        }
-
-        async function AddCoin() {
-            if (!sessionTicket) return alert("Please set your SessionTicket first.");
-
-            try {
-                const res = await fetch(`https://${titleId}.playfabapi.com/Client/ExecuteCloudScript`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Authorization": sessionTicket
-                    },
-                    body: JSON.stringify({
-                        FunctionName: "usefulDeed",
-                        FunctionParameter: {}, // Add parameters here if needed
-                        GeneratePlayStreamEvent: true
-                    })
-                });
-
-                const data = await res.json();
-                const result = data.data?.FunctionResult;
-                const output = typeof result === "object" ?
-                    Object.entries(result).map(([key, val]) => `- ${key}: ${val}`).join("\n") :
-                    result || "No result returned.";
-
-                document.getElementById("usefulDeedOutput").textContent = `&#9989; usefulDeed Result:\n${output}`;
-                console.log("usefulDeed response:", data);
-            } catch (err) {
-                document.getElementById("usefulDeedOutput").textContent = "&#10060; Error calling usefulDeed.";
-                console.error("Error calling usefulDeed:", err);
-            }
-        }
-
-        async function viewStatistics() {
-            if (!sessionTicket) return alert("Please set your SessionTicket first.");
-
-            const res = await fetch(`https://${titleId}.playfabapi.com/Client/GetPlayerStatistics`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Authorization": sessionTicket
-                },
-                body: JSON.stringify({})
-            });
-
-            const data = await res.json();
-            const stats = data.data?.Statistics || [];
-            const output = stats.map(stat => `${stat.StatisticName}: ${stat.Value}`).join("\n");
-            document.getElementById("statsOutput").textContent = output || "No statistics found.";
-        }
-
-      async function getPlayFabInfo() {
-  const playfabId = document.getElementById("playfabId").value;
-  const resultBox = document.getElementById("result");
-
-  if (!playfabId) {
-    resultBox.textContent = "⚠️ Please enter a PlayFab ID.";
-    return;
-  }
-
-   // Replace with actual session ticket
-  const headers = {
-    "Content-Type": "application/json",
-    "X-Authorization": sessionTicket
-  };
-
-  const combinedInfoBody = {
-    PlayFabId: playfabId,
-    InfoRequestParameters: {
-      GetUserAccountInfo: true,
-      GetPlayerStatistics: true
-    }
-  };
-
-  const profileBody = {
-    PlayFabId: playfabId,
-    ProfileConstraints: {
-      ShowLastLogin: true,
-      ShowBannedUntil: true
-    }
-  };
-
-  try {
-    resultBox.textContent = "⏳ Fetching data...";
-    const [combinedRes, profileRes] = await Promise.all([
-      fetch("https://bdff1.playfabapi.com/Client/GetPlayerCombinedInfo", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(combinedInfoBody)
-      }),
-      fetch("https://bdff1.playfabapi.com/Client/GetPlayerProfile", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(profileBody)
-      })
-    ]);
-
-    const combinedData = await combinedRes.json();
-    const profileData = await profileRes.json();
-
-    const accountInfo = combinedData.data?.UserAccountInfo;
-    const stats = combinedData.data?.PlayerStatistics;
-    const profile = profileData.data?.PlayerProfile;
-
-    let output = `🎮 Player Info for PlayFab ID: ${playfabId}\n\n`;
-
-    if (accountInfo) {
-      output += `👤 Username: ${accountInfo.Username || "N/A"}\n`;
-      output += `📧 Email: ${accountInfo.PrivateInfo?.Email || "N/A"}\n`;
-    }
-
-    if (profile) {
-      output += `🕒 Last Login: ${profile.LastLogin || "N/A"}\n`;
-      output += `🚫 Banned Until: ${profile.BannedUntil || "Not banned"}\n`;
-    }
-
-    if (stats && stats.length > 0) {
-      output += `📊 Player Statistics:\n`;
-      stats.forEach(stat => {
-        output += `  • ${stat.StatisticName}: ${stat.Value}\n`;
-      });
-    }
-
-    resultBox.textContent = output;
-  } catch (error) {
-    resultBox.textContent = "❌ Error: " + error.message;
-  }
-}
-
-        async function getPlayFabId() {
-            if (!sessionTicket) return alert("Please set your SessionTicket first.");
-
-            const steamUsername = document.getElementById("steamUsername").value.trim();
-            if (!steamUsername) return alert("Please enter a Steam username.");
-
-            const res = await fetch(`https://${titleId}.playfabapi.com/Client/GetPlayFabIDsFromSteamNames`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Authorization": sessionTicket
-                },
-                body: JSON.stringify({
-                    SteamNames: [steamUsername]
-                })
-            });
-
-            const data = await res.json();
-            const match = data.data?.Data?.[0];
-            const output = match ?
-                `PlayFabId for "${steamUsername}": ${match.PlayFabId}` :
-                "No matching PlayFab ID found.";
-            document.getElementById("playerIdOutput").textContent = output;
-            console.log(data);
-        }
-
-        function toggleCoinFarmBot() {
-            if (coinFarmBotRunning) {
-                clearInterval(coinFarmIntervalId);
-                coinFarmBotRunning = false;
-                alert("Coin Farm Bot stopped.");
-                return;
-            }
-
-            const delayMinutes = parseInt(document.getElementById("delaySelect").value);
-            const delayMs = delayMinutes * 60 * 1000;
-
-            coinFarmBotRunning = true;
-            alert(`Coin Farm Bot started with ${delayMinutes} minute delay.`);
-
-            async function runCoinFarmCycle() {
-                if (!sessionTicket) {
-                    alert("Please set your SessionTicket first.");
-                    return;
-                }
-
-                const roomType = document.getElementById("roomType").value;
-                const playerIds = [
-                    document.getElementById("playerId1").value.trim(),
-                    document.getElementById("playerId2").value.trim(),
-                    document.getElementById("playerId3").value.trim(),
-                    document.getElementById("playerId4").value.trim(),
-                    document.getElementById("playerId5").value.trim(),
-                    document.getElementById("playerId6").value.trim()
-                ].filter(id => id);
-
-                const functions = ["startNewMatch", "decideSpecialRole", "finishMatch"];
-                let output = `&#128338; Cycle started at ${new Date().toLocaleTimeString()}\nRoom Type: ${roomType}\nPlayers: ${playerIds.join(", ")}\n`;
-
-                for (const fn of functions) {
-    try {
-        const res = await fetch(`https://${titleId}.playfabapi.com/Client/ExecuteCloudScript`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Authorization": sessionTicket
-            },
-            body: JSON.stringify({
-                FunctionName: fn,
-                FunctionParameter: {
-                    roomType,
-                    playerIds
-                },
-                GeneratePlayStreamEvent: true
-            })
-        });
-
-        const data = await res.json();
-        const result = data.data?.FunctionResult;
-
-        if (fn === "finishMatch") {
-            // Log as raw text
-            output += `✅ ${fn}: ${String(result)}\n`;
-        } else if (typeof result === "object" && result !== null) {
-            const formatted = Object.entries(result)
-                .map(([key, val]) => `- ${key}: ${val}`)
-                .join("\n");
-            output += `✅ ${fn}:\n${formatted}\n`;
-        } else {
-            output += `✅ ${fn}: ${result || "No result returned."}\n`;
-        }
-    } catch (err) {
-        output += `❌ ${fn}: Error occurred.\n`;
-    }
-}
-
-                output += `&#127744; Waiting ${delayMinutes} minutes for next cycle...\n\n`;
-                const cloudOutput = document.getElementById("cloudOutput");
-                cloudOutput.textContent += output;
-                cloudOutput.scrollTop = cloudOutput.scrollHeight;
-            }
-
-            runCoinFarmCycle();
-            coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs);
-        }
-    </script>
