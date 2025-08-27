@@ -489,12 +489,10 @@
         resultText += "=== ACCOUNT INFO ===\n";
         resultText += `Username: ${info.InfoResultPayload.AccountInfo.TitleInfo?.DisplayName || "N/A"}\n`;
         resultText += `Created: ${info.InfoResultPayload.AccountInfo.TitleInfo?.Created || "N/A"}\n`;
-        
-        if (info.PlayerStatistics) {
-          resultText += "\n=== STATISTICS ===\n";
+        resultText += "\n=== STATISTICS ===\n";
           info.PlayerStatistics.forEach(stat => {
             resultText += `${stat.StatisticName}: ${stat.Value}\n`;
-          });
+         
         }
       }
 
