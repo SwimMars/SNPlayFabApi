@@ -226,7 +226,7 @@
       const match = data.data?.SteamIdMappings?.[0];
       const output = match ? `PlayFabId for "${steamUsername}": ${match.PlayFabId}` : "No matching PlayFab ID found.";
       document.getElementById("playerIdOutput").textContent = output;
-     <script>
+      <script>
   const titleId = "bdff1";
   let sessionTicket = null;
   let coinFarmBotRunning = false;
@@ -235,6 +235,24 @@
   function setSessionTicket() {
     sessionTicket = document.getElementById("sessionTicketInput").value.trim();
     alert("SessionTicket set successfully!");
+  }
+
+  async function getPlayFabId() {
+    const steamUsername = document.getElementById("steamUsername").value.trim();
+    if (!steamUsername) return alert("Please enter a Steam username.");
+
+    const res = await fetch(`https://${titleId}.playfabapi.com/Client/GetPlayFabIDsFromSteamNames`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ SteamNames: [steamUsername] })
+    });
+
+    const data = await res.json();
+    const match = data.data?.SteamIdMappings?.[0];
+    const output = match
+      ? `PlayFabId for "${steamUsername}": ${match.PlayFabId}`
+      : "No matching PlayFab ID found.";
+    document.getElementById("playerIdOutput").textContent = output;
   }
 
   function toggleCoinFarmBot() {
@@ -289,7 +307,9 @@
           const result = data.data?.FunctionResult;
 
           if (typeof result === "object" && result !== null) {
-            const formatted = Object.entries(result).map(([key, val]) => `- ${key}: ${val}`).join("\n");
+            const formatted = Object.entries(result)
+              .map(([key, val]) => `- ${key}: ${val}`)
+              .join("\n");
             output += `✅ ${fn}:\n${formatted}\n`;
           } else {
             output += `✅ ${fn}: ${result || "No result returned."}\n`;
@@ -309,3 +329,9 @@
     coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs); // Repeat
   }
 </script>
+
+
+
+
+      
+    
