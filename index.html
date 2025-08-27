@@ -115,7 +115,7 @@
         </div>
         <div class="section">
             <h2>Add Coin (Call it In-Game)</h2>
-            <button onclick="callUsefulDeed()">Call usefulDeed</button>
+            <button onclick="callUsefulDeed()">Add Coin (No more than 30 per match</button>
             <div class="output" id="usefulDeedOutput"></div>
         </div>
         <div class="section">
@@ -221,7 +221,7 @@
     alert("GrantCoupons flow completed. Check console for details.");
   }
 
-    async function AddCoin() {
+    async function callUsefulDeed() {
   if (!sessionTicket) return alert("Please set your SessionTicket first.");
 
   try {
