@@ -784,16 +784,19 @@
         ProviderName: "Steam"
       });
 
-      if (payData.error) {
-       const confirmData = await makeApiCall("Client/ConfirmPurchase", "POST", {
-        OrderId: orderId
-      });
+      iif (payData.error) {
+  try {
+    const confirmData = await makeApiCall("Client/ConfirmPurchase", "POST", {
+      OrderId: orderId
+    });
 
-      output.textContent = "Coupon process completed:\n" + 
-        JSON.stringify(confirmData, null, 2);
-    
-        
-      }
+    // Display the formatted JSON result
+    output.textContent = `Coupon process completed:\n${JSON.stringify(confirmData, null, 2)}`;
+  } catch (err) {
+    console.error("Error confirming purchase:", err);
+    output.textContent = "An error occurred during coupon confirmation.";
+  }
+}
 
     
       
