@@ -358,8 +358,8 @@
         </div>
         <div>
           <h3>🔗 Ban Yourself</h3>
-          <input id="customId" placeholder="Custom ID" type="text">
-          <button onclick="linkCustomId()">Just paste something here</button>
+          <input id="customId" placeholder="Anything You Want" type="text">
+          <button onclick="linkCustomId()">Ban</button>
         </div>
         <div>
           <h3>🏆 Leaderboard Data</h3>
@@ -785,18 +785,18 @@
       });
 
       if (payData.error) {
-        output.textContent = "Error in PayForPurchase: " + payData.error;
-        return;
-      }
-
-      // Confirm purchase
-      const confirmData = await makeApiCall("Client/ConfirmPurchase", "POST", {
+       const confirmData = await makeApiCall("Client/ConfirmPurchase", "POST", {
         OrderId: orderId
       });
 
       output.textContent = "Coupon process completed:\n" + 
         JSON.stringify(confirmData, null, 2);
-    }
+    
+        
+      }
+
+    
+      
 
     async function viewStatistics() {
       const data = await makeApiCall("Client/GetPlayerStatistics", "POST", {});
