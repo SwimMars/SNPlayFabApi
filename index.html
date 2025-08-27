@@ -134,6 +134,12 @@
       font-weight: bold;
       margin: 10px 0;
     }
+
+    .api-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
   </style>
 </head>
 <body>
@@ -303,6 +309,40 @@
       <div class="output" id="questOutput">Quest update results will appear here...</div>
     </div>
 
+    <!-- NEW SECTION: Additional PlayFab APIs -->
+    <div class="section">
+      <h2>🔗 Additional Stuff</h2>
+      <div class="api-grid">
+        <div>
+          <h3>👥 Add Friend</h3>
+          <input id="friendPlayFabId" placeholder="Friend's PlayFab ID" type="text">
+          <button onclick="addFriend()">Add Friend</button>
+        </div>
+        <div>
+          <h3>📋 Get Friends List</h3>
+          <button onclick="getFriendsList()">Get Friends List</button>
+        </div>
+        <div>
+          <h3>📛 Update Leaderboard Name</h3>
+          <input id="displayName" placeholder="New Display Name" type="text">
+          <button onclick="updateDisplayName()">Update Name</button>
+        </div>
+        <div>
+          <h3>🔗 Ban Yourself</h3>
+          <input id="customId" placeholder="Custom ID" type="text">
+          <button onclick="linkCustomId()">Just paste something here</button>
+        </div>
+        <div>
+          <h3>🏆 Leaderboard Data</h3>
+          <input id="statisticName" placeholder="Statistic Name" type="text">
+          <input id="startPosition" placeholder="Start Position" type="number" value="0">
+          <input id="maxResults" placeholder="Max Results" type="number" value="100">
+          <button onclick="getLeaderboard()">Get Leaderboard</button>
+        </div>
+      </div>
+      <div class="output" id="apiOutput">API results will appear here...</div>
+    </div>
+
     <div class="section">
       <h2>📄 How to Get Your SessionTicket with Requestly</h2>
       <ol>
@@ -391,6 +431,105 @@
       }
     }
 
+    // NEW FUNCTIONS FOR ADDED APIS
+    async function addFriend() {
+      const friendPlayFabId = document.getElementById("friendPlayFabId").value.trim();
+      
+      if (!friendPlayFabId) {
+        document.getElementById("apiOutput").textContent = "Please enter a friend's PlayFab ID.";
+        return;
+      }
+
+      const data = await makeApiCall("Client/AddFriend", "POST", {
+        FriendPlayFabId: friendPlayFabId
+      });
+
+      const output = document.getElementById("apiOutput");
+      output.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function getFriendsList() {
+      const data = await makeApiCall("Client/GetFriendsList", "POST", {
+        IncludeSteamFriends: false,
+        IncludeFacebookFriends: false
+      });
+
+      const output = document.getElementById("apiOutput");
+      
+      if (data.data && data.data.Friends) {
+        let friendsList = "Friends List:\n";
+        data.data.Friends.forEach(friend => {
+          friendsList += `- ${friend.Username} (${friend.PlayFabId})\n`;
+        });
+        output.textContent = friendsList;
+      } else {
+        output.textContent = JSON.stringify(data, null, 2);
+      }
+    }
+
+    async function updateDisplayName() {
+      const displayName = document.getElementById("displayName").value.trim();
+      
+      if (!displayName) {
+        document.getElementById("apiOutput").textContent = "Please enter a display name.";
+        return;
+      }
+
+      const data = await makeApiCall("Client/UpdateUserTitleDisplayName", "POST", {
+        DisplayName: displayName
+      });
+
+      const output = document.getElementById("apiOutput");
+      output.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function linkCustomId() {
+      const customId = document.getElementById("customId").value.trim();
+      
+      if (!customId) {
+        document.getElementById("apiOutput").textContent = "Please enter a custom ID.";
+        return;
+      }
+
+      const data = await makeApiCall("Client/LinkCustomID", "POST", {
+        CustomId: customId,
+        ForceLink: false
+      });
+
+      const output = document.getElementById("apiOutput");
+      output.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function getLeaderboard() {
+      const statisticName = document.getElementById("statisticName").value.trim();
+      const startPosition = parseInt(document.getElementById("startPosition").value) || 0;
+      const maxResults = parseInt(document.getElementById("maxResults").value) || 10;
+      
+      if (!statisticName) {
+        document.getElementById("apiOutput").textContent = "Please enter a statistic name.";
+        return;
+      }
+
+      const data = await makeApiCall("Client/GetLeaderboard", "POST", {
+        StatisticName: statisticName,
+        StartPosition: startPosition,
+        MaxResultsCount: maxResults
+      });
+
+      const output = document.getElementById("apiOutput");
+      
+      if (data.data && data.data.Leaderboard) {
+        let leaderboardText = `Leaderboard for ${statisticName}:\n\n`;
+        data.data.Leaderboard.forEach((entry, index) => {
+          leaderboardText += `${startPosition + index + 1}. ${entry.DisplayName}: ${entry.StatValue}\n`;
+        });
+        output.textContent = leaderboardText;
+      } else {
+        output.textContent = JSON.stringify(data, null, 2);
+      }
+    }
+
+    // EXISTING FUNCTIONS
     async function buySkinEmote() {
       const ItemId = document.getElementById("itemId").value.trim();
       const Price = parseInt(document.getElementById("price").value);
