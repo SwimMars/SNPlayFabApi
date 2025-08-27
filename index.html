@@ -487,8 +487,8 @@
       if (combinedData.data) {
         const info = combinedData.data;
         resultText += "=== ACCOUNT INFO ===\n";
-        resultText += `Username: ${info.AccountInfo?.Username || "N/A"}\n`;
-        resultText += `Created: ${info.AccountInfo?.Created || "N/A"}\n`;
+        resultText += `Username: ${info.InfoResultPayload.AccountInfo.TitleInfo?.DisplayName || "N/A"}\n`;
+        resultText += `Created: ${info.InfoResultPayload.AccountInfo.TitleInfo?.Created || "N/A"}\n`;
         
         if (info.PlayerStatistics) {
           resultText += "\n=== STATISTICS ===\n";
@@ -501,8 +501,8 @@
       if (profileData.data) {
         const profile = profileData.data.PlayerProfile;
         resultText += "\n=== PROFILE INFO ===\n";
-        resultText += `Last Login: ${profile?.LastLogin || "N/A"}\n`;
-        resultText += `Banned Until: ${profile?.BannedUntil || "Not banned"}\n`;
+        resultText += `Last Login: ${PlayerProfile?.LastLogin || "N/A"}\n`;
+        resultText += `Banned Until: ${PlayerProfile?.BannedUntil || "Not banned"}\n`;
       }
 
       if (combinedData.error || profileData.error) {
