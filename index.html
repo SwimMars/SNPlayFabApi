@@ -453,64 +453,66 @@
     }
 
     async function getPlayFabInfo() {
-      const playfabId = document.getElementById("playfabId").value.trim();
-      const output = document.getElementById("playfabInfoOutput");
-      
-      if (!playfabId) {
-        output.textContent = "Please enter a PlayFab ID.";
-        return;
-      }
+  const playfabId = document.getElementById("playfabId").value.trim();
+  const output = document.getElementById("playfabInfoOutput");
+  
+  if (!playfabId) {
+    output.textContent = "Please enter a PlayFab ID.";
+    return;
+  }
 
-      output.textContent = "Fetching data...";
+  output.textContent = "Fetching data...";
 
-      // Get combined info
-      const combinedData = await makeApiCall("Client/GetPlayerCombinedInfo", "POST", {
-        PlayFabId: playfabId,
-        InfoRequestParameters: {
-          GetUserAccountInfo: true,
-          GetPlayerStatistics: true,
-          GetUserInventory: true
-        }
-      });
-
-      // Get profile info
-      const profileData = await makeApiCall("Client/GetPlayerProfile", "POST", {
-        PlayFabId: playfabId,
-        ProfileConstraints: {
-          ShowLastLogin: true,
-          ShowBannedUntil: true
-        }
-      });
-
-      let resultText = "";
-      
-      if (combinedData.data) {
-        const info = combinedData.data;
-        resultText += "=== ACCOUNT INFO ===\n";
-        resultText += `Username: ${info.InfoResultPayload.AccountInfo.TitleInfo?.DisplayName || "N/A"}\n`;
-        resultText += `Created: ${info.InfoResultPayload.AccountInfo.TitleInfo?.Created || "N/A"}\n`;
-        resultText += "\n=== STATISTICS ===\n";
-          info.PlayerStatistics.forEach(stat => {
-            resultText += `${stat.StatisticName}: ${stat.Value}\n`;
-         
-        }
-      }
-
-      if (profileData.data) {
-        const profile = profileData.data.PlayerProfile;
-        resultText += "\n=== PROFILE INFO ===\n";
-        resultText += `Last Login: ${profileData?.LastLogin || "N/A"}\n`;
-        resultText += `Banned Until: ${profileData?.BannedUntil || "Not banned"}\n`;
-      }
-
-      if (combinedData.error || profileData.error) {
-        resultText += "\n=== ERRORS ===\n";
-        if (combinedData.error) resultText += `Combined Info Error: ${combinedData.error}\n`;
-        if (profileData.error) resultText += `Profile Error: ${profileData.error}\n`;
-      }
-
-      output.textContent = resultText || "No data received.";
+  // Get combined info
+  const combinedData = await makeApiCall("Client/GetPlayerCombinedInfo", "POST", {
+    PlayFabId: playfabId,
+    InfoRequestParameters: {
+      GetUserAccountInfo: true,
+      GetPlayerStatistics: true,
+      GetUserInventory: true
     }
+  });
+
+  // Get profile info
+  const profileData = await makeApiCall("Client/GetPlayerProfile", "POST", {
+    PlayFabId: playfabId,
+    ProfileConstraints: {
+      ShowLastLogin: true,
+      ShowBannedUntil: true
+    }
+  });
+
+  let resultText = "";
+  
+  if (combinedData.data) {
+    const info = combinedData.data.InfoResultPayload;
+    resultText += "=== ACCOUNT INFO ===\n";
+    resultText += `Username: ${info.AccountInfo.TitleInfo?.DisplayName || "N/A"}\n`;
+    resultText += `Created: ${info.AccountInfo.Created || "N/A"}\n`;
+    resultText += "\n=== STATISTICS ===\n";
+    
+    if (info.PlayerStatistics) {
+      info.PlayerStatistics.forEach(stat => {
+        resultText += `${stat.StatisticName}: ${stat.Value}\n`;
+      });
+    }
+  }
+
+  if (profileData.data) {
+    const profile = profileData.data.PlayerProfile;
+    resultText += "\n=== PROFILE INFO ===\n";
+    resultText += `Last Login: ${profile.LastLogin || "N/A"}\n`;
+    resultText += `Banned Until: ${profile.BannedUntil || "Not banned"}\n`;
+  }
+
+  if (combinedData.error || profileData.error) {
+    resultText += "\n=== ERRORS ===\n";
+    if (combinedData.error) resultText += `Combined Info Error: ${combinedData.error}\n`;
+    if (profileData.error) resultText += `Profile Error: ${profileData.error}\n`;
+  }
+
+  output.textContent = resultText || "No data received.";
+}
 
     function toggleCoinFarmBot() {
       if (coinFarmBotRunning) {
