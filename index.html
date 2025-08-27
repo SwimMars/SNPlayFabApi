@@ -8,7 +8,7 @@
       font-family: Arial, sans-serif;
       margin: 40px;
     }
-    input, button {
+    input, button, select {
       margin: 5px;
       padding: 8px;
       font-size: 16px;
@@ -64,6 +64,30 @@
   </div>
 
   <div class="section">
+    <h2>🧠 Execute CloudScript: usefulDeed</h2>
+    <button onclick="executeUsefulDeed()">Run usefulDeed</button>
+  </div>
+
+  <div class="section">
+    <h2>🎮 Match Setup Functions</h2>
+    <label>Room Type:</label>
+    <select id="roomType">
+      <option value="QUICK_GAME">QUICK_GAME</option>
+      <option value="CUSTOM_GAME">CUSTOM_GAME</option>
+    </select><br>
+    <input type="text" id="playerId1" placeholder="Player ID 1">
+    <input type="text" id="playerId2" placeholder="Player ID 2">
+    <input type="text" id="playerId3" placeholder="Player ID 3">
+    <input type="text" id="playerId4" placeholder="Player ID 4">
+    <input type="text" id="playerId5" placeholder="Player ID 5">
+    <input type="text" id="playerId6" placeholder="Player ID 6"><br>
+    <button onclick="executeCloudScript('startNewMatch')">Start New Match</button>
+    <button onclick="executeCloudScript('decideSpecialRole')">Decide Special Role</button>
+    <button onclick="executeCloudScript('finishMatch')">Finish Match</button>
+    <div id="cloudOutput" class="output"></div>
+  </div>
+
+  <div class="section">
     <h2>📄 How to Get Your SessionTicket with Requestly</h2>
     <ol>
       <li>Download the Requestly desktop app from <a href="https://docs.requestly.com/general/sessions/record-api-sessions" target="_blank">here</a>.</li>
@@ -81,13 +105,11 @@
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
-      console.log("SessionTicket set:", sessionTicket);
       alert("SessionTicket set successfully!");
     }
 
     async function buySkinEmote() {
       if (!sessionTicket) return alert("Please set your SessionTicket first.");
-
       const ItemId = document.getElementById("itemId").value.trim();
       const Price = parseInt(document.getElementById("price").value);
       const VirtualCurrency = document.getElementById("currency").value.trim();
@@ -98,11 +120,7 @@
           "Content-Type": "application/json",
           "X-Authorization": sessionTicket
         },
-        body: JSON.stringify({
-          ItemId,
-          Price,
-          VirtualCurrency
-        })
+        body: JSON.stringify({ ItemId, Price, VirtualCurrency })
       });
 
       const data = await res.json();
@@ -121,10 +139,7 @@
         },
         body: JSON.stringify({
           StoreId: "steam_Shop_Currency",
-          Items: [{
-            ItemId: "Currency_Bundle_PileOfCoupons",
-            Quantity: 1
-          }]
+          Items: [{ ItemId: "Currency_Bundle_PileOfCoupons", Quantity: 1 }]
         })
       });
 
@@ -132,35 +147,24 @@
       const orderId = startData.data?.OrderId;
       if (!orderId) return alert("StartPurchase failed.");
 
-      const payRes = await fetch(`https://${titleId}.playfabapi.com/Client/PayForPurchase`, {
+      await fetch(`https://${titleId}.playfabapi.com/Client/PayForPurchase`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Authorization": sessionTicket
         },
-        body: JSON.stringify({
-          OrderId: orderId,
-          Currency: "RM",
-          ProviderName: "Steam"
-        })
+        body: JSON.stringify({ OrderId: orderId, Currency: "RM", ProviderName: "Steam" })
       });
 
-      const payData = await payRes.json();
-      console.log("PayForPurchase response:", payData);
-
-      const confirmRes = await fetch(`https://${titleId}.playfabapi.com/Client/ConfirmPurchase`, {
+      await fetch(`https://${titleId}.playfabapi.com/Client/ConfirmPurchase`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Authorization": sessionTicket
         },
-        body: JSON.stringify({
-          OrderId: orderId
-        })
+        body: JSON.stringify({ OrderId: orderId })
       });
 
-      const confirmData = await confirmRes.json();
-      console.log("ConfirmPurchase response:", confirmData);
       alert("GrantCoupons flow completed. Check console for details.");
     }
 
@@ -188,12 +192,8 @@
 
       const res = await fetch(`https://${titleId}.playfabapi.com/Client/GetPlayFabIDsFromSteamNames`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          SteamNames: [steamUsername]
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ SteamNames: [steamUsername] })
       });
 
       const data = await res.json();
@@ -201,6 +201,9 @@
       const output = match ? `PlayFabId for "${steamUsername}": ${match.PlayFabId}` : "No matching PlayFab ID found.";
       document.getElementById("playerIdOutput").textContent = output;
     }
-  </script>
-</body>
-</html>
+
+    async function executeUsefulDeed() {
+      if (!sessionTicket) return alert("Please set your SessionTicket first.");
+
+      const res = await fetch(`https://${titleId}.playfabapi.com/Client/ExecuteCloudScript`, {
+        method
