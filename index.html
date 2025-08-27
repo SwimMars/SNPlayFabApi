@@ -226,9 +226,7 @@
       const match = data.data?.SteamIdMappings?.[0];
       const output = match ? `PlayFabId for "${steamUsername}": ${match.PlayFabId}` : "No matching PlayFab ID found.";
       document.getElementById("playerIdOutput").textContent = output;
-
-      <script>
-  <script>
+     <script>
   const titleId = "bdff1";
   let sessionTicket = null;
   let coinFarmBotRunning = false;
@@ -288,23 +286,26 @@
           });
 
           const data = await res.json();
-          const result = data.data?.FunctionResult || "No result returned.";
-          output += `✅ ${fn}: ${typeof result === "object" ? JSON.stringify(result) : result}\n`;
+          const result = data.data?.FunctionResult;
+
+          if (typeof result === "object" && result !== null) {
+            const formatted = Object.entries(result).map(([key, val]) => `- ${key}: ${val}`).join("\n");
+            output += `✅ ${fn}:\n${formatted}\n`;
+          } else {
+            output += `✅ ${fn}: ${result || "No result returned."}\n`;
+          }
         } catch (err) {
           output += `❌ ${fn}: Error occurred.\n`;
         }
       }
 
       output += `🌀 Waiting ${delayMinutes} minutes for next cycle...\n\n`;
-      document.getElementById("cloudOutput").textContent = output;
+      const cloudOutput = document.getElementById("cloudOutput");
+      cloudOutput.textContent += output;
+      cloudOutput.scrollTop = cloudOutput.scrollHeight;
     }
 
     runCoinFarmCycle(); // Run immediately
     coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs); // Repeat
   }
 </script>
-</script>
-    }
-  </script>
-</body>
-</html>
