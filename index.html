@@ -1,146 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Secret Neighbor Exploits</title>
-    <style>
-        <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-image: url('https://tse4.mm.bing.net/th/id/OIP.9l4fXjh_eRObbYaLBC2iZAHaJQ?r=0&cb=thfc1&rs=1&pid=ImgDetMain&o=7&rm=3');
-            /* Replace with your image path */
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            height: 100vh;
-            font-family: sans-serif;
-            color: white;
-        }
+  <meta charset="UTF-8">
+  <title>Secret Neighbor Exploits</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url('https://tse4.mm.bing.net/th/id/OIP.9l4fXjh_eRObbYaLBC2iZAHaJQ?r=0&cb=thfc1&rs=1&pid=ImgDetMain&o=7&rm=3');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+    }
 
-    </style>
+    h1 {
+      margin-top: 40px;
+      text-shadow: 2px 2px 4px #000;
+    }
+
+    .section {
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      padding: 20px;
+      margin: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 700px;
+      text-align: center;
+    }
+
+    input, button, select {
+      margin: 5px;
+      padding: 8px;
+      font-size: 16px;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .output {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f4f4f4;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+      color: black;
+    }
+  </style>
 </head>
-  
-    <h1>&#127918; Secret Neighbor Exploits</h1>
-    <div class="section">
-        <h2>&#128272; SessionTicket</h2>
-        <input id="sessionTicketInput" placeholder="Paste your SessionTicket here" style="width: 400px;" type="text">
-        <button onclick="setSessionTicket()">Set Token</button>
-    </div>
-    <div class="section">
-        <h2>&#128717;&#65039; Buy Skin/Emote</h2>
-        <input id="itemId" placeholder="ItemId" type="text">
-        <input id="price" placeholder="Price" type="number">
-        <input id="currency" placeholder="VirtualCurrency" type="text">
-        <button onclick="buySkinEmote()">Buy Skin/Emote</button>
-    </div>
-    <div class="section">
-        <h2>&#127873; Grant Coupons</h2>
-        <button onclick="grantCoupons()">Grant Coupons</button>
-    </div>
-    <div class="section">
-        <h2>&#128202; View Statistics</h2>
-        <button onclick="viewStatistics()">View Statistics</button>
-        <div class="output" id="statsOutput"></div>
-    </div>
-    <div class="section">
-        <h2>&#129489;&zwj;&#128187; Obtain Player ID With Username</h2>
-        <input id="steamUsername" placeholder="Steam Username" type="text">
-        <button onclick="getPlayFabId()">Obtain Player ID</button>
-        <div class="output" id="playerIdOutput"></div>
-    </div>
-    <div class="section">
-        <h2>&#128196; How to Get Your SessionTicket with Requestly</h2>
-        <ol>
-            <li>
-                Download the Requestly desktop app from
-                <a href="https://docs.requestly.com/general/sessions/record-api-sessions" target="_blank">here</a>
-                .
-            </li>
-            <li>
-                Open Requestly and start recording network traffic.
-            </li>
-            <li>Log into your game or app using PlayFab.</li>
-            <li>
-                Find the request to
-                <code>
+<body>
+  <h1>🎮 Secret Neighbor Exploits</h1>
 
+  <div class="section">
+    <h2>🔐 SessionTicket</h2>
+    <input id="sessionTicketInput" placeholder="Paste your SessionTicket here" type="text">
+    <button onclick="setSessionTicket()">Set Token</button>
+  </div>
 
+  <div class="section">
+    <h2>🛍️ Buy Skin/Emote</h2>
+    <input id="itemId" placeholder="ItemId" type="text">
+    <input id="price" placeholder="Price" type="number">
+    <input id="currency" placeholder="VirtualCurrency" type="text">
+    <button onclick="buySkinEmote()">Buy Skin/Emote</button>
+  </div>
 
+  <div class="section">
+    <h2>🎁 Grant Coupons</h2>
+    <button onclick="grantCoupons()">Grant Coupons</button>
+  </div>
 
+  <div class="section">
+    <h2>📊 View Statistics</h2>
+    <button onclick="viewStatistics()">View Statistics</button>
+    <div class="output" id="statsOutput"></div>
+  </div>
 
-                    /Client/LoginWithSteam
-                </code>
-                or similar.
-            </li>
-            <li>
-                Copy the
-                <code>
+  <div class="section">
+    <h2>🧑‍💻 Obtain Player ID With Username</h2>
+    <input id="steamUsername" placeholder="Steam Username" type="text">
+    <button onclick="getPlayFabId()">Obtain Player ID</button>
+    <div class="output" id="playerIdOutput"></div>
+  </div>
 
+  <div class="section">
+    <h2>📄 How to Get Your SessionTicket with Requestly</h2>
+    <ol>
+      <li>Download the Requestly desktop app from <a href="https://docs.requestly.com/general/sessions/record-api-sessions" target="_blank">here</a>.</li>
+      <li>Open Requestly and start recording network traffic.</li>
+      <li>Log into your game or app using PlayFab.</li>
+      <li>Find the request to <code>/Client/LoginWithSteam</code> or similar.</li>
+      <li>Copy the <code>SessionTicket</code> or <code>X-Authorization</code> from the response body.</li>
+      <li>Paste it into the field above and click "Set Token".</li>
+    </ol>
+  </div>
 
+  <div class="section">
+    <h2>💰 Add Coin (Call it In-Game)</h2>
+    <button onclick="AddCoin()">Add Coin (No more than 30 per match)</button>
+    <div class="output" id="usefulDeedOutput"></div>
+  </div>
 
+  <div class="section">
+    <h2>🤖 Coin Farm Bot</h2>
+    <label>Room Type:</label>
+    <select id="roomType">
+      <option value="QUICK_GAME">QUICK_GAME</option>
+      <option value="CUSTOM_GAME">CUSTOM_GAME</option>
+    </select>
+    <label>Delay:</label>
+    <select id="delaySelect">
+      <option value="10">10 minutes</option>
+      <option value="5">5 minutes</option>
+      <option value="2">2 minutes</option>
+    </select><br>
+    <input id="playerId1" placeholder="Player ID 1" type="text">
+    <input id="playerId2" placeholder="Player ID 2" type="text">
+    <input id="playerId3" placeholder="Player ID 3" type="text">
+    <input id="playerId4" placeholder="Player ID 4" type="text">
+    <input id="playerId5" placeholder="Player ID 5" type="text">
+    <input id="playerId6" placeholder="Player ID 6" type="text"><br>
+    <button onclick="toggleCoinFarmBot()">Start/Stop Coin Farm Bot</button>
+    <div class="output" id="cloudOutput">Bot output will appear here...</div>
+  </div>
 
+  <div class="section">
+    <h2>🧪 Level Editor</h2>
+    <input type="text" id="classIdInput" placeholder="Class ID"><br>
+    <input type="number" id="receivedXPInput" placeholder="Received XP"><br>
+    <input type="number" id="xpInput" placeholder="XP"><br>
+    <input type="number" id="xpToNextLevelInput" placeholder="XP to Next Level"><br>
+    <input type="number" id="levelInput" placeholder="Level"><br>
+    <input type="number" id="perkSlotsInput" placeholder="Available Perk Slots (max 3)" max="3"><br>
+    <input type="number" id="playerLevelInput" placeholder="Player Level"><br>
+    <button onclick="submitLevelProgression()">Submit</button>
+    <div class="output" id="levelProgressionOutput"></div>
+  </div>
 
-                    SessionTicket
-                </code>
-                or
-                <code>
-
-
-
-
-
-                    X-Authorization
-                </code>
-                from the response body.
-            </li>
-            <li>
-                Paste it into the field above and click "Set Token".
-            </li>
-        </ol>
-    </div>
-    <div class="section">
-        <h2>Add Coin (Call it In-Game)</h2>
-        <button onclick="AddCoin()">Add Coin (No more than 30 per match</button>
-        <div class="output" id="usefulDeedOutput"></div>
-    </div>
-    <div class="section">
-        <h2>&#127918; Coin Farm Bot</h2>
-        <label>Room Type:</label>
-        <select id="roomType">
-            <option value="QUICK_GAME">QUICK_GAME</option>
-            <option value="CUSTOM_GAME">CUSTOM_GAME</option>
-        </select>
-        <label>Delay:</label>
-        <select id="delaySelect">
-            <option value="10">10 minutes</option>
-            <option value="5">5 minutes</option>
-            <option value="2">2 minutes</option>
-        </select>
-        <br>
-        <input id="playerId1" placeholder="Player ID 1" type="text">
-        <input id="playerId2" placeholder="Player ID 2" type="text">
-        <input id="playerId3" placeholder="Player ID 3" type="text">
-        <input id="playerId4" placeholder="Player ID 4" type="text">
-        <input id="playerId5" placeholder="Player ID 5" type="text">
-        <input id="playerId6" placeholder="Player ID 6" type="text">
-        <br>
-        <button onclick="toggleCoinFarmBot()">Start/Stop Coin Farm Bot</button>
-        <div class="output" id="cloudOutput">Bot output will appear here...</div>
-    </div>
-
-    <div class="section">
-        <h2>Level Editor &#128377;&#65039;</h2>
-        <input type="text" id="classIdInput" placeholder="Class ID" style="width: 200px;"><br><br>
-        <input type="number" id="receivedXPInput" placeholder="Received XP" style="width: 150px;"><br><br>
-        <input type="number" id="xpInput" placeholder="XP" style="width: 150px;"><br><br>
-        <input type="number" id="xpToNextLevelInput" placeholder="XP to Next Level" style="width: 180px;"><br><br>
-        <input type="number" id="levelInput" placeholder="Level" style="width: 150px;"><br><br>
-        <input type="number" id="perkSlotsInput" placeholder="Available Perk Slots (max 3)" style="width: 200px;" max="3"><br><br>
-        <input type="number" id="playerLevelInput" placeholder="Player Level" style="width: 150px;"><br><br>
-        <button onclick="submitLevelProgression()">Submit</button>
-        <div id="levelProgressionOutput" class="output"></div>
+  <script>
+    // Your JavaScript functions go here
+    // Example: setSessionTicket(), buySkinEmote(), grantCoupons(), etc.
+  </script>
+</body>
+</html>
     </div>
     <script>
         const titleId = "bdff1";
