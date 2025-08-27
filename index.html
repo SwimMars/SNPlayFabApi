@@ -142,6 +142,19 @@
             <button onclick="toggleCoinFarmBot()">Start/Stop Coin Farm Bot</button>
             <div class="output" id="cloudOutput">Bot output will appear here...</div>
         </div>
+
+        <div class="section">
+  <h2>🎮 Set Level Progression</h2>
+  <input type="text" id="classIdInput" placeholder="Class ID" style="width: 200px;"><br><br>
+  <input type="number" id="receivedXPInput" placeholder="Received XP" style="width: 150px;"><br><br>
+  <input type="number" id="xpInput" placeholder="XP" style="width: 150px;"><br><br>
+  <input type="number" id="xpToNextLevelInput" placeholder="XP to Next Level" style="width: 180px;"><br><br>
+  <input type="number" id="levelInput" placeholder="Level" style="width: 150px;"><br><br>
+  <input type="number" id="perkSlotsInput" placeholder="Available Perk Slots (max 3)" style="width: 200px;" max="3"><br><br>
+  <input type="number" id="playerLevelInput" placeholder="Player Level" style="width: 150px;"><br><br>
+  <button onclick="submitLevelProgression()">Submit</button>
+  <div id="levelProgressionOutput" class="output"></div>
+</div>
         <script>
         
         
@@ -180,6 +193,58 @@
     console.log("PurchaseItem response:", data);
     alert("PurchaseItem response logged to console.");
   }
+
+            async function submitLevelProgression() {
+  const classId = document.getElementById("classIdInput").value.trim();
+  const receivedXP = parseInt(document.getElementById("receivedXPInput").value);
+  const XP = parseInt(document.getElementById("xpInput").value);
+  const XpToNextLevel = parseInt(document.getElementById("xpToNextLevelInput").value);
+  const level = parseInt(document.getElementById("levelInput").value);
+  const availablePerkSlotsCount = Math.min(parseInt(document.getElementById("perkSlotsInput").value), 3);
+  const playerLevel = parseInt(document.getElementById("playerLevelInput").value);
+
+  if (!classId || isNaN(receivedXP) || isNaN(XP) || isNaN(XpToNextLevel) || isNaN(level) || isNaN(availablePerkSlotsCount) || isNaN(playerLevel)) {
+    return alert("Please fill in all fields correctly.");
+  }
+
+  const currentLevelProgression = {
+    playerLevel,
+    classLevel: [{
+      classId,
+      XP,
+      XpToNextLevel,
+      level,
+      availablePerkSlotsCount
+    }]
+  };
+
+  try {
+    const res = await fetch("https://bdff1.playfabapi.com/Client/ExecuteCloudScript", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Authorization": sessionTicket // Make sure this is set
+      },
+      body: JSON.stringify({
+        FunctionName: "setLevelProgressionForClass",
+        FunctionParameter: {
+          classId,
+          receivedXP,
+          currentLevelProgression: JSON.stringify(currentLevelProgression)
+        },
+        GeneratePlayStreamEvent: true
+      })
+    });
+
+    const data = await res.json();
+    const result = data.data?.FunctionResult || "No result returned.";
+    document.getElementById("levelProgressionOutput").textContent = `✅ Response:\n${JSON.stringify(result, null, 2)}`;
+    console.log("API response:", data);
+  } catch (err) {
+    document.getElementById("levelProgressionOutput").textContent = "❌ Error occurred.";
+    console.error("Error:", err);
+  }
+}
 
   async function grantCoupons() {
     if (!sessionTicket) return alert("Please set your SessionTicket first.");
