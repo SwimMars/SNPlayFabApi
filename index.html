@@ -19,6 +19,13 @@
     .section {
       margin-bottom: 40px;
     }
+    .output {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f4f4f4;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -27,7 +34,7 @@
   <div class="section">
     <h2>🔐 SessionTicket</h2>
     <input type="text" id="sessionTicketInput" placeholder="Paste your SessionTicket here" style="width: 400px;">
-    <button onclick="setSessionTicket()">Set Tokent</button>
+    <button onclick="setSessionTicket()">Set Token</button>
   </div>
 
   <div class="section">
@@ -44,19 +51,32 @@
   </div>
 
   <div class="section">
+    <h2>📊 View Statistics</h2>
+    <button onclick="viewStatistics()">View Statistics</button>
+    <div id="statsOutput" class="output"></div>
+  </div>
+
+  <div class="section">
+    <h2>🧑‍💻 Obtain Player ID With Username</h2>
+    <input type="text" id="steamUsername" placeholder="Steam Username">
+    <button onclick="getPlayFabId()">Obtain Player ID</button>
+    <div id="playerIdOutput" class="output"></div>
+  </div>
+
+  <div class="section">
     <h2>📄 How to Get Your SessionTicket with Requestly</h2>
     <ol>
       <li>Download the Requestly desktop app from <a href="https://docs.requestly.com/general/sessions/record-api-sessions" target="_blank">here</a>.</li>
       <li>Open Requestly and start recording network traffic.</li>
       <li>Log into your game or app using PlayFab.</li>
       <li>Find the request to <code>/Client/LoginWithSteam</code> or similar.</li>
-      <li>Copy the <code>SessionTicket/X-Authorization</code> from the response body.</li>
+      <li>Copy the <code>SessionTicket</code> or <code>X-Authorization</code> from the response body.</li>
       <li>Paste it into the field above and click "Set Token".</li>
     </ol>
   </div>
 
   <script>
-    const titleId = "bdff1"; // Replace with your actual PlayFab title ID
+    const titleId = "bdff1";
     let sessionTicket = null;
 
     function setSessionTicket() {
@@ -81,8 +101,7 @@
         body: JSON.stringify({
           ItemId,
           Price,
-          VirtualCurrency,
-          StoreId: "steam_Shop_Items"
+          VirtualCurrency
         })
       });
 
@@ -94,7 +113,6 @@
     async function grantCoupons() {
       if (!sessionTicket) return alert("Please set your SessionTicket first.");
 
-      // Step 1: StartPurchase
       const startRes = await fetch(`https://${titleId}.playfabapi.com/Client/StartPurchase`, {
         method: "POST",
         headers: {
@@ -114,7 +132,6 @@
       const orderId = startData.data?.OrderId;
       if (!orderId) return alert("StartPurchase failed.");
 
-      // Step 2: PayForPurchase
       const payRes = await fetch(`https://${titleId}.playfabapi.com/Client/PayForPurchase`, {
         method: "POST",
         headers: {
@@ -123,15 +140,14 @@
         },
         body: JSON.stringify({
           OrderId: orderId,
-          Currency: "RM", // Replace with your currency code
-          ProviderName: "Steam" // Or PayPal, etc.
+          Currency: "RM",
+          ProviderName: "Steam"
         })
       });
 
       const payData = await payRes.json();
       console.log("PayForPurchase response:", payData);
 
-      // Step 3: ConfirmPurchase
       const confirmRes = await fetch(`https://${titleId}.playfabapi.com/Client/ConfirmPurchase`, {
         method: "POST",
         headers: {
@@ -146,6 +162,44 @@
       const confirmData = await confirmRes.json();
       console.log("ConfirmPurchase response:", confirmData);
       alert("GrantCoupons flow completed. Check console for details.");
+    }
+
+    async function viewStatistics() {
+      if (!sessionTicket) return alert("Please set your SessionTicket first.");
+
+      const res = await fetch(`https://${titleId}.playfabapi.com/Client/GetPlayerStatistics`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Authorization": sessionTicket
+        },
+        body: JSON.stringify({})
+      });
+
+      const data = await res.json();
+      const stats = data.data?.Statistics || [];
+      const output = stats.map(stat => `${stat.StatisticName}: ${stat.Value}`).join("\n");
+      document.getElementById("statsOutput").textContent = output || "No statistics found.";
+    }
+
+    async function getPlayFabId() {
+      const steamUsername = document.getElementById("steamUsername").value.trim();
+      if (!steamUsername) return alert("Please enter a Steam username.");
+
+      const res = await fetch(`https://${titleId}.playfabapi.com/Client/GetPlayFabIDsFromSteamNames`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          SteamNames: [steamUsername]
+        })
+      });
+
+      const data = await res.json();
+      const match = data.data?.SteamIdMappings?.[0];
+      const output = match ? `PlayFabId for "${steamUsername}": ${match.PlayFabId}` : "No matching PlayFab ID found.";
+      document.getElementById("playerIdOutput").textContent = output;
     }
   </script>
 </body>
