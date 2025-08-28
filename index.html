@@ -251,7 +251,7 @@
     </div>
 
     <div class="section">
-      <h2>🧪 Level Editor</h2>
+      <h2>🧪 Level Editor <span id="levelEditorStatus" class="status-indicator status-inactive"></span></h2>
       <input type="text" id="classIdInput" placeholder="Class ID">
       <input type="number" id="receivedXPInput" placeholder="Received XP">
       <input type="number" id="xpInput" placeholder="XP">
@@ -259,7 +259,7 @@
       <input type="number" id="levelInput" placeholder="Level">
       <input type="number" id="perkSlotsInput" placeholder="Available Perk Slots (max 3)" max="3" min="0">
       <input type="number" id="playerLevelInput" placeholder="Player Level">
-      <button onclick="submitLevelProgression()">Submit</button>
+      <button onclick="toggleLevelEditor()" id="levelEditorToggleButton">Start Level Editor</button>
       <div class="output" id="levelProgressionOutput">Level progression results will appear here...</div>
     </div>
 
@@ -368,6 +368,17 @@
           <input id="maxResults" placeholder="Max Results" type="number" value="100">
           <button onclick="getLeaderboard()">Get Leaderboard</button>
         </div>
+        <div>
+          <h3>🚩 Report Player</h3>
+          <select id="reportReason">
+            <option value="CHEATING">Cheating</option>
+            <option value="VOICE_CHAT_ABUSE">Voice Chat Abuse</option>
+            <option value="AFK">AFK</option>
+            <option value="TEAMING_WITH_ENEMY">Teaming with Enemy</option>
+          </select>
+          <input id="targetPlayerId" placeholder="Target PlayFab ID" type="text">
+          <button onclick="reportPlayer()">Report Player</button>
+        </div>
       </div>
       <div class="output" id="apiOutput">API results will appear here...</div>
     </div>
@@ -390,12 +401,15 @@
     let sessionTicket = null;
     let coinFarmBotRunning = false;
     let coinFarmIntervalId = null;
+    let levelEditorRunning = false;
+    let levelEditorIntervalId = null;
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
       const tokenStatus = document.getElementById("tokenStatus");
       
       if (sessionTicket) {
+        localStorage.setItem('sessionTicket', sessionTicket);
         tokenStatus.textContent = "✅ Token set successfully!";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
@@ -412,6 +426,7 @@
 
     function clearSessionTicket() {
       sessionTicket = null;
+      localStorage.removeItem('sessionTicket');
       document.getElementById("sessionTicketInput").value = "";
       const tokenStatus = document.getElementById("tokenStatus");
       tokenStatus.textContent = "❌ Token cleared";
@@ -449,6 +464,7 @@
         if (data.data && data.data.EntityToken) {
           // Update the session ticket with the new one
           sessionTicket = data.data.EntityToken;
+          localStorage.setItem('sessionTicket', sessionTicket);
           document.getElementById("sessionTicketInput").value = sessionTicket;
           
           tokenStatus.textContent = "✅ Session ticket renewed successfully!";
@@ -513,6 +529,13 @@
         console.error("API call failed:", error);
         return { error: error.message };
       }
+    }
+
+    function formatResponse(result) {
+      if (typeof result === "object" && result !== null) {
+        return Object.entries(result).map(([key, value]) => `${key}: ${value}`).join("\n");
+      }
+      return result;
     }
 
     // NEW FUNCTION: Purchase All Skins and Emotes
@@ -649,7 +672,11 @@
       });
 
       const output = document.getElementById("apiOutput");
-      output.textContent = JSON.stringify(data, null, 2);
+      if (data.error) {
+        output.textContent = `Error: ${data.error}`;
+      } else {
+        output.textContent = formatResponse(data.data);
+      }
     }
 
     async function getFriendsList() {
@@ -666,8 +693,10 @@
           friendsList += `- ${friend.Username} (${friend.PlayFabId})\n`;
         });
         output.textContent = friendsList;
+      } else if (data.error) {
+        output.textContent = `Error: ${data.error}`;
       } else {
-        output.textContent = JSON.stringify(data, null, 2);
+        output.textContent = formatResponse(data);
       }
     }
 
@@ -684,7 +713,11 @@
       });
 
       const output = document.getElementById("apiOutput");
-      output.textContent = JSON.stringify(data, null, 2);
+      if (data.error) {
+        output.textContent = `Error: ${data.error}`;
+      } else {
+        output.textContent = formatResponse(data.data);
+      }
     }
 
     async function linkCustomId() {
@@ -701,7 +734,11 @@
       });
 
       const output = document.getElementById("apiOutput");
-      output.textContent = JSON.stringify(data, null, 2);
+      if (data.error) {
+        output.textContent = `Error: ${data.error}`;
+      } else {
+        output.textContent = formatResponse(data.data);
+      }
     }
 
     async function getLeaderboard() {
@@ -728,8 +765,42 @@
           leaderboardText += `${startPosition + index + 1}. ${entry.DisplayName}: ${entry.StatValue}\n`;
         });
         output.textContent = leaderboardText;
+      } else if (data.error) {
+        output.textContent = `Error: ${data.error}`;
       } else {
-        output.textContent = JSON.stringify(data, null, 2);
+        output.textContent = formatResponse(data);
+      }
+    }
+
+    async function reportPlayer() {
+      const reportReason = document.getElementById("reportReason").value;
+      const targetPlayerId = document.getElementById("targetPlayerId").value.trim();
+      
+      if (!targetPlayerId) {
+        document.getElementById("apiOutput").textContent = "Please enter a target PlayFab ID.";
+        return;
+      }
+
+      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+        CustomTags: null,
+        FunctionName: "reportPlayer",
+        FunctionParameter: {
+          reportReason: reportReason,
+          targetPlayerId: targetPlayerId
+        },
+        GeneratePlayStreamEvent: true,
+        RevisionSelection: null,
+        SpecificRevision: null,
+        AuthenticationContext: null
+      });
+
+      const output = document.getElementById("apiOutput");
+      if (data.error) {
+        output.textContent = `Error: ${data.error}`;
+      } else if (data.data && data.data.FunctionResult) {
+        output.textContent = formatResponse(data.data.FunctionResult);
+      } else {
+        output.textContent = formatResponse(data.data);
       }
     }
 
@@ -750,7 +821,11 @@
       });
 
       const output = document.getElementById("purchaseOutput");
-      output.textContent = JSON.stringify(data, null, 2);
+      if (data.error) {
+        output.textContent = `Error: ${data.error}`;
+      } else {
+        output.textContent = formatResponse(data.data);
+      }
     }
 
  async function grantCoupons() {
@@ -769,7 +844,7 @@
     });
 
     if (startData.error) {
-      output.textContent += `\nError in StartPurchase: ${JSON.stringify(startData.error, null, 2)}`;
+      output.textContent += `\nError in StartPurchase: ${startData.error}`;
       return;
     }
 
@@ -798,10 +873,10 @@
     });
 
     if (confirmData.error) {
-      output.textContent += `\nError in ConfirmPurchase: ${JSON.stringify(confirmData.error, null, 2)}`;
+      output.textContent += `\nError in ConfirmPurchase: ${confirmData.error}`;
     } else {
       output.textContent += "\nCoupon process completed:\n" + 
-        JSON.stringify(confirmData, null, 2);
+        formatResponse(confirmData.data);
     }
       
   } catch (error) {
@@ -857,10 +932,7 @@
       const output = document.getElementById("usefulDeedOutput");
       if (data.data?.FunctionResult) {
         const result = data.data.FunctionResult;
-        const formatted = typeof result === "object" ? 
-          Object.entries(result).map(([key, val]) => `- ${key}: ${val}`).join("\n") : 
-          result;
-        output.textContent = `✅ usefulDeed Result:\n${formatted}`;
+        output.textContent = `✅ usefulDeed Result:\n${formatResponse(result)}`;
       } else {
         output.textContent = "Error: " + (data.error || "Unknown error");
       }
@@ -877,8 +949,7 @@
 
       if (!classId || isNaN(receivedXP) || isNaN(XP) || isNaN(XpToNextLevel) || 
           isNaN(level) || isNaN(availablePerkSlotsCount) || isNaN(playerLevel)) {
-        alert("Please fill in all fields correctly.");
-        return;
+        return { error: "Please fill in all fields correctly." };
       }
 
       const currentLevelProgression = {
@@ -902,8 +973,7 @@
         GeneratePlayStreamEvent: true
       });
 
-      const output = document.getElementById("levelProgressionOutput");
-      output.textContent = JSON.stringify(data, null, 2);
+      return data;
     }
 
     async function getPlayFabInfo() {
@@ -990,7 +1060,13 @@
       });
 
       const output = document.getElementById("questOutput");
-      output.textContent = JSON.stringify(data, null, 2);
+      if (data.error) {
+        output.textContent = `Error: ${data.error}`;
+      } else if (data.data && data.data.FunctionResult) {
+        output.textContent = formatResponse(data.data.FunctionResult);
+      } else {
+        output.textContent = formatResponse(data.data);
+      }
     }
 
     function toggleCoinFarmBot() {
@@ -1024,27 +1100,95 @@
           document.getElementById("playerId6").value.trim()
         ].filter(id => id);
 
-        const functions = ["startNewMatch", "decideSpecialRole", "finishMatch"];
         let output = `\n=== Cycle started at ${new Date().toLocaleTimeString()} ===\n`;
         output += `Room Type: ${roomType}\nPlayers: ${playerIds.join(", ") || "None"}\n`;
 
-        for (const fn of functions) {
+        let matchId = null;
+
+        // startNewMatch
+        try {
+          const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+            FunctionName: "startNewMatch",
+            FunctionParameter: { roomType, playerIds },
+            GeneratePlayStreamEvent: true
+          });
+
+          if (data.error) {
+            output += `❌ startNewMatch: Error - ${data.error}\n`;
+          } else {
+            const result = data.data?.FunctionResult;
+            output += `✅ startNewMatch: ${formatResponse(result)}\n`;
+            if (result && result.CurrentMatchId) {
+              matchId = result.CurrentMatchId;
+              output += `New MatchId: ${matchId}\n`;
+            }
+          }
+        } catch (err) {
+          output += `❌ startNewMatch: Exception - ${err.message}\n`;
+        }
+
+        // decideSpecialRole
+        try {
+          const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+            FunctionName: "decideSpecialRole",
+            FunctionParameter: { roomType, playerIds },
+            GeneratePlayStreamEvent: true
+          });
+
+          if (data.error) {
+            output += `❌ decideSpecialRole: Error - ${data.error}\n`;
+          } else {
+            const result = data.data?.FunctionResult;
+            output += `✅ decideSpecialRole: ${formatResponse(result)}\n`;
+          }
+        } catch (err) {
+          output += `❌ decideSpecialRole: Exception - ${err.message}\n`;
+        }
+
+        // xpConsumed if matchId available
+        if (matchId) {
           try {
             const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-              FunctionName: fn,
-              FunctionParameter: { roomType, playerIds },
-              GeneratePlayStreamEvent: true
+              CustomTags: null,
+              FunctionName: "xpConsumed",
+              FunctionParameter: {
+                token: matchId
+              },
+              GeneratePlayStreamEvent: true,
+              RevisionSelection: null,
+              SpecificRevision: null,
+              AuthenticationContext: null
             });
 
             if (data.error) {
-              output += `❌ ${fn}: Error - ${data.error}\n`;
+              output += `❌ xpConsumed: Error - ${data.error}\n`;
             } else {
               const result = data.data?.FunctionResult;
-              output += `✅ ${fn}: ${typeof result === "object" ? JSON.stringify(result) : result}\n`;
+              output += `✅ xpConsumed: ${formatResponse(result)}\n`;
             }
           } catch (err) {
-            output += `❌ ${fn}: Exception - ${err.message}\n`;
+            output += `❌ xpConsumed: Exception - ${err.message}\n`;
           }
+        } else {
+          output += `⏩ xpConsumed: Skipped - No MatchId available\n`;
+        }
+
+        // finishMatch
+        try {
+          const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+            FunctionName: "finishMatch",
+            FunctionParameter: { roomType, playerIds },
+            GeneratePlayStreamEvent: true
+          });
+
+          if (data.error) {
+            output += `❌ finishMatch: Error - ${data.error}\n`;
+          } else {
+            const result = data.data?.FunctionResult;
+            output += `✅ finishMatch: ${formatResponse(result)}\n`;
+          }
+        } catch (err) {
+          output += `❌ finishMatch: Exception - ${err.message}\n`;
         }
 
         output += `Waiting ${delayMinutes} minutes for next cycle...\n`;
@@ -1060,9 +1204,60 @@
       coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs);
     }
 
+    function toggleLevelEditor() {
+      if (levelEditorRunning) {
+        clearInterval(levelEditorIntervalId);
+        levelEditorRunning = false;
+        document.getElementById("levelEditorStatus").className = "status-indicator status-inactive";
+        document.getElementById("levelEditorToggleButton").textContent = "Start Level Editor";
+        document.getElementById("levelProgressionOutput").textContent += "\nLevel editor stopped manually.";
+        return;
+      }
+
+      levelEditorRunning = true;
+      document.getElementById("levelEditorStatus").className = "status-indicator status-active";
+      document.getElementById("levelEditorToggleButton").textContent = "Stop Level Editor";
+
+      document.getElementById("levelProgressionOutput").textContent = 
+        `Starting Level Editor...\n`;
+
+      async function runLevelEditorCycle() {
+        let output = `\n=== Cycle started at ${new Date().toLocaleTimeString()} ===\n`;
+
+        try {
+          const data = await submitLevelProgression();
+
+          if (data.error) {
+            output += `❌ setLevelProgressionForClass: Error - ${data.error}\n`;
+          } else {
+            const result = data.data?.FunctionResult;
+            output += `✅ setLevelProgressionForClass: ${formatResponse(result)}\n`;
+          }
+        } catch (err) {
+          output += `❌ setLevelProgressionForClass: Exception - ${err.message}\n`;
+        }
+
+        const levelOutput = document.getElementById("levelProgressionOutput");
+        levelOutput.textContent += output;
+        levelOutput.scrollTop = levelOutput.scrollHeight;
+      }
+
+      // Run continuously with no delay (but add minimal timeout to avoid blocking)
+      levelEditorIntervalId = setInterval(runLevelEditorCycle, 100); // 100ms minimal delay to prevent overload
+    }
+
     // Initialize page
     document.addEventListener("DOMContentLoaded", function() {
       console.log("Secret Neighbor Exploits page loaded");
+      const savedTicket = localStorage.getItem('sessionTicket');
+      if (savedTicket) {
+        sessionTicket = savedTicket;
+        document.getElementById("sessionTicketInput").value = savedTicket;
+        const tokenStatus = document.getElementById("tokenStatus");
+        tokenStatus.textContent = "✅ Token loaded from storage!";
+        tokenStatus.style.display = "block";
+        tokenStatus.style.color = "green";
+      }
     });
   </script>
 </body>
