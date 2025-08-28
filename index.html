@@ -1600,25 +1600,25 @@ function stopBruteforce() {
     }
 
     function connectToPhoton() {
-      if (!photonToken) {
-        document.getElementById("photonConnectionOutput").textContent = "❌ Set Photon Token first.";
-        return;
-      }
+  if (!photonToken) {
+    document.getElementById("photonConnectionOutput").textContent = "❌ Set Photon Token first.";
+    return;
+  }
 
-      const region = document.getElementById("photonRegion").value;
-      photonClient = new MyPhotonClient(Photon.ConnectionProtocol.Ws, appId, appVersion);
-      photonClient.setCustomAuthentication(photonToken, Photon.LoadBalancing.Constants.CustomAuthenticationType.Custom, { token: photonToken });
-      photonClient.connectToRegionMaster(region);
+  const region = document.getElementById("photonRegion").value;
+  photonClient = new MyPhotonClient(Photon.ConnectionProtocol.Ws, appId, appVersion);
+  photonClient.setCustomAuthentication(photonToken, Photon.LoadBalancing.Constants.CustomAuthenticationType.Custom, { token: photonToken });
+  photonClient.connectToRegionMaster(region);
 
-      photonClient.onStateChange = function(state) {
-        const status = Photon.LoadBalancing.LoadBalancingClient.StateToName(state);
-        document.getElementById("photonConnectionOutput").textContent += `📡 State: ${status}\n`;
-        if (state === Photon.LoadBalancing.LoadBalancingClient.State.ConnectedToMaster) {
-          document.getElementById("photonConnectionOutput").textContent += "✅ Connected to Master Server!\n";
-          photonClient.joinLobby();
-        }
-      };
+  photonClient.onStateChange = function(state) {
+    const status = Photon.LoadBalancing.LoadBalancingClient.StateToName(state);
+    document.getElementById("photonConnectionOutput").textContent += `📡 State: ${status}\n`;
+    if (state === Photon.LoadBalancing.LoadBalancingClient.State.ConnectedToMaster) {
+      document.getElementById("photonConnectionOutput").textContent += "✅ Connected to Master Server!\n";
+      photonClient.joinLobby();
     }
+  };
+}
 
     function toggleSpamPhotonRooms() {
       if (spamRoomsRunning) {
