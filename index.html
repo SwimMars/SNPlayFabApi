@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -159,6 +160,8 @@
       background-color: #0b7dda;
     }
   </style>
+  <!-- Photon Client SDK - Download from https://dashboard.photonengine.com and host locally or use CDN if available -->
+  <script src="Photon-Javascript_SDK.min.js"></script> <!-- Replace with actual path to Photon-Javascript_SDK.min.js -->
 </head>
 <body>
   <h1>🎮 Secret Neighbor Exploits</h1>
@@ -185,6 +188,17 @@
         <button onclick="clearSessionTicket()">Clear Token</button>
       </div>
       <div id="tokenStatus" class="output" style="display: none;">No token set</div>
+    </div>
+
+    <div class="section">
+      <h2>🔐 Set Photon Token</h2>
+      <input id="photonTokenInput" placeholder="Paste your Photon Token here" type="text">
+      <button onclick="setPhotonToken()">Set Photon Token</button>
+      <div class="grid-2">
+        <button class="renew-btn" onclick="renewPhotonToken()">Renew Photon Token</button>
+        <button onclick="clearPhotonToken()">Clear Photon Token</button>
+      </div>
+      <div id="photonTokenStatus" class="output" style="display: none;">No photon token set</div>
     </div>
 
     <div class="section">
@@ -420,11 +434,89 @@
       <button onclick="stopBruteforce()">Stop Bruteforce</button>
       <div class="output" id="bruteforceOutput">Results will appear here...</div>
     </div>
+
+    <div class="section">
+      <h2>📡 Connect to Photon</h2>
+      <select id="photonRegion">
+        <option value="eu">EU</option>
+        <option value="us">US</option>
+        <option value="asia">Asia</option>
+        <!-- Add more regions as needed -->
+      </select>
+      <button onclick="connectToPhoton()">Connect to Photon</button>
+      <div class="output" id="photonConnectionOutput">Connection status will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🚀 Spam Photon Rooms <span id="spamRoomsStatus" class="status-indicator status-inactive"></span></h2>
+      <input id="spamRoomCount" placeholder="Number of Rooms to Spam" type="number" value="10">
+      <input id="spamRoomPrefix" placeholder="Room Name Prefix" type="text" value="spam_">
+      <button onclick="toggleSpamPhotonRooms()" id="spamRoomsToggleButton">Start Spamming Rooms</button>
+      <div class="output" id="spamRoomsOutput">Spam results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🔀 Join Random Rooms</h2>
+      <button onclick="joinRandomPhotonRoom()">Join Random Room</button>
+      <div class="output" id="joinRandomOutput">Join results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🏠 Create Room</h2>
+      <input id="createRoomName" placeholder="Room Name" type="text">
+      <input id="createMaxPlayers" placeholder="Max Players" type="number" value="6">
+      <button onclick="createPhotonRoom()">Create Room</button>
+      <div class="output" id="createRoomOutput">Create results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🚪 Join Specific Room</h2>
+      <input id="joinRoomName" placeholder="Room Name" type="text">
+      <button onclick="joinPhotonRoom()">Join Room</button>
+      <div class="output" id="joinRoomOutput">Join results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>📤 Raise Event</h2>
+      <input id="eventCode" placeholder="Event Code (number)" type="number">
+      <input id="eventData" placeholder="Event Data (JSON)" type="text">
+      <button onclick="raisePhotonEvent()">Raise Event</button>
+      <div class="output" id="raiseEventOutput">Event results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🛠️ Set Room Properties</h2>
+      <input id="roomProperties" placeholder="Properties (JSON)" type="text">
+      <button onclick="setRoomProperties()">Set Properties</button>
+      <div class="output" id="setPropertiesOutput">Properties results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>👥 Get Room List</h2>
+      <button onclick="getPhotonRoomList()">Get Room List</button>
+      <div class="output" id="roomListOutput">Room list will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🚪 Leave Room</h2>
+      <button onclick="leavePhotonRoom()">Leave Room</button>
+      <div class="output" id="leaveRoomOutput">Leave results will appear here...</div>
+    </div>
+
+    <div class="section">
+      <h2>🔌 Disconnect from Photon</h2>
+      <button onclick="disconnectFromPhoton()">Disconnect</button>
+      <div class="output" id="disconnectOutput">Disconnect status will appear here...</div>
+    </div>
+
   </div>
 
   <script>
     const titleId = "bdff1";
+    const appId = "2b76b55a-bf65-47af-836f-daa9c8eb9f1e"; // From existing code
+    const appVersion = "1.0"; // Assume a version; adjust as needed
     let sessionTicket = null;
+    let photonToken = null;
     let coinFarmBotRunning = false;
     let coinFarmIntervalId = null;
     let levelEditorRunning = false;
@@ -432,6 +524,9 @@
     let bruteforceRunning = false;
     let photonTokenRunning = false;
     let photonTokenIntervalId = null;
+    let spamRoomsRunning = false;
+    let spamRoomsIntervalId = null;
+    let photonClient = null;
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -504,6 +599,71 @@
       } catch (error) {
         tokenStatus.textContent = `❌ Error renewing session ticket: ${error.message}`;
         tokenStatus.style.color = "red";
+      }
+    }
+
+    function setPhotonToken() {
+      photonToken = document.getElementById("photonTokenInput").value.trim();
+      const photonTokenStatus = document.getElementById("photonTokenStatus");
+      
+      if (photonToken) {
+        localStorage.setItem('photonToken', photonToken);
+        photonTokenStatus.textContent = "✅ Photon Token set successfully!";
+        photonTokenStatus.style.display = "block";
+        photonTokenStatus.style.color = "green";
+        console.log("Photon Token set:", photonToken);
+      } else {
+        photonTokenStatus.textContent = "❌ Please enter a valid photon token";
+        photonTokenStatus.style.display = "block";
+        photonTokenStatus.style.color = "red";
+      }
+    }
+
+    function clearPhotonToken() {
+      photonToken = null;
+      localStorage.removeItem('photonToken');
+      document.getElementById("photonTokenInput").value = "";
+      const photonTokenStatus = document.getElementById("photonTokenStatus");
+      photonTokenStatus.textContent = "❌ Photon Token cleared";
+      photonTokenStatus.style.display = "block";
+      photonTokenStatus.style.color = "red";
+    }
+
+    async function renewPhotonToken() {
+      const photonTokenStatus = document.getElementById("photonTokenStatus");
+      
+      if (!sessionTicket) {
+        photonTokenStatus.textContent = "❌ No session ticket available. Set SessionTicket first.";
+        photonTokenStatus.style.display = "block";
+        photonTokenStatus.style.color = "red";
+        return;
+      }
+      
+      photonTokenStatus.textContent = "🔄 Renewing photon token...";
+      photonTokenStatus.style.display = "block";
+      photonTokenStatus.style.color = "blue";
+      
+      try {
+        const data = await makeApiCall("Client/GetPhotonAuthenticationToken", "POST", {
+          PhotonApplicationId: appId
+        });
+        
+        if (data.data && data.data.PhotonCustomAuthenticationToken) {
+          photonToken = data.data.PhotonCustomAuthenticationToken;
+          localStorage.setItem('photonToken', photonToken);
+          document.getElementById("photonTokenInput").value = photonToken;
+          
+          photonTokenStatus.textContent = "✅ Photon token renewed successfully!";
+          photonTokenStatus.style.color = "green";
+          
+          console.log("Photon Token renewed:", photonToken);
+        } else {
+          photonTokenStatus.textContent = `❌ Failed to renew photon token: ${data.errorMessage || "Unknown error"}`;
+          photonTokenStatus.style.color = "red";
+        }
+      } catch (error) {
+        photonTokenStatus.textContent = `❌ Error renewing photon token: ${error.message}`;
+        photonTokenStatus.style.color = "red";
       }
     }
 
@@ -1408,6 +1568,218 @@ function stopBruteforce() {
   document.getElementById("bruteforceOutput").textContent += "Bruteforce stopped.\n";
   document.getElementById("bruteforceOutput").scrollTop = document.getElementById("bruteforceOutput").scrollHeight;
 }
+
+    // Photon Functions
+    class MyPhotonClient extends Photon.LoadBalancing.LoadBalancingClient {
+      onError(errorCode, errorMsg) {
+        console.error("Photon Error:", errorCode, errorMsg);
+        document.getElementById("photonConnectionOutput").textContent += `❌ Error: ${errorCode} - ${errorMsg}\n`;
+      }
+
+      onEvent(code, content, actorNr) {
+        console.log("Photon Event:", code, content, actorNr);
+        document.getElementById("photonConnectionOutput").textContent += `📥 Event: Code ${code}, From Actor ${actorNr}, Content: ${JSON.stringify(content)}\n`;
+      }
+
+      onRoomList(rooms) {
+        console.log("Room List Updated:", rooms);
+        document.getElementById("roomListOutput").textContent = "Room List:\n" + rooms.map(r => `- ${r.name} (${r.playerCount}/${r.maxPlayers})`).join("\n");
+      }
+
+      onJoinRoom(roomName, roomOptions, createOptions) {
+        console.log("Joined Room:", roomName);
+      }
+
+      onOperationResponse(errorCode, errorMsg, code, content) {
+        if (errorCode) {
+          console.error("Operation Response Error:", errorCode, errorMsg);
+          document.getElementById("photonConnectionOutput").textContent += `❌ Op Response Error: ${errorCode} - ${errorMsg}\n`;
+        } else {
+          console.log("Operation Response:", code, content);
+        }
+      }
+    }
+
+    function connectToPhoton() {
+      if (!photonToken) {
+        document.getElementById("photonConnectionOutput").textContent = "❌ Set Photon Token first.";
+        return;
+      }
+
+      const region = document.getElementById("photonRegion").value;
+      photonClient = new MyPhotonClient(Photon.ConnectionProtocol.Ws, appId, appVersion);
+      photonClient.setCustomAuthentication(photonToken, Photon.LoadBalancing.Constants.CustomAuthenticationType.Custom, { token: photonToken });
+      photonClient.connectToRegionMaster(region);
+
+      photonClient.onStateChange = function(state) {
+        const status = Photon.LoadBalancing.LoadBalancingClient.StateToName(state);
+        document.getElementById("photonConnectionOutput").textContent += `📡 State: ${status}\n`;
+        if (state === Photon.LoadBalancing.LoadBalancingClient.State.ConnectedToMaster) {
+          document.getElementById("photonConnectionOutput").textContent += "✅ Connected to Master Server!\n";
+          photonClient.joinLobby();
+        }
+      };
+    }
+
+    function toggleSpamPhotonRooms() {
+      if (spamRoomsRunning) {
+        clearInterval(spamRoomsIntervalId);
+        spamRoomsRunning = false;
+        document.getElementById("spamRoomsStatus").className = "status-indicator status-inactive";
+        document.getElementById("spamRoomsToggleButton").textContent = "Start Spamming Rooms";
+        document.getElementById("spamRoomsOutput").textContent += "\nSpam stopped manually.";
+        return;
+      }
+
+      if (!photonClient || !photonClient.isConnectedToMaster()) {
+        document.getElementById("spamRoomsOutput").textContent = "❌ Connect to Photon first.";
+        return;
+      }
+
+      spamRoomsRunning = true;
+      document.getElementById("spamRoomsStatus").className = "status-indicator status-active";
+      document.getElementById("spamRoomsToggleButton").textContent = "Stop Spamming Rooms";
+
+      const count = parseInt(document.getElementById("spamRoomCount").value) || 10;
+      const prefix = document.getElementById("spamRoomPrefix").value || "spam_";
+      let created = 0;
+
+      document.getElementById("spamRoomsOutput").textContent = `Starting to spam ${count} rooms...\n`;
+
+      function createSpamRoom() {
+        if (created >= count || !spamRoomsRunning) {
+          clearInterval(spamRoomsIntervalId);
+          spamRoomsRunning = false;
+          document.getElementById("spamRoomsStatus").className = "status-indicator status-inactive";
+          document.getElementById("spamRoomsToggleButton").textContent = "Start Spamming Rooms";
+          return;
+        }
+
+        const roomName = `${prefix}${Math.random().toString(36).substring(2)}`;
+        photonClient.createRoom(roomName, { maxPlayers: 2 });
+        document.getElementById("spamRoomsOutput").textContent += `Created room: ${roomName}\n`;
+        created++;
+      }
+
+      createSpamRoom();
+      spamRoomsIntervalId = setInterval(createSpamRoom, 500); // Spam every 0.5s
+    }
+
+    function joinRandomPhotonRoom() {
+      if (!photonClient || !photonClient.isConnectedToMaster()) {
+        document.getElementById("joinRandomOutput").textContent = "❌ Connect to Photon first.";
+        return;
+      }
+
+      const result = photonClient.joinRandomRoom({ }, 0);
+      document.getElementById("joinRandomOutput").textContent += result ? "✅ Joining random room...\n" : "❌ No rooms available.\n";
+    }
+
+    function createPhotonRoom() {
+      if (!photonClient || !photonClient.isConnectedToMaster()) {
+        document.getElementById("createRoomOutput").textContent = "❌ Connect to Photon first.";
+        return;
+      }
+
+      const roomName = document.getElementById("createRoomName").value.trim();
+      const maxPlayers = parseInt(document.getElementById("createMaxPlayers").value) || 6;
+
+      if (!roomName) {
+        document.getElementById("createRoomOutput").textContent = "❌ Enter room name.";
+        return;
+      }
+
+      photonClient.createRoom(roomName, { maxPlayers: maxPlayers });
+      document.getElementById("createRoomOutput").textContent += `Creating room: ${roomName} (max ${maxPlayers})\n`;
+    }
+
+    function joinPhotonRoom() {
+      if (!photonClient || !photonClient.isConnectedToMaster()) {
+        document.getElementById("joinRoomOutput").textContent = "❌ Connect to Photon first.";
+        return;
+      }
+
+      const roomName = document.getElementById("joinRoomName").value.trim();
+
+      if (!roomName) {
+        document.getElementById("joinRoomOutput").textContent = "❌ Enter room name.";
+        return;
+      }
+
+      photonClient.joinRoom(roomName);
+      document.getElementById("joinRoomOutput").textContent += `Joining room: ${roomName}\n`;
+    }
+
+    function raisePhotonEvent() {
+      if (!photonClient || !photonClient.isJoinedToRoom()) {
+        document.getElementById("raiseEventOutput").textContent = "❌ Join a room first.";
+        return;
+      }
+
+      const code = parseInt(document.getElementById("eventCode").value);
+      const dataStr = document.getElementById("eventData").value.trim();
+      let data;
+      try {
+        data = JSON.parse(dataStr || "{}");
+      } catch {
+        document.getElementById("raiseEventOutput").textContent = "❌ Invalid JSON data.";
+        return;
+      }
+
+      photonClient.raiseEvent(code, data);
+      document.getElementById("raiseEventOutput").textContent += `Raised event ${code} with data: ${dataStr}\n`;
+    }
+
+    function setRoomProperties() {
+      if (!photonClient || !photonClient.isJoinedToRoom()) {
+        document.getElementById("setPropertiesOutput").textContent = "❌ Join a room first.";
+        return;
+      }
+
+      const propsStr = document.getElementById("roomProperties").value.trim();
+      let props;
+      try {
+        props = JSON.parse(propsStr || "{}");
+      } catch {
+        document.getElementById("setPropertiesOutput").textContent = "❌ Invalid JSON properties.";
+        return;
+      }
+
+      photonClient.setCustomProperty(props);
+      document.getElementById("setPropertiesOutput").textContent += `Set properties: ${propsStr}\n`;
+    }
+
+    function getPhotonRoomList() {
+      if (!photonClient || !photonClient.isConnectedToMaster()) {
+        document.getElementById("roomListOutput").textContent = "❌ Connect to Photon first.";
+        return;
+      }
+
+      const rooms = photonClient.availableRooms();
+      document.getElementById("roomListOutput").textContent = "Room List:\n" + (rooms.length ? rooms.map(r => `- ${r.name} (${r.playerCount}/${r.maxPlayers})`).join("\n") : "No rooms available.");
+    }
+
+    function leavePhotonRoom() {
+      if (!photonClient || !photonClient.isJoinedToRoom()) {
+        document.getElementById("leaveRoomOutput").textContent = "❌ Not in a room.";
+        return;
+      }
+
+      photonClient.leaveRoom();
+      document.getElementById("leaveRoomOutput").textContent += "Left the room.\n";
+    }
+
+    function disconnectFromPhoton() {
+      if (!photonClient) {
+        document.getElementById("disconnectOutput").textContent = "❌ Not connected.";
+        return;
+      }
+
+      photonClient.disconnect();
+      document.getElementById("disconnectOutput").textContent += "Disconnected from Photon.\n";
+      photonClient = null;
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
       console.log("Secret Neighbor Exploits page loaded");
       const savedTicket = localStorage.getItem('sessionTicket');
@@ -1419,7 +1791,17 @@ function stopBruteforce() {
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
       }
+      const savedPhotonToken = localStorage.getItem('photonToken');
+      if (savedPhotonToken) {
+        photonToken = savedPhotonToken;
+        document.getElementById("photonTokenInput").value = savedPhotonToken;
+        const photonTokenStatus = document.getElementById("photonTokenStatus");
+        photonTokenStatus.textContent = "✅ Photon Token loaded from storage!";
+        photonTokenStatus.style.display = "block";
+        photonTokenStatus.style.color = "green";
+      }
     });
   </script>
 </body>
 </html>
+```
