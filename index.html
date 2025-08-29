@@ -1539,7 +1539,7 @@ async function startBruteforce() {
   async function tryTokenBatch() {
     if (!bruteforceRunning) return;
 
-    const batchSize = 5000;
+    const batchSize = 1000;
     const tokens = Array.from({ length: batchSize }, generateRandomToken);
     const results = await Promise.all(tokens.map(token => checkToken(playFabId, token)));
 
