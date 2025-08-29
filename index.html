@@ -784,7 +784,6 @@
 
     async function getLeaderboard() {
       const statisticName = document.getElementById("statisticName").value.trim();
-শ0
       const startPosition = parseInt(document.getElementById("startPosition").value) || 0;
       const maxResults = parseInt(document.getElementById("maxResults").value) || 10;
       
@@ -1234,7 +1233,7 @@
 
         output.textContent += `changeMatchPlayerStatus: ${matchData.error ? `❌ Error: ${matchData.error}` : "✅ Success"}\n`;
         output.scrollTop = output.scrollHeight;
-      }, 10 * 60 * 1000);
+      }, 3 * 60 * 1000);
     }
 
     function toggleCoinFarmBot() {
