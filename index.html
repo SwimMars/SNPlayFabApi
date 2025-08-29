@@ -417,7 +417,7 @@
         <button class="reset-penalty-btn" onclick="decreasePenaltyPoints()">Decrease Penalty Points</button>
       </div>
       <input id="matchPlayerId" placeholder="Player ID for Match Status" type="text">
-      <button onclick="startMatchStatusSequence()">Update Match Status (10min delay)</button>
+      <button onclick="startMatchStatusSequence()">Decrease Penalty Points Fixed (3 delay)</button>
       <div class="output" id="penaltyOutput">Penalty and match status results will appear here...</div>
     </div>
 
@@ -1213,7 +1213,7 @@
       output.textContent += `refreshStartPunishmentLevelTime: ${refreshData.error ? `❌ Error: ${refreshData.error}` : "✅ Success"}\n`;
       output.textContent += `getXpMultiplier: ${xpMultiplierData.error ? `❌ Error: ${xpMultiplierData.error}` : "✅ Success"}\n`;
       output.textContent += `checkPopCornEvent: ${popCornData.error ? `❌ Error: ${popCornData.error}` : "✅ Success"}\n`;
-      output.textContent += "Waiting 10 minutes to update match status...\n";
+      output.textContent += "Waiting 3 minutes to update match status...\n";
       output.scrollTop = output.scrollHeight;
 
       setTimeout(async () => {
