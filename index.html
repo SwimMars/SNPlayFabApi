@@ -216,10 +216,10 @@
     </div>
 
     <div class="section">
-      <h2>🧑‍💻 Obtain Player ID With Username</h2>
+      <h2>🧑‍💻 Obtain PlayFab ID With Username</h2>
       <input id="steamUsername" placeholder="Steam Username" type="text">
-      <button onclick="getPlayFabId()">Obtain Player ID</button>
-      <div class="output" id="playerIdOutput">Player ID will appear here...</div>
+      <button onclick="getPlayFabId()">Obtain PlayFab ID</button>
+      <div class="output" id="playerIdOutput">PlayFab ID will appear here...</div>
     </div>
 
     <div class="section">
@@ -250,12 +250,12 @@
       </div>
       
       <div class="player-id-inputs">
-        <input id="playerId1" placeholder="Player ID 1" type="text">
-        <input id="playerId2" placeholder="Player ID 2" type="text">
-        <input id="playerId3" placeholder="Player ID 3" type="text">
-        <input id="playerId4" placeholder="Player ID 4" type="text">
-        <input id="playerId5" placeholder="Player ID 5" type="text">
-        <input id="playerId6" placeholder="Player ID 6" type="text">
+        <input id="playerId1" placeholder="PlayFab ID 1" type="text">
+        <input id="playerId2" placeholder="PlayFab ID 2" type="text">
+        <input id="playerId3" placeholder="PlayFab ID 3" type="text">
+        <input id="playerId4" placeholder="PlayFab ID 4" type="text">
+        <input id="playerId5" placeholder="PlayFab ID 5" type="text">
+        <input id="playerId6" placeholder="PlayFab ID 6" type="text">
       </div>
       
       <button onclick="toggleCoinFarmBot()" id="botToggleButton">Start Coin Farm Bot</button>
@@ -415,7 +415,7 @@
 
     <div class="section">
       <h2>🔨 Photon Token Bruteforcer</h2>
-      <input id="playFabUsername" placeholder="PlayFab Username" type="text">
+      <input id="playFabUsername" placeholder="PlayFab ID type="text">
       <button onclick="startBruteforce()">Start Bruteforce</button>
       <button onclick="stopBruteforce()">Stop Bruteforce</button>
       <div class="output" id="bruteforceOutput">Results will appear here...</div>
@@ -1360,7 +1360,7 @@
             const output = document.getElementById("bruteforceOutput");
             
             if (!username) {
-                output.textContent = "Please enter a PlayFab Username.";
+                output.textContent = "Please enter a PlayFab ID.";
                 return;
             }
 
