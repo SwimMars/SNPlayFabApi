@@ -1493,8 +1493,8 @@
     }
 
     function generateRandomToken() {
-  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-';
-  const tokenLength = 36; // Standard UUID-like length for Photon tokens
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const tokenLength = 50; // Standard UUID-like length for Photon tokens
   let token = '';
   for (let i = 0; i < tokenLength; i++) {
     token += chars.charAt(Math.floor(Math.random() * chars.length));
