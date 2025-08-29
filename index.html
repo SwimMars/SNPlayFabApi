@@ -1492,7 +1492,7 @@
       }
     }
 
-   function generateRandomToken() {
+  function generateRandomToken() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   const tokenLength = 50; // Standard UUID-like length for Photon tokens
   let token = '';
@@ -1534,6 +1534,7 @@ async function startBruteforce() {
   }
 
   bruteforceRunning = true;
+  let foundValid = false; // Declare foundValid here
   output.textContent = "Token bruteforcer enabled! We will notify you when we find a valid token.\n";
 
   async function tryTokenBatch() {
