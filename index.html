@@ -1493,10 +1493,11 @@
     }
 
    
-const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'.split(''); // Precompute character array
-const charsLength = chars.length;
 
 function generateRandomToken() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'.split(''); // Precompute character array
+const charsLength = chars.length;
+
   const tokenLength = 50;
   const randomBytes = crypto.getRandomValues(new Uint8Array(tokenLength));
   return Array.from(randomBytes, byte => chars[byte % charsLength]).join('');
