@@ -459,6 +459,7 @@
     let bruteforceRunning = false;
     let photonTokenRunning = false;
     let photonTokenIntervalId = null;
+    let failedAttempts = 0;
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -1492,7 +1493,7 @@
       }
     }
 
-  function generateRandomToken() {
+ function generateRandomToken() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   const tokenLength = 50; // Standard UUID-like length for Photon tokens
   let token = '';
@@ -1534,6 +1535,7 @@ async function startBruteforce() {
   }
 
   bruteforceRunning = true;
+  failedAttempts = 0; // Reset failed attempts counter
   let foundValid = false; // Declare foundValid here
   output.textContent = "Token bruteforcer enabled! We will notify you when we find a valid token.\n";
 
@@ -1549,9 +1551,12 @@ async function startBruteforce() {
     for (const { token, result, error } of results) {
       if (error) {
         outputBuffer.push(`Error for token ${token}: ${error}`);
+        failedAttempts++; // Increment failed attempts
       } else if (result.resultCode === 1) {
         outputBuffer.push(`✅ Valid token found: ${token}`);
         foundValid = true;
+      } else {
+        failedAttempts++; // Increment failed attempts for invalid tokens
       }
     }
 
@@ -1577,7 +1582,7 @@ async function startBruteforce() {
 function stopBruteforce() {
   bruteforceRunning = false;
   const output = document.getElementById("bruteforceOutput");
-  output.textContent += "Photon token bruteforce stopped.\n";
+  output.textContent += `Photon token bruteforce stopped. Failed Attempts: ${failedAttempts}\n`;
   output.scrollTop = output.scrollHeight;
 }
 
