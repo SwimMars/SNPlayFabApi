@@ -1553,7 +1553,7 @@ async function startBruteforce() {
         outputBuffer.push(`Error for token ${token}: ${error}`);
         failedAttempts++; // Increment failed attempts
       } else if (result.resultCode === 1) {
-        outputBuffer.push(`✅ Valid token found: ${token}`);
+        outputBuffer.push(`✅ Valid token found: ${token} (Failed Attempts: ${failedAttempts})`);
         foundValid = true;
       } else {
         failedAttempts++; // Increment failed attempts for invalid tokens
