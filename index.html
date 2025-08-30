@@ -479,14 +479,14 @@
     const titleId = "bdff1";
     let sessionTicket = null;
     let coinFarmBotRunning = false;
-    let coinFarmIntervalId = null;
+    let coinFarmId = null;
     let levelEditorRunning = false;
-    let levelEditorIntervalId = null;
+    let levelEditorId = null;
     let bruteforceRunning = false;
     let photonTokenRunning = false;
-    let photonTokenIntervalId = null;
+    let photonTokenId = null;
     let couponBruteforceRunning = false;
-    let couponBruteforceIntervalId = null;
+    let couponBruteforceId = null;
     let failedAttempts = 0;
     const logEntries = [];
     let totalTokensGenerated = 0;
@@ -1267,7 +1267,7 @@
 
     function toggleCoinFarmBot() {
       if (coinFarmBotRunning) {
-        clearInterval(coinFarmIntervalId);
+        clear(coinFarmId);
         coinFarmBotRunning = false;
         document.getElementById("botStatus").className = "status-indicator status-inactive";
         document.getElementById("botToggleButton").textContent = "Start Coin Farm Bot";
@@ -1283,7 +1283,7 @@
       document.getElementById("botToggleButton").textContent = "Stop Coin Farm Bot";
 
       document.getElementById("cloudOutput").textContent = 
-        `Starting Coin Farm Bot with ${delayMinutes} minute interval...\n`;
+        `Starting Coin Farm Bot with ${delayMinutes} minute ...\n`;
 
       async function runCoinFarmCycle() {
         const roomType = document.getElementById("roomType").value;
@@ -1390,12 +1390,12 @@
       }
 
       runCoinFarmCycle();
-      coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs);
+      coinFarmId = set(runCoinFarmCycle, delayMs);
     }
 
     function toggleLevelEditor() {
       if (levelEditorRunning) {
-        clearInterval(levelEditorIntervalId);
+        clear(levelEditorId);
         levelEditorRunning = false;
         document.getElementById("levelEditorStatus").className = "status-indicator status-inactive";
         document.getElementById("levelEditorToggleButton").textContent = "Start Level Editor";
@@ -1431,12 +1431,12 @@
       }
 
       runLevelEditorCycle();
-      levelEditorIntervalId = setInterval(runLevelEditorCycle, 1000);
+      levelEditorId = set(runLevelEditorCycle, 1000);
     }
 
     function togglePhotonTokenGenerator() {
       if (photonTokenRunning) {
-        clearInterval(photonTokenIntervalId);
+        clear(photonTokenId);
         photonTokenRunning = false;
         document.getElementById("photonTokenStatus").className = "status-indicator status-inactive";
         document.getElementById("photonTokenToggleButton").textContent = "Start Generating Photon Token";
@@ -1466,7 +1466,7 @@
       }
 
       generatePhotonToken();
-      photonTokenIntervalId = setInterval(generatePhotonToken, 1000);
+      photonTokenId = set(generatePhotonToken, 1000);
     }
 
     async function resetLoadout() {
@@ -1648,7 +1648,7 @@
 
   function toggleBruteforceRedeemCoupon() {
   if (couponBruteforceRunning) {
-    clearInterval(couponBruteforceIntervalId);
+    clear(couponBruteforceId);
     couponBruteforceRunning = false;
     document.getElementById("couponBruteforceStatus").className = "status-indicator status-inactive";
     document.getElementById("couponBruteforceToggleButton").textContent = "Start Bruteforce Redeem Coupon";
@@ -1714,7 +1714,7 @@
   }
 
   runCouponBruteforce();
-  couponBruteforceIntervalId = setInterval(runCouponBruteforce, 10000); // 10 seconds
+  couponBruteforceIntervalId = setInterval(runCouponBruteforce, 1000); // 1
 }
 
     async function grantTrophy() {
