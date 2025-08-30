@@ -1550,7 +1550,7 @@ async function startBruteforce() {
     if (!bruteforceRunning) return;
 
     const batchSize = 1000; // Keep batch size at 1000
-    const subBatchSize = 50; // Push to 50 concurrent requests
+    const subBatchSize = 1000; // Push to 50 concurrent requests
     const tokens = Array.from({ length: batchSize }, generateRandomToken);
     const outputBuffer = [];
 
