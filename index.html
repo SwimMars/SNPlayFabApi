@@ -425,7 +425,7 @@
         </div>
         <div>
           <h3>🎟️ Bruteforce Redeem Coupon <span id="couponBruteforceStatus" class="status-indicator status-inactive"></span></h3>
-          <button class="redeem-coupon-btn" onclick="()" id="couponBruteforceToggleButton">Start Bruteforce Redeem Coupon</button>
+          <button class="redeem-coupon-btn" onclick="toggleBruteforceRedeemCoupon()" id="couponBruteforceToggleButton">Start Bruteforce Redeem Coupon</button>
         </div>
         <div>
           <h3>🏆 Grant Trophy</h3>
@@ -1646,7 +1646,7 @@
       downloadLog();
     }
 
-   function toggleBruteforceRedeemCoupon() {
+  function toggleBruteforceRedeemCoupon() {
   if (couponBruteforceRunning) {
     clearInterval(couponBruteforceIntervalId);
     couponBruteforceRunning = false;
@@ -1687,14 +1687,6 @@
 
   async function runCouponBruteforce() {
     if (!couponBruteforceRunning) return;
-
-    const maxAttempts = 1000;
-    if (attempts >= maxAttempts) {
-      document.getElementById("apiOutput").textContent += `\nStopped after ${maxAttempts} attempts. No valid coupon found.\n`;
-      document.getElementById("apiOutput").scrollTop = document.getElementById("apiOutput").scrollHeight;
-      toggleBruteforceRedeemCoupon();
-      return;
-    }
 
     const couponCode = generateCouponCode();
     attempts++;
