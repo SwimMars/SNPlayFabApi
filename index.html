@@ -425,7 +425,7 @@
         </div>
         <div>
           <h3>🎟️ Bruteforce Redeem Coupon <span id="couponBruteforceStatus" class="status-indicator status-inactive"></span></h3>
-          <button class="redeem-coupon-btn" onclick="toggleBruteforceRedeemCoupon()" id="couponBruteforceToggleButton">Start Bruteforce Redeem Coupon</button>
+          <button class="redeem-coupon-btn" onclick="()" id="couponBruteforceToggleButton">Start Bruteforce Redeem Coupon</button>
         </div>
         <div>
           <h3>🏆 Grant Trophy</h3>
@@ -1646,87 +1646,84 @@
       downloadLog();
     }
 
-    function toggleBruteforceRedeemCoupon() {
-      if (couponBruteforceRunning) {
-        clearInterval(couponBruteforceIntervalId);
-        couponBruteforceRunning = false;
-        document.getElementById("couponBruteforceStatus").className = "status-indicator status-inactive";
-        document.getElementById("couponBruteforceToggleButton").textContent = "Start Bruteforce Redeem Coupon";
-        document.getElementById("apiOutput").textContent += "\nCoupon bruteforce stopped manually.\n";
-        document.getElementById("apiOutput").scrollTop = document.getElementById("apiOutput").scrollHeight;
-        return;
-      }
+   function toggleBruteforceRedeemCoupon() {
+  if (couponBruteforceRunning) {
+    clearInterval(couponBruteforceIntervalId);
+    couponBruteforceRunning = false;
+    document.getElementById("couponBruteforceStatus").className = "status-indicator status-inactive";
+    document.getElementById("couponBruteforceToggleButton").textContent = "Start Bruteforce Redeem Coupon";
+    document.getElementById("apiOutput").textContent += `\nCoupon bruteforce stopped manually. Total attempts: ${attempts}\n`;
+    document.getElementById("apiOutput").scrollTop = document.getElementById("apiOutput").scrollHeight;
+    return;
+  }
 
-      if (!sessionTicket) {
-        document.getElementById("apiOutput").textContent = "Please set your SessionTicket first.\n";
-        return;
-      }
+  if (!sessionTicket) {
+    document.getElementById("apiOutput").textContent = "Please set your SessionTicket first.\n";
+    return;
+  }
 
-      couponBruteforceRunning = true;
-      document.getElementById("couponBruteforceStatus").className = "status-indicator status-active";
-      document.getElementById("couponBruteforceToggleButton").textContent = "Stop Bruteforce Redeem Coupon";
-      document.getElementById("apiOutput").textContent = "Starting coupon bruteforce...\n";
+  couponBruteforceRunning = true;
+  attempts = 0; // Reset attempts counter
+  document.getElementById("couponBruteforceStatus").className = "status-indicator status-active";
+  document.getElementById("couponBruteforceToggleButton").textContent = "Stop Bruteforce Redeem Coupon";
+  document.getElementById("apiOutput").textContent = "Starting coupon bruteforce...\n";
 
-      async function runCouponBruteforce() {
-        if (!couponBruteforceRunning) return;
-
-        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        function generateCouponCode() {
-          let code = '';
-          for (let i = 0; i < 3; i++) {
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
-          }
-          code += '-';
-          for (let i = 0; i < 4; i++) {
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
-          }
-          code += '-';
-          for (let i = 0; i < 3; i++) {
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
-          }
-          return code;
-        }
-
-        const output = document.getElementById("apiOutput");
-        const maxAttempts = 1000;
-        let attempts = 0;
-        let foundValid = false;
-
-        while (attempts < maxAttempts && couponBruteforceRunning && !foundValid) {
-          const couponCode = generateCouponCode();
-          attempts++;
-          output.textContent += `Attempt ${attempts}: Trying ${couponCode}...\n`;
-
-          try {
-            const data = await makeApiCall("Client/RedeemCoupon", "POST", {
-              CouponCode: couponCode,
-              CatalogVersion: "Ingame"
-            });
-
-            if (data.error) {
-              output.textContent += `❌ Failed: ${data.errorMessage || data.error}\n`;
-            } else {
-              output.textContent += `✅ Success! Coupon ${couponCode} redeemed!\n`;
-              output.textContent += formatResponse(data.data);
-              foundValid = true;
-            }
-          } catch (err) {
-            output.textContent += `❌ Error: ${err.message}\n`;
-          }
-
-          output.scrollTop = output.scrollHeight;
-        }
-
-        if (!foundValid && couponBruteforceRunning) {
-          output.textContent += `\nStopped after ${maxAttempts} attempts. No valid coupon found.\n`;
-          output.scrollTop = output.scrollHeight;
-          toggleBruteforceRedeemCoupon();
-        }
-      }
-
-      runCouponBruteforce();
-      couponBruteforceIntervalId = setInterval(runCouponBruteforce, 10000);
+  function generateCouponCode() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let code = '';
+    for (let i = 0; i < 3; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
+    code += '-';
+    for (let i = 0; i < 4; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    code += '-';
+    for (let i = 0; i < 3; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  async function runCouponBruteforce() {
+    if (!couponBruteforceRunning) return;
+
+    const maxAttempts = 1000;
+    if (attempts >= maxAttempts) {
+      document.getElementById("apiOutput").textContent += `\nStopped after ${maxAttempts} attempts. No valid coupon found.\n`;
+      document.getElementById("apiOutput").scrollTop = document.getElementById("apiOutput").scrollHeight;
+      toggleBruteforceRedeemCoupon();
+      return;
+    }
+
+    const couponCode = generateCouponCode();
+    attempts++;
+    const output = document.getElementById("apiOutput");
+    output.textContent += `Attempt ${attempts}: Trying ${couponCode}...\n`;
+
+    try {
+      const data = await makeApiCall("Client/RedeemCoupon", "POST", {
+        CouponCode: couponCode,
+        CatalogVersion: "Ingame"
+      });
+
+      if (data.error) {
+        output.textContent += `❌ Failed: ${data.errorMessage || data.error}\n`;
+      } else {
+        output.textContent += `✅ Success! Coupon ${couponCode} redeemed!\n`;
+        output.textContent += formatResponse(data.data);
+        toggleBruteforceRedeemCoupon(); // Stop on success
+      }
+    } catch (err) {
+      output.textContent += `❌ Error: ${err.message}\n`;
+    }
+
+    output.scrollTop = output.scrollHeight;
+  }
+
+  runCouponBruteforce();
+  couponBruteforceIntervalId = setInterval(runCouponBruteforce, 10000); // 10 seconds
+}
 
     async function grantTrophy() {
       const trophyId = document.getElementById("trophyId").value.trim();
