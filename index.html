@@ -466,7 +466,8 @@
     let coinFarmId = null;
     let levelEditorRunning = false;
     let levelEditorId = null;
-    let lastCoinFarmResponse = null; // Store last response for Coin Farm Bot
+    let lastCoinFarmResponse = null;
+    let totalCoinsEarned = 0;
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -1332,12 +1333,14 @@
         document.getElementById("botToggleButton").textContent = "Start Coin Farm Bot";
         cloudOutput.textContent += "\n=== Coin Farm Bot Stopped ===\n";
         cloudOutput.textContent += `Bot stopped at ${new Date().toLocaleTimeString()}\n`;
+        cloudOutput.textContent += `Total Coins Earned: ${totalCoinsEarned}\n`;
         if (lastCoinFarmResponse) {
           cloudOutput.textContent += `Last Response:\n${formatResponse(lastCoinFarmResponse)}\n`;
         } else {
           cloudOutput.textContent += "No response data available.\n";
         }
         cloudOutput.scrollTop = cloudOutput.scrollHeight;
+        totalCoinsEarned = 0; // Reset coin counter
         return;
       }
 
@@ -1378,10 +1381,10 @@
           } else if (data.data?.FunctionResult?.currentMatchId) {
             matchId = data.data.FunctionResult.currentMatchId;
             output += `✅ startNewMatch: MatchId - ${matchId}\n`;
-            lastCoinFarmResponse = data.data; // Store response
+            lastCoinFarmResponse = data.data;
           } else {
             output += `✅ startNewMatch: Success\n`;
-            lastCoinFarmResponse = data.data; // Store response
+            lastCoinFarmResponse = data.data;
           }
         } catch (err) {
           output += `❌ startNewMatch: Exception - ${err.message}\n`;
@@ -1398,7 +1401,7 @@
             output += `❌ decideSpecialRole: Error - ${data.error}\n`;
           } else {
             output += `✅ decideSpecialRole: Success\n`;
-            lastCoinFarmResponse = data.data; // Store response
+            lastCoinFarmResponse = data.data;
           }
         } catch (err) {
           output += `❌ decideSpecialRole: Exception - ${err.message}\n`;
@@ -1422,7 +1425,7 @@
               output += `❌ xpConsumed: Error - ${data.error}\n`;
             } else {
               output += `✅ xpConsumed: Success\n`;
-              lastCoinFarmResponse = data.data; // Store response
+              lastCoinFarmResponse = data.data;
             }
           } catch (err) {
             output += `❌ xpConsumed: Exception - ${err.message}\n`;
@@ -1440,7 +1443,19 @@
             output += `❌ finishMatch: Error - ${data.error}\n`;
           } else {
             output += `✅ finishMatch: Success\n`;
-            lastCoinFarmResponse = data.data; // Store response
+            lastCoinFarmResponse = data.data;
+            // Parse Logs for coin amounts
+            let cycleCoins = 0;
+            if (data.data?.Logs) {
+              data.data.Logs.forEach(log => {
+                const match = log.Message.match(/Coins granted: (\d+)/);
+                if (match) {
+                  cycleCoins += parseInt(match[1], 10);
+                }
+              });
+            }
+            totalCoinsEarned += cycleCoins;
+            output += `💰 Coins Earned This Cycle: ${cycleCoins}\n`;
           }
         } catch (err) {
           output += `❌ finishMatch: Exception - ${err.message}\n`;
