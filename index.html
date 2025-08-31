@@ -207,6 +207,10 @@
         <li>Copy the <code>SessionTicket</code> or <code>X-Authorization</code> from the response body.</li>
         <li>Paste it into the field above and click "Set Token".</li>
       </ol>
+      <p>
+        Watch a video tutorial: <a href="https://www.youtube.com/watch?v=orUbChEBxt0" target="_blank">How to Get Your SessionTicket</a><br>
+        Tutorial Made by B0B
+      </p>
     </div>
 
     <div class="section">
@@ -668,7 +672,6 @@
             continue;
           }
 
-          // Check blacklist: years, specific items, and RM-only Devil/PS4 items
           const itemName = item.ItemId.toLowerCase();
           const isBlacklistedYear = blacklistYears.some(year => itemName.includes(year.toLowerCase()));
           const isBlacklistedItem = blacklistItems.includes(item.ItemId);
@@ -710,7 +713,6 @@
             output.textContent += `🛍️ Attempting to purchase ${item.ItemId} for ${item.Price} ${item.VirtualCurrency}...\n`;
 
             if (item.VirtualCurrency === "RM") {
-              // RM currency: Follow grantCoupons flow (StartPurchase -> PayForPurchase -> ConfirmPurchase)
               output.textContent += `Starting purchase for ${item.ItemId}...\n`;
               const startData = await makeApiCall("Client/StartPurchase", "POST", {
                 StoreId: "steam_Shop_Currency",
@@ -753,7 +755,6 @@
                 successfulPurchases++;
               }
             } else {
-              // Non-RM currency: Use direct PurchaseItem
               const purchaseData = await makeApiCall("Client/PurchaseItem", "POST", {
                 ItemId: item.ItemId,
                 Price: item.Price,
@@ -774,7 +775,6 @@
           }
 
           output.scrollTop = output.scrollHeight;
-          // Wait briefly between purchases to avoid overwhelming the server
           await new Promise(resolve => setTimeout(resolve, 0));
         }
 
@@ -1559,7 +1559,6 @@
         const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
         const randomChar = () => chars.charAt(Math.floor(Math.random() * chars.length));
         
-        // Generate xxx-xxxx-xxx format (3 chars, 4 chars, 3 chars)
         const part1 = randomChar() + randomChar() + randomChar();
         const part2 = randomChar() + randomChar() + randomChar() + randomChar();
         const part3 = randomChar() + randomChar() + randomChar();
