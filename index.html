@@ -775,7 +775,7 @@
 
           output.scrollTop = output.scrollHeight;
           // Wait briefly between purchases to avoid overwhelming the server
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 0));
         }
 
         output.textContent += `\n🎉 Purchase process completed!\n`;
