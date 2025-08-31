@@ -175,14 +175,6 @@
       background-color: #1976D2;
     }
 
-    .redeem-coupon-btn {
-      background-color: #9c27b0;
-    }
-
-    .redeem-coupon-btn:hover {
-      background-color: #7b1fa2;
-    }
-
     .grant-trophy-btn {
       background-color: #ffeb3b;
       color: black;
@@ -428,10 +420,6 @@
           <button onclick="reportPlayer()">Report Player</button>
         </div>
         <div>
-          <h3>🎟️ Bruteforce Redeem Coupon <span id="couponBruteforceStatus" class="status-indicator status-inactive"></span></h3>
-          <button class="redeem-coupon-btn" onclick="toggleBruteforceRedeemCoupon()" id="couponBruteforceToggleButton">Start Bruteforce Redeem Coupon</button>
-        </div>
-        <div>
           <h3>🏆 Grant Trophy</h3>
           <input id="trophyId" placeholder="Trophy ID" type="text">
           <button class="grant-trophy-btn" onclick="grantTrophy()">Grant Trophy</button>
@@ -452,12 +440,6 @@
     </div>
 
     <div class="section">
-      <h2>🔑 Photon Token Generator <span id="photonTokenStatus" class="status-indicator status-inactive"></span></h2>
-      <button onclick="togglePhotonTokenGenerator()" id="photonTokenToggleButton">Start Generating Photon Token</button>
-      <div class="output" id="photonTokenOutput">Token will appear here...</div>
-    </div>
-
-    <div class="section">
       <h2>🔄 Reset Loadout</h2>
       <button onclick="resetLoadout()">Reset Loadout</button>
       <div class="output" id="resetLoadoutOutput">Results will appear here...</div>
@@ -469,14 +451,6 @@
       <button onclick="stealLoadout()">Steal Loadout</button>
       <div class="output" id="stealLoadoutOutput">Results will appear here...</div>
     </div>
-
-    <div class="section">
-      <h2>🔨 Photon Token Bruteforcer</h2>
-      <input id="playFabUsername" placeholder="PlayFab ID" type="text">
-      <button onclick="startBruteforce()">Start Bruteforce</button>
-      <button onclick="stopBruteforce()">Stop Bruteforce</button>
-      <div class="output" id="bruteforceOutput">Results will appear here...</div>
-    </div>
   </div>
 
   <script>
@@ -486,16 +460,6 @@
     let coinFarmId = null;
     let levelEditorRunning = false;
     let levelEditorId = null;
-    let bruteforceRunning = false;
-    let photonTokenRunning = false;
-    let photonTokenId = null;
-    let couponBruteforceRunning = false;
-    let couponBruteforceId = null;
-    let attempts = 0;
-    let couponBruteforceIntervalId = null;
-    let failedAttempts = 0;
-    const logEntries = [];
-    let totalTokensGenerated = 0;
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -1506,117 +1470,6 @@
       }
     }
 
-    function toggleBruteforceRedeemCoupon() {
-      if (couponBruteforceRunning) {
-        clearInterval(couponBruteforceIntervalId);
-        couponBruteforceRunning = false;
-        document.getElementById("couponBruteforceStatus").className = "status-indicator status-inactive";
-        document.getElementById("couponBruteforceToggleButton").textContent = "Start Bruteforce Redeem Coupon";
-        document.getElementById("apiOutput").textContent += `\nCoupon bruteforce stopped manually. Total attempts: ${attempts}\n`;
-        document.getElementById("apiOutput").scrollTop = document.getElementById("apiOutput").scrollHeight;
-        return;
-      }
-
-      if (!sessionTicket) {
-        document.getElementById("apiOutput").textContent = "Please set your SessionTicket first.\n";
-        return;
-      }
-
-      couponBruteforceRunning = true;
-      attempts = 0;
-      document.getElementById("couponBruteforceStatus").className = "status-indicator status-active";
-      document.getElementById("couponBruteforceToggleButton").textContent = "Stop Bruteforce Redeem Coupon";
-      document.getElementById("apiOutput").textContent = "Starting coupon bruteforce...\n";
-
-      async function runCouponBruteforce() {
-        const couponCode = generateRandomCouponCode();
-        attempts++;
-        const output = document.getElementById("apiOutput");
-
-        try {
-          const data = await makeApiCall("Client/RedeemCoupon", "POST", {
-            CouponCode: couponCode,
-            CatalogVersion: null
-          });
-
-          if (data.error) {
-            output.textContent += `Attempt ${attempts}: Coupon ${couponCode} failed - ${data.error}\n`;
-          } else {
-            output.textContent += `✅ Attempt ${attempts}: Coupon ${couponCode} redeemed successfully!\n`;
-            couponBruteforceRunning = false;
-            clearInterval(couponBruteforceIntervalId);
-            document.getElementById("couponBruteforceStatus").className = "status-indicator status-inactive";
-            document.getElementById("couponBruteforceToggleButton").textContent = "Start Bruteforce Redeem Coupon";
-          }
-        } catch (err) {
-          output.textContent += `Attempt ${attempts}: Coupon ${couponCode} error - ${err.message}\n`;
-        }
-
-        output.scrollTop = output.scrollHeight;
-      }
-
-      function generateRandomCouponCode() {
-        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        const randomChar = () => chars.charAt(Math.floor(Math.random() * chars.length));
-        
-        const part1 = randomChar() + randomChar() + randomChar();
-        const part2 = randomChar() + randomChar() + randomChar() + randomChar();
-        const part3 = randomChar() + randomChar() + randomChar();
-        
-        return `${part1}-${part2}-${part3}`;
-      }
-
-      runCouponBruteforce();
-      couponBruteforceIntervalId = setInterval(runCouponBruteforce, 2000);
-    }
-
-    async function togglePhotonTokenGenerator() {
-      const output = document.getElementById("photonTokenOutput");
-
-      if (photonTokenRunning) {
-        clearInterval(photonTokenId);
-        photonTokenRunning = false;
-        document.getElementById("photonTokenStatus").className = "status-indicator status-inactive";
-        document.getElementById("photonTokenToggleButton").textContent = "Start Generating Photon Token";
-        output.textContent += `\nPhoton token generator stopped. Total tokens generated: ${totalTokensGenerated}\n`;
-        output.scrollTop = output.scrollHeight;
-        return;
-      }
-
-      if (!sessionTicket) {
-        output.textContent = "Please set your SessionTicket first.\n";
-        return;
-      }
-
-      photonTokenRunning = true;
-      totalTokensGenerated = 0;
-      document.getElementById("photonTokenStatus").className = "status-indicator status-active";
-      document.getElementById("photonTokenToggleButton").textContent = "Stop Generating Photon Token";
-      output.textContent = "Starting Photon token generation...\n";
-
-      async function generatePhotonToken() {
-        try {
-          const data = await makeApiCall("Client/GetPhotonAuthenticationToken", "POST", {
-            PhotonApplicationId: "3e3a8012-6e9e-4e17-b61e-7f56c3f91b0b"
-          });
-
-          if (data.error) {
-            output.textContent += `❌ Failed to generate token: ${data.error}\n`;
-          } else {
-            totalTokensGenerated++;
-            output.textContent += `✅ Token ${totalTokensGenerated}: ${data.data.PhotonCustomAuthenticationToken}\n`;
-          }
-        } catch (err) {
-          output.textContent += `❌ Error: ${err.message}\n`;
-        }
-
-        output.scrollTop = output.scrollHeight;
-      }
-
-      generatePhotonToken();
-      photonTokenId = setInterval(generatePhotonToken, 1000);
-    }
-
     async function resetLoadout() {
       const output = document.getElementById("resetLoadoutOutput");
 
@@ -1665,78 +1518,6 @@
       } else {
         output.textContent = formatResponse(data.data);
       }
-    }
-
-    async function startBruteforce() {
-      const playFabId = document.getElementById("playFabUsername").value.trim();
-      const output = document.getElementById("bruteforceOutput");
-
-      if (!playFabId) {
-        output.textContent = "Please enter a PlayFab ID.\n";
-        return;
-      }
-
-      if (!sessionTicket) {
-        output.textContent = "Please set your SessionTicket first.\n";
-        return;
-      }
-
-      if (bruteforceRunning) {
-        output.textContent += "Bruteforce is already running.\n";
-        return;
-      }
-
-      bruteforceRunning = true;
-      failedAttempts = 0;
-
-      output.textContent = "Starting bruteforce...\n";
-
-      async function runBruteforce() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        const token = Array(10).fill().map(() => 
-          chars.charAt(Math.floor(Math.random() * chars.length))).join('');
-
-        try {
-          const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-            FunctionName: "changeMatchPlayerStatus",
-            FunctionParameter: {
-              playerId: playFabId,
-              matchId: token,
-              newStatus: "FINISHED"
-            },
-            GeneratePlayStreamEvent: true
-          });
-
-          if (data.error) {
-            failedAttempts++;
-            output.textContent += `Attempt ${failedAttempts}: Token ${token} failed - ${data.error}\n`;
-          } else {
-            output.textContent += `✅ Success! Valid token found: ${token}\n`;
-            bruteforceRunning = false;
-            clearInterval(couponBruteforceId);
-          }
-        } catch (err) {
-          failedAttempts++;
-          output.textContent += `Attempt ${failedAttempts}: Token ${token} error - ${err.message}\n`;
-        }
-
-        output.scrollTop = output.scrollHeight;
-      }
-
-      runBruteforce();
-      couponBruteforceId = setInterval(runBruteforce, 1000);
-    }
-
-    function stopBruteforce() {
-      if (!bruteforceRunning) {
-        document.getElementById("bruteforceOutput").textContent += "Bruteforce is not running.\n";
-        return;
-      }
-
-      clearInterval(couponBruteforceId);
-      bruteforceRunning = false;
-      document.getElementById("bruteforceOutput").textContent += `Bruteforce stopped. Total failed attempts: ${failedAttempts}\n`;
-      document.getElementById("bruteforceOutput").scrollTop = document.getElementById("bruteforceOutput").scrollHeight;
     }
   </script>
 </body>
