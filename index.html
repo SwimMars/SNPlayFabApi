@@ -451,15 +451,22 @@
       <button onclick="stealLoadout()">Steal Loadout</button>
       <div class="output" id="stealLoadoutOutput">Results will appear here...</div>
     </div>
+
+    <div class="section">
+      <h2>📦 View Inventory</h2>
+      <button onclick="viewInventory()">View Inventory</button>
+      <div class="output" id="inventoryOutput">Inventory results will appear here...</div>
+    </div>
   </div>
 
   <script>
     const titleId = "bdff1";
-    let sessionTicket = null;
+    let sessionTicket = localStorage.getItem('sessionTicket') || null;
     let coinFarmBotRunning = false;
     let coinFarmId = null;
     let levelEditorRunning = false;
     let levelEditorId = null;
+    let lastCoinFarmResponse = null; // Store last response for Coin Farm Bot
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -586,9 +593,36 @@
 
     function formatResponse(result) {
       if (typeof result === "object" && result !== null) {
-        return Object.entries(result).map(([key, value]) => `${key}: ${value}`).join("\n");
+        return Object.entries(result).map(([key, value]) => `${key}: ${JSON.stringify(value, null, 2)}`).join("\n");
       }
       return result;
+    }
+
+    async function viewInventory() {
+      const output = document.getElementById("inventoryOutput");
+      output.textContent = "Fetching inventory...\n";
+
+      const data = await makeApiCall("Client/GetUserInventory", "POST", {});
+
+      if (data && data.data) {
+        if (data.data.Inventory && data.data.Inventory.length > 0) {
+          output.textContent = "=== Inventory ===\n";
+          data.data.Inventory.forEach(item => {
+            output.textContent += `Item ID: ${item.ItemId}\n`;
+            output.textContent += `Item Instance ID: ${item.ItemInstanceId}\n`;
+            output.textContent += `Item Class: ${item.ItemClass || "N/A"}\n`;
+            output.textContent += `Remaining Uses: ${item.RemainingUses || "N/A"}\n`;
+            output.textContent += `Custom Data: ${JSON.stringify(item.CustomData, null, 2) || "None"}\n`;
+            output.textContent += "--------------------\n";
+          });
+          output.textContent += `Virtual Currency: ${JSON.stringify(data.data.VirtualCurrency, null, 2) || "None"}\n`;
+        } else {
+          output.textContent = "No items in inventory.";
+        }
+      } else {
+        output.textContent = `Error: ${data.error || "Unknown error"}`;
+      }
+      output.scrollTop = output.scrollHeight;
     }
 
     async function attemptToBuyEverything() {
@@ -1289,13 +1323,21 @@
       }, 10 * 60 * 1000);
     }
 
-    function toggleCoinFarmBot() {
+    async function toggleCoinFarmBot() {
+      const cloudOutput = document.getElementById("cloudOutput");
       if (coinFarmBotRunning) {
         clearInterval(coinFarmId);
         coinFarmBotRunning = false;
         document.getElementById("botStatus").className = "status-indicator status-inactive";
         document.getElementById("botToggleButton").textContent = "Start Coin Farm Bot";
-        document.getElementById("cloudOutput").textContent += "\nBot stopped manually.";
+        cloudOutput.textContent += "\n=== Coin Farm Bot Stopped ===\n";
+        cloudOutput.textContent += `Bot stopped at ${new Date().toLocaleTimeString()}\n`;
+        if (lastCoinFarmResponse) {
+          cloudOutput.textContent += `Last Response:\n${formatResponse(lastCoinFarmResponse)}\n`;
+        } else {
+          cloudOutput.textContent += "No response data available.\n";
+        }
+        cloudOutput.scrollTop = cloudOutput.scrollHeight;
         return;
       }
 
@@ -1306,8 +1348,7 @@
       document.getElementById("botStatus").className = "status-indicator status-active";
       document.getElementById("botToggleButton").textContent = "Stop Coin Farm Bot";
 
-      document.getElementById("cloudOutput").textContent = 
-        `Starting Coin Farm Bot with ${delayMinutes} minute delay...\n`;
+      cloudOutput.textContent = `Starting Coin Farm Bot with ${delayMinutes} minute delay...\n`;
 
       async function runCoinFarmCycle() {
         const roomType = document.getElementById("roomType").value;
@@ -1337,8 +1378,10 @@
           } else if (data.data?.FunctionResult?.currentMatchId) {
             matchId = data.data.FunctionResult.currentMatchId;
             output += `✅ startNewMatch: MatchId - ${matchId}\n`;
+            lastCoinFarmResponse = data.data; // Store response
           } else {
             output += `✅ startNewMatch: Success\n`;
+            lastCoinFarmResponse = data.data; // Store response
           }
         } catch (err) {
           output += `❌ startNewMatch: Exception - ${err.message}\n`;
@@ -1355,6 +1398,7 @@
             output += `❌ decideSpecialRole: Error - ${data.error}\n`;
           } else {
             output += `✅ decideSpecialRole: Success\n`;
+            lastCoinFarmResponse = data.data; // Store response
           }
         } catch (err) {
           output += `❌ decideSpecialRole: Exception - ${err.message}\n`;
@@ -1378,6 +1422,7 @@
               output += `❌ xpConsumed: Error - ${data.error}\n`;
             } else {
               output += `✅ xpConsumed: Success\n`;
+              lastCoinFarmResponse = data.data; // Store response
             }
           } catch (err) {
             output += `❌ xpConsumed: Exception - ${err.message}\n`;
@@ -1395,12 +1440,12 @@
             output += `❌ finishMatch: Error - ${data.error}\n`;
           } else {
             output += `✅ finishMatch: Success\n`;
+            lastCoinFarmResponse = data.data; // Store response
           }
         } catch (err) {
           output += `❌ finishMatch: Exception - ${err.message}\n`;
         }
 
-        const cloudOutput = document.getElementById("cloudOutput");
         cloudOutput.textContent += output;
         cloudOutput.scrollTop = cloudOutput.scrollHeight;
       }
