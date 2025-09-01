@@ -1637,8 +1637,8 @@
 
       const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
         CustomTags: null,
-        FunctionName: "addTrophy",
-        FunctionParameter: { trophyId },
+        FunctionName: "grantTrophy",
+        FunctionParameter: { "trophyToGrant": trophyId},
         GeneratePlayStreamEvent: true,
         RevisionSelection: null,
         SpecificRevision: null,
@@ -1699,7 +1699,7 @@
         return;
       }
 
-      if (!getData.data?.Data?.Loadout) {
+      if (!getData.data?.Data?.Value.loadout) {
         output.textContent += "❌ No Loadout found for the target PlayFab ID.\n";
         return;
       }
