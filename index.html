@@ -560,7 +560,6 @@
   </div>
 
   <script>
-    // JavaScript remains unchanged as per request
     const titleId = "bdff1";
     let sessionTicket = localStorage.getItem('sessionTicket') || null;
     let coinFarmBotRunning = false;
@@ -1594,7 +1593,7 @@
       coinFarmId = setInterval(runCoinFarmCycle, delayMs);
     }
 
-    function toggleLevelEditor() {
+    async function toggleLevelEditor() {
       if (levelEditorRunning) {
         clearInterval(levelEditorId);
         levelEditorRunning = false;
@@ -1658,23 +1657,24 @@
     async function resetLoadout() {
       const output = document.getElementById("resetLoadoutOutput");
 
-      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-        CustomTags: null,
-        FunctionName: "resetLoadout",
-        FunctionParameter: {},
-        GeneratePlayStreamEvent: true,
-        RevisionSelection: null,
-        SpecificRevision: null,
-        AuthenticationContext: null
+      output.textContent = "Resetting Loadout...\n";
+
+      // Update the user's Loadout to an empty object
+      const data = await makeApiCall("Client/UpdateUserData", "POST", {
+        Data: {
+          Loadout: "{}"
+        },
+        Permission: "Public"
       });
 
       if (data.error) {
-        output.textContent = `Error: ${data.error}`;
-      } else if (data.data?.FunctionResult) {
-        output.textContent = formatResponse(data.data.FunctionResult);
+        output.textContent += `❌ Error resetting Loadout: ${data.error}\n`;
       } else {
-        output.textContent = formatResponse(data.data);
+        output.textContent += `✅ Success! Loadout reset to empty.\n`;
+        output.textContent += formatResponse(data.data);
       }
+
+      output.scrollTop = output.scrollHeight;
     }
 
     async function stealLoadout() {
@@ -1686,23 +1686,43 @@
         return;
       }
 
-      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-        CustomTags: null,
-        FunctionName: "stealLoadout",
-        FunctionParameter: { targetPlayFabId },
-        GeneratePlayStreamEvent: true,
-        RevisionSelection: null,
-        SpecificRevision: null,
-        AuthenticationContext: null
+      output.textContent = "Fetching target user's loadout...\n";
+
+      // Step 1: Get the target user's data
+      const getData = await makeApiCall("Client/GetUserData", "POST", {
+        PlayFabId: targetPlayFabId,
+        Keys: ["Loadout"]
       });
 
-      if (data.error) {
-        output.textContent = `Error: ${data.error}`;
-      } else if (data.data?.FunctionResult) {
-        output.textContent = formatResponse(data.data.FunctionResult);
-      } else {
-        output.textContent = formatResponse(data.data);
+      if (getData.error) {
+        output.textContent += `❌ Error fetching user data: ${getData.error}\n`;
+        return;
       }
+
+      if (!getData.data?.Data?.Loadout) {
+        output.textContent += "❌ No Loadout found for the target PlayFab ID.\n";
+        return;
+      }
+
+      const loadLoadout = getData.data.Data.Loadout.Value;
+      output.textContent += `✅ Found Loadout: ${loadLoadout}\nCopying to your account...\n`;
+
+      // Step 2: Update the current user's Loadout with the retrieved data
+      const updateData = await makeApiCall("Client/UpdateUserData", "POST", {
+        Data: {
+          Loadout: loadLoadout
+        },
+        Permission: "Public"
+      });
+
+      if (updateData.error) {
+        output.textContent += `❌ Error updating Loadout: ${updateData.error}\n`;
+      } else {
+        output.textContent += `✅ Success! Loadout copied successfully.\n`;
+        output.textContent += formatResponse(updateData.data);
+      }
+
+      output.scrollTop = output.scrollHeight;
     }
 
     // Helper function to download logs as a text file
