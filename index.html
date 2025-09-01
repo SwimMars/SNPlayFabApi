@@ -1378,7 +1378,6 @@
         output += `Room Type: ${roomType}\nPlayers: ${playerIds.join(", ") || "None"}\n`;
 
         let matchId = null;
-        neighborPlayerId = null; // Reset for each cycle
 
         try {
           const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
@@ -1418,7 +1417,8 @@
               neighborPlayerId = data.data.FunctionResult.neighborId;
               output += `Neighbor Role Assigned: ${neighborPlayerId}\n`;
             } else {
-              output += `Neighbor Role Assigned: None (All players are Kids)\n`;
+              neighborPlayerId = null;
+              output += `Neighbor Role Assigned: Unknown\n`;
             }
           }
         } catch (err) {
@@ -1462,43 +1462,24 @@
           } else {
             output += `✅ finishMatch: Success\n`;
             lastCoinFarmResponse = data.data;
-
-            // Parse Logs for coin amounts and attribute based on Neighbor role
-            let cycleNeighborCoins = 0;
-            let cycleKidCoins = 0;
-
-            if (data.data?.FunctionResult?.players) {
-              // Iterate through the players in the finishMatch response
-              data.data.FunctionResult.players.forEach(player => {
-                const playerId = player.PlayFabId;
-                const coins = player.coins || 0; // Get coins for this player
-                if (playerId === neighborPlayerId) {
-                  cycleNeighborCoins += coins;
-                } else {
-                  cycleKidCoins += coins;
-                }
-              });
-            } else if (data.data?.Logs) {
-              // Fallback: Parse logs if FunctionResult.players is not available
+            // Parse Logs for coin amounts
+            let cycleCoins = 0;
+            if (data.data?.Logs) {
               data.data.Logs.forEach(log => {
-                const match = log.Message.match(/Player (\w+) granted (\d+) coins/);
+                const match = log.Message.match(/Coins granted: (\d+)/);
                 if (match) {
-                  const playerId = match[1];
-                  const coins = parseInt(match[2], 10);
-                  if (playerId === neighborPlayerId) {
-                    cycleNeighborCoins += coins;
-                  } else {
-                    cycleKidCoins += coins;
-                  }
+                  cycleCoins += parseInt(match[1], 10);
                 }
               });
             }
-
-            neighborCoins += cycleNeighborCoins;
-            kidCoins += cycleKidCoins;
-
-            output += `💰 Neighbor Coins This Cycle: ${cycleNeighborCoins}\n`;
-            output += `💰 Kid Coins This Cycle: ${cycleKidCoins}\n`;
+            // Attribute coins based on Neighbor role
+            if (neighborPlayerId && playerIds.includes(neighborPlayerId)) {
+              neighborCoins += cycleCoins;
+              output += `💰 Coins Earned This Cycle: ${cycleCoins} (Neighbor)\n`;
+            } else {
+              kidCoins += cycleCoins;
+              output += `💰 Coins Earned This Cycle: ${cycleCoins} (Kid)\n`;
+            }
           }
         } catch (err) {
           output += `❌ finishMatch: Exception - ${err.message}\n`;
