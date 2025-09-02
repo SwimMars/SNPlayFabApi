@@ -207,6 +207,10 @@
         <li>Copy the <code>SessionTicket</code> or <code>X-Authorization</code> from the response body.</li>
         <li>Paste it into the field above and click "Set Token".</li>
       </ol>
+      <p>
+        Here is a Tutorial on how to get the SessionTicket: <a href="https://www.youtube.com/watch?v=orUbChEBxt0" target="_blank">Tutorial</a><br>
+        Tutorial Made by B0B
+      </p>
     </div>
 
     <div class="section">
@@ -221,9 +225,9 @@
     </div>
 
     <div class="section">
-      <h2>🛒 Purchase All Skins & Emotes</h2>
-      <p class="warning">This will attempt to purchase all available items that use FE, AC, or XP currency</p>
-      <button class="purchase-all-btn" onclick="purchaseAllSkinsEmotes()">Attempt to Purchase All Skins and Emotes</button>
+      <h2>🛒 Buy Everything</h2>
+      <p class="warning">This will attempt to purchase all available items (including RM currency). Close Steam before starting.</p>
+      <button class="purchase-all-btn" onclick="purchaseAllSkinsEmotes()">Attempt to Buy Everything</button>
       <div class="output" id="purchaseAllOutput">Purchase logs will appear here...</div>
     </div>
 
@@ -339,7 +343,7 @@
             <li>WIN_WITH_HALF_LOCKS_INTACT</li>
             <li>OPEN_LOCKS</li>
             <li>OPEN_LOCKS_IN_ONE_MATCH</li>
-            <li>SEearch_DRAWERS</li>
+            <li>SEARCH_DRAWERS</li>
             <li>FIND_KEYS_VIA_PHOTO</li>
             <li>USE_KEYCARDS</li>
             <li>CATCH_KIDS</li>
@@ -467,6 +471,12 @@
     </div>
 
     <div class="section">
+      <h2>📦 View Inventory</h2>
+      <button onclick="viewInventory()">View Inventory</button>
+      <div class="output" id="inventoryOutput">Inventory results will appear here...</div>
+    </div>
+
+    <div class="section">
       <h2>🔨 Photon Token Bruteforcer</h2>
       <input id="playFabUsername" placeholder="PlayFab ID" type="text">
       <button onclick="startBruteforce()">Start Bruteforce</button>
@@ -490,6 +500,7 @@
     let failedAttempts = 0;
     const logEntries = [];
     let totalTokensGenerated = 0;
+    let attempts = 0;
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -623,7 +634,7 @@
 
     async function purchaseAllSkinsEmotes() {
       const output = document.getElementById("purchaseAllOutput");
-      output.textContent = "Starting purchase process...\n";
+      output.textContent = "Starting purchase process (ensure Steam is closed)...\n";
       
       if (!sessionTicket) {
         output.textContent += "❌ Please set your SessionTicket first.\n";
@@ -656,6 +667,8 @@
         output.textContent += `✅ You own ${ownedItems.length} items\n`;
         
         const itemsToPurchase = [];
+        const blacklistYears = ["2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"];
+        const blacklistItems = ["PS4", "Devil", "Neighbor_HEAD_Spy", "Cheater_Token"];
         
         for (const item of catalogItems) {
           if (ownedItems.includes(item.ItemId)) {
@@ -663,23 +676,27 @@
             continue;
           }
           
+          const itemName = item.ItemId.toLowerCase();
+          const isBlacklistedYear = blacklistYears.some(year => itemName.includes(year.toLowerCase()));
+          const isBlacklistedItem = blacklistItems.some(keyword => itemName.includes(keyword.toLowerCase()));
+          
+          if (isBlacklistedYear || isBlacklistedItem) {
+            output.textContent += `⏩ Skipping ${item.ItemId} (blacklisted)\n`;
+            continue;
+          }
+          
           if (item.VirtualCurrencyPrices) {
             const currencies = Object.keys(item.VirtualCurrencyPrices);
-            const acceptableCurrencies = currencies.filter(currency => 
-              ['FE', 'AC', 'XP'].includes(currency) && currency !== 'RM'
-            );
+            const selectedCurrency = currencies.find(currency => ["FE", "AC", "XP", "RM"].includes(currency));
             
-            if (acceptableCurrencies.length > 0) {
-              const currency = acceptableCurrencies[0];
-              const price = item.VirtualCurrencyPrices[currency];
-              
+            if (selectedCurrency) {
+              const price = item.VirtualCurrencyPrices[selectedCurrency];
               itemsToPurchase.push({
                 ItemId: item.ItemId,
                 Price: price,
-                VirtualCurrency: currency
+                VirtualCurrency: selectedCurrency
               });
-              
-              output.textContent += `➕ Will purchase ${item.ItemId} for ${price} ${currency}\n`;
+              output.textContent += `➕ Will attempt to purchase ${item.ItemId} for ${price} ${selectedCurrency}\n`;
             } else {
               output.textContent += `⏩ Skipping ${item.ItemId} (no acceptable currency)\n`;
             }
@@ -688,32 +705,79 @@
           }
         }
         
-        output.textContent += `\n🛒 Attempting to purchase ${itemsToPurchase.length} items...\n\n`;
+        output.textContent += `\n🛒 Attempting to purchase ${itemsToPurchase.length} items (one at a time)...\n\n`;
         
         let successfulPurchases = 0;
         let failedPurchases = 0;
         
         for (const item of itemsToPurchase) {
           try {
-            output.textContent += `🛍️ Purchasing ${item.ItemId} for ${item.Price} ${item.VirtualCurrency}... `;
+            output.textContent += `🛍️ Attempting to purchase ${item.ItemId} for ${item.Price} ${item.VirtualCurrency}...\n`;
             
-            const purchaseData = await makeApiCall("Client/PurchaseItem", "POST", {
-              ItemId: item.ItemId,
-              Price: item.Price,
-              VirtualCurrency: item.VirtualCurrency
-            });
-            
-            if (purchaseData.error) {
-              output.textContent += `❌ Failed: ${purchaseData.errorMessage || purchaseData.error}\n`;
-              failedPurchases++;
+            if (item.VirtualCurrency === "RM") {
+              output.textContent += `Starting purchase for ${item.ItemId}...\n`;
+              const startData = await makeApiCall("Client/StartPurchase", "POST", {
+                StoreId: "steam_Shop_Currency",
+                Items: [{
+                  ItemId: item.ItemId,
+                  Quantity: 1
+                }]
+              });
+              
+              if (startData.error) {
+                output.textContent += `❌ Error in StartPurchase: ${startData.error}\n`;
+                failedPurchases++;
+                continue;
+              }
+              
+              const orderId = startData.data?.OrderId;
+              if (!orderId) {
+                output.textContent += `❌ StartPurchase failed for ${item.ItemId}. No OrderId returned.\n`;
+                failedPurchases++;
+                continue;
+              }
+              
+              output.textContent += `Order ID: ${orderId}\nPaying for purchase...\n`;
+              const payData = await makeApiCall("Client/PayForPurchase", "POST", {
+                OrderId: orderId,
+                Currency: "RM",
+                ProviderName: "Steam"
+              });
+              
+              output.textContent += `Confirming purchase for ${item.ItemId}...\n`;
+              const confirmData = await makeApiCall("Client/ConfirmPurchase", "POST", {
+                OrderId: orderId
+              });
+              
+              if (confirmData.error) {
+                output.textContent += `❌ Error in ConfirmPurchase: ${confirmData.error}\n`;
+                failedPurchases++;
+              } else {
+                output.textContent += `✅ Success! Purchased ${item.ItemId}\n`;
+                successfulPurchases++;
+              }
             } else {
-              output.textContent += `✅ Success!\n`;
-              successfulPurchases++;
+              const purchaseData = await makeApiCall("Client/PurchaseItem", "POST", {
+                ItemId: item.ItemId,
+                Price: item.Price,
+                VirtualCurrency: item.VirtualCurrency
+              });
+              
+              if (purchaseData.error) {
+                output.textContent += `❌ Failed: ${purchaseData.errorMessage || purchaseData.error}\n`;
+                failedPurchases++;
+              } else {
+                output.textContent += `✅ Success! Purchased ${item.ItemId}\n`;
+                successfulPurchases++;
+              }
             }
           } catch (err) {
-            output.textContent += `❌ Error: ${err.message}\n`;
+            output.textContent += `❌ Error purchasing ${item.ItemId}: ${err.message}\n`;
             failedPurchases++;
           }
+          
+          output.scrollTop = output.scrollHeight;
+          await new Promise(resolve => setTimeout(resolve, 0));
         }
         
         output.textContent += `\n🎉 Purchase process completed!\n`;
@@ -724,6 +788,33 @@
         output.textContent += `❌ Unexpected error: ${error.message}\n`;
       }
       
+      output.scrollTop = output.scrollHeight;
+    }
+
+    async function viewInventory() {
+      const output = document.getElementById("inventoryOutput");
+      output.textContent = "Fetching inventory...\n";
+      
+      const data = await makeApiCall("Client/GetUserInventory", "POST", {});
+      
+      if (data && data.data) {
+        if (data.data.Inventory && data.data.Inventory.length > 0) {
+          output.textContent = "=== Inventory ===\n";
+          data.data.Inventory.forEach(item => {
+            output.textContent += `Item ID: ${item.ItemId}\n`;
+            output.textContent += `Item Instance ID: ${item.ItemInstanceId}\n`;
+            output.textContent += `Item Class: ${item.ItemClass || "N/A"}\n`;
+            output.textContent += `Remaining Uses: ${item.RemainingUses || "N/A"}\n`;
+            output.textContent += `Custom Data: ${JSON.stringify(item.CustomData, null, 2) || "None"}\n`;
+            output.textContent += "--------------------\n";
+          });
+          output.textContent += `Virtual Currency: ${JSON.stringify(data.data.VirtualCurrency, null, 2) || "None"}\n`;
+        } else {
+          output.textContent = "No items in inventory.";
+        }
+      } else {
+        output.textContent = `Error: ${data.error || "Unknown error"}`;
+      }
       output.scrollTop = output.scrollHeight;
     }
 
@@ -1646,76 +1737,76 @@
       downloadLog();
     }
 
-  function toggleBruteforceRedeemCoupon() {
-  if (couponBruteforceRunning) {
-    clearInterval(couponBruteforceIntervalId);
-    couponBruteforceRunning = false;
-    document.getElementById("couponBruteforceStatus").className = "status-indicator status-inactive";
-    document.getElementById("couponBruteforceToggleButton").textContent = "Start Bruteforce Redeem Coupon";
-    document.getElementById("apiOutput").textContent += `\nCoupon bruteforce stopped manually. Total attempts: ${attempts}\n`;
-    document.getElementById("apiOutput").scrollTop = document.getElementById("apiOutput").scrollHeight;
-    return;
-  }
-
-  if (!sessionTicket) {
-    document.getElementById("apiOutput").textContent = "Please set your SessionTicket first.\n";
-    return;
-  }
-
-  couponBruteforceRunning = true;
-  attempts = 0; // Reset attempts counter
-  document.getElementById("couponBruteforceStatus").className = "status-indicator status-active";
-  document.getElementById("couponBruteforceToggleButton").textContent = "Stop Bruteforce Redeem Coupon";
-  document.getElementById("apiOutput").textContent = "Starting coupon bruteforce...\n";
-
-  function generateCouponCode() {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    let code = '';
-    for (let i = 0; i < 3; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    code += '-';
-    for (let i = 0; i < 4; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    code += '-';
-    for (let i = 0; i < 3; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-  }
-
-  async function runCouponBruteforce() {
-    if (!couponBruteforceRunning) return;
-
-    const couponCode = generateCouponCode();
-    attempts++;
-    const output = document.getElementById("apiOutput");
-    output.textContent += `Attempt ${attempts}: Trying ${couponCode}...\n`;
-
-    try {
-      const data = await makeApiCall("Client/RedeemCoupon", "POST", {
-        CouponCode: couponCode,
-        CatalogVersion: "Ingame"
-      });
-
-      if (data.error) {
-        output.textContent += `❌ Failed: ${data.errorMessage || data.error}\n`;
-      } else {
-        output.textContent += `✅ Success! Coupon ${couponCode} redeemed!\n`;
-        output.textContent += formatResponse(data.data);
-        toggleBruteforceRedeemCoupon(); // Stop on success
+    function toggleBruteforceRedeemCoupon() {
+      if (couponBruteforceRunning) {
+        clearInterval(couponBruteforceIntervalId);
+        couponBruteforceRunning = false;
+        document.getElementById("couponBruteforceStatus").className = "status-indicator status-inactive";
+        document.getElementById("couponBruteforceToggleButton").textContent = "Start Bruteforce Redeem Coupon";
+        document.getElementById("apiOutput").textContent += `\nCoupon bruteforce stopped manually. Total attempts: ${attempts}\n`;
+        document.getElementById("apiOutput").scrollTop = document.getElementById("apiOutput").scrollHeight;
+        return;
       }
-    } catch (err) {
-      output.textContent += `❌ Error: ${err.message}\n`;
+
+      if (!sessionTicket) {
+        document.getElementById("apiOutput").textContent = "Please set your SessionTicket first.\n";
+        return;
+      }
+
+      couponBruteforceRunning = true;
+      attempts = 0; // Reset attempts counter
+      document.getElementById("couponBruteforceStatus").className = "status-indicator status-active";
+      document.getElementById("couponBruteforceToggleButton").textContent = "Stop Bruteforce Redeem Coupon";
+      document.getElementById("apiOutput").textContent = "Starting coupon bruteforce...\n";
+
+      function generateCouponCode() {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let code = '';
+        for (let i = 0; i < 3; i++) {
+          code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        code += '-';
+        for (let i = 0; i < 4; i++) {
+          code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        code += '-';
+        for (let i = 0; i < 3; i++) {
+          code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
+      }
+
+      async function runCouponBruteforce() {
+        if (!couponBruteforceRunning) return;
+
+        const couponCode = generateCouponCode();
+        attempts++;
+        const output = document.getElementById("apiOutput");
+        output.textContent += `Attempt ${attempts}: Trying ${couponCode}...\n`;
+
+        try {
+          const data = await makeApiCall("Client/RedeemCoupon", "POST", {
+            CouponCode: couponCode,
+            CatalogVersion: "Ingame"
+          });
+
+          if (data.error) {
+            output.textContent += `❌ Failed: ${data.errorMessage || data.error}\n`;
+          } else {
+            output.textContent += `✅ Success! Coupon ${couponCode} redeemed!\n`;
+            output.textContent += formatResponse(data.data);
+            toggleBruteforceRedeemCoupon(); // Stop on success
+          }
+        } catch (err) {
+          output.textContent += `❌ Error: ${err.message}\n`;
+        }
+
+        output.scrollTop = output.scrollHeight;
+      }
+
+      runCouponBruteforce();
+      couponBruteforceIntervalId = setInterval(runCouponBruteforce, 10000); // 10 seconds
     }
-
-    output.scrollTop = output.scrollHeight;
-  }
-
-  runCouponBruteforce();
-  couponBruteforceIntervalId = setInterval(runCouponBruteforce, 10000); // 10 seconds
-}
 
     async function grantTrophy() {
       const trophyId = document.getElementById("trophyId").value.trim();
