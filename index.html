@@ -794,7 +794,7 @@
             playerId += chars.charAt(Math.floor(Math.random() * chars.length));
           }
           const randomDigits = Math.floor(1000 + Math.random() * 9000);
-          const displayName = `${displayNameBase}${randomDigits}`;
+          const displayName = `${displayNameBase}-${randomDigits}`; // e.g., UserName-1234
 
           output.textContent += `Creating account with PlayerId: ${playerId}...\n`;
           logIOSAction("Account Creation Attempt", { playerId });
@@ -839,59 +839,48 @@
           // Step 3: Spam Leaderboard
           output.textContent += "\n=== Leaderboard Spam ===\n";
           logIOSAction("Leaderboard Spam Attempt", { platformName });
-          output.textContent += "📋 Fetching level progression...\n";
-          const progressionData = await makeApiCall(
-            "Client/ExecuteCloudScript",
-            "POST",
-            {
-              FunctionName: "getLevelProgression",
-              FunctionParameter: {},
-              GeneratePlayStreamEvent: true
-            },
-            titleIdIOS,
-            sessionTicketIOS
-          );
 
-          if (progressionData.error || !progressionData.data?.FunctionResult) {
-            const errorMsg = progressionData.error || "Unknown error";
-            output.textContent += `❌ Failed to get level progression: ${errorMsg}\n`;
-            logIOSAction("Leaderboard Spam Failed", { step: "getLevelProgression", error: errorMsg, platformName });
-            output.style.color = "red";
-            return;
-          }
-
-          let currentLevelProgression = progressionData.data.FunctionResult;
-          output.textContent += `✅ Retrieved level progression:\n${JSON.stringify(currentLevelProgression, null, 2)}\n`;
-          logIOSAction("Get Level Progression Success", { progression: currentLevelProgression, platformName });
-
+          // Construct currentLevelProgression with modified levels
           const maxInt = 2147483647;
-          const modifiedProgression = JSON.parse(JSON.stringify(currentLevelProgression));
-          Object.keys(modifiedProgression).forEach(key => {
-            if (typeof modifiedProgression[key] === "number") {
-              modifiedProgression[key] = Math.random() > 0.5 ? 69420 : maxInt;
-            } else if (typeof modifiedProgression[key] === "object" && modifiedProgression[key] !== null) {
-              Object.keys(modifiedProgression[key]).forEach(subKey => {
-                if (typeof modifiedProgression[key][subKey] === "number") {
-                  modifiedProgression[key][subKey] = Math.random() > 0.5 ? 69420 : maxInt;
-                }
-              });
-            }
-          });
+          const currentLevelProgression = {
+            playerLevel: 1347,
+            classLevel: [
+              { classId: "Bagman", XP: 959, XpToNextLevel: 2730, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "Brave", XP: 503, XpToNextLevel: 2790, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "Detective", XP: 1304, XpToNextLevel: 5280, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "Inventor", XP: 3196, XpToNextLevel: 3630, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "Leader", XP: 2403, XpToNextLevel: 4170, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "Quentin", XP: 1760, XpToNextLevel: 3960, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 },
+              { classId: "Scout", XP: 1871, XpToNextLevel: 8640, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "BasicNeighbor", XP: 864, XpToNextLevel: 900, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "ButcherNeighbor", XP: 5841, XpToNextLevel: 6690, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "ClownNeighbor", XP: 434, XpToNextLevel: 480, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 1 },
+              { classId: "GhostNeighbor", XP: 49, XpToNextLevel: 2370, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "GuestNeighbor", XP: 1603, XpToNextLevel: 1830, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 3 },
+              { classId: "HunterNeighbor", XP: 50, XpToNextLevel: 840, level: Math.random() > 0.5 ? 69420 : maxInt, availablePerkSlotsCount: 2 },
+              { classId: "RandomNeighbor", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 }
+            ]
+          };
 
-          output.textContent += `📝 Modified level progression:\n${JSON.stringify(modifiedProgression, null, 2)}\n`;
-          logIOSAction("Modified Progression", { modifiedProgression, platformName });
+          output.textContent += `📝 Modified level progression:\n${JSON.stringify(currentLevelProgression, null, 2)}\n`;
+          logIOSAction("Modified Progression", { modifiedProgression: currentLevelProgression, platformName });
 
           output.textContent += `🔄 Updating leaderboard (Platform: ${platformName})...\n`;
           const updateData = await makeApiCall(
             "Client/ExecuteCloudScript",
             "POST",
             {
+              CustomTags: null,
               FunctionName: "refreshLeaderboardPlatform",
               FunctionParameter: {
-                currentLevelProgression: JSON.stringify(modifiedProgression),
+                currentLevelProgression: JSON.stringify(currentLevelProgression),
                 platformName: platformName
               },
-              GeneratePlayStreamEvent: true
+              GeneratePlayStreamEvent: true,
+              RevisionSelection: null,
+              SpecificRevision: null,
+              AuthenticationContext: null
             },
             titleIdIOS,
             sessionTicketIOS
@@ -1694,7 +1683,7 @@
       async function runCoinFarmCycle() {
         const roomType = document.getElementById("roomType").value;
         const playerIds = [
-          document.getElementBydocument.getElementById("playerId1").value.trim(),
+          document.getElementById("playerId1").value.trim(),
           document.getElementById("playerId2").value.trim(),
           document.getElementById("playerId3").value.trim(),
           document.getElementById("playerId4").value.trim(),
