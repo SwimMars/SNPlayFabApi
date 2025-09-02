@@ -263,6 +263,10 @@
     <div class="section">
       <h2>📱 IOS Features <span id="iosAutomationStatus" class="status-indicator status-inactive"></span></h2>
       <input id="displayNameIOS" placeholder="Enter Display Name" type="text">
+      <select id="platformNameSelect">
+        <option value="IOS">IOS</option>
+        <option value="PS4">PS4</option>
+      </select>
       <div class="grid-2">
         <button class="ios-automation-btn" onclick="toggleIOSAutomation()" id="iosAutomationToggleButton">Start IOS Automation</button>
         <button class="ios-leaderboard-btn" onclick="viewIOSLeaderboard()">View IOS Leaderboard</button>
@@ -527,6 +531,7 @@
     let totalTokensGenerated = 0;
     let attempts = 0;
     const iosAutomationLog = [];
+    const logEntries = []; // For Photon Token Bruteforcer
 
     function logIOSAction(action, details) {
       iosAutomationLog.push({
@@ -750,6 +755,7 @@
     async function toggleIOSAutomation() {
       const output = document.getElementById("iosOutput");
       const displayNameBase = document.getElementById("displayNameIOS").value.trim();
+      const platformName = document.getElementById("platformNameSelect").value;
 
       if (iosAutomationRunning) {
         clearInterval(iosAutomationIntervalId);
@@ -774,8 +780,8 @@
       iosAutomationRunning = true;
       document.getElementById("iosAutomationStatus").className = "status-indicator status-active";
       document.getElementById("iosAutomationToggleButton").textContent = "Stop IOS Automation";
-      output.textContent = "Starting IOS Automation...\n";
-      logIOSAction("Automation Started", { message: "IOS Automation started" });
+      output.textContent = `Starting IOS Automation (Platform: ${platformName})...\n`;
+      logIOSAction("Automation Started", { message: "IOS Automation started", platformName });
 
       async function runIOSAutomationCycle() {
         try {
@@ -832,7 +838,7 @@
 
           // Step 3: Spam Leaderboard
           output.textContent += "\n=== Leaderboard Spam ===\n";
-          logIOSAction("Leaderboard Spam Attempt", {});
+          logIOSAction("Leaderboard Spam Attempt", { platformName });
           output.textContent += "📋 Fetching level progression...\n";
           const progressionData = await makeApiCall(
             "Client/ExecuteCloudScript",
@@ -849,14 +855,14 @@
           if (progressionData.error || !progressionData.data?.FunctionResult) {
             const errorMsg = progressionData.error || "Unknown error";
             output.textContent += `❌ Failed to get level progression: ${errorMsg}\n`;
-            logIOSAction("Leaderboard Spam Failed", { step: "getLevelProgression", error: errorMsg });
+            logIOSAction("Leaderboard Spam Failed", { step: "getLevelProgression", error: errorMsg, platformName });
             output.style.color = "red";
             return;
           }
 
           let currentLevelProgression = progressionData.data.FunctionResult;
           output.textContent += `✅ Retrieved level progression:\n${JSON.stringify(currentLevelProgression, null, 2)}\n`;
-          logIOSAction("Get Level Progression Success", { progression: currentLevelProgression });
+          logIOSAction("Get Level Progression Success", { progression: currentLevelProgression, platformName });
 
           const maxInt = 2147483647;
           const modifiedProgression = JSON.parse(JSON.stringify(currentLevelProgression));
@@ -873,16 +879,17 @@
           });
 
           output.textContent += `📝 Modified level progression:\n${JSON.stringify(modifiedProgression, null, 2)}\n`;
-          logIOSAction("Modified Progression", { modifiedProgression });
+          logIOSAction("Modified Progression", { modifiedProgression, platformName });
 
-          output.textContent += "🔄 Updating leaderboard...\n";
+          output.textContent += `🔄 Updating leaderboard (Platform: ${platformName})...\n`;
           const updateData = await makeApiCall(
             "Client/ExecuteCloudScript",
             "POST",
             {
               FunctionName: "refreshLeaderboardPlatform",
               FunctionParameter: {
-                currentLevelProgression: JSON.stringify(modifiedProgression)
+                currentLevelProgression: JSON.stringify(modifiedProgression),
+                platformName: platformName
               },
               GeneratePlayStreamEvent: true
             },
@@ -892,23 +899,23 @@
 
           if (updateData.error) {
             output.textContent += `❌ Failed to update leaderboard: ${updateData.error}\n`;
-            logIOSAction("Leaderboard Update Failed", { error: updateData.error });
+            logIOSAction("Leaderboard Update Failed", { error: updateData.error, platformName });
             output.style.color = "red";
           } else {
             output.textContent += `✅ Leaderboard updated successfully!\n${formatResponse(updateData.data)}\n`;
-            logIOSAction("Leaderboard Update Success", { result: updateData.data });
+            logIOSAction("Leaderboard Update Success", { result: updateData.data, platformName });
             output.style.color = "green";
           }
         } catch (error) {
           output.textContent += `❌ Unexpected error: ${error.message}\n`;
-          logIOSAction("Unexpected Error", { error: error.message });
+          logIOSAction("Unexpected Error", { error: error.message, platformName });
           output.style.color = "red";
         }
         output.scrollTop = output.scrollHeight;
       }
 
       runIOSAutomationCycle();
-      iosAutomationIntervalId = setInterval(runIOSAutomationCycle, 1000); // 1-second interval for continuous operation
+      iosAutomationIntervalId = setInterval(runIOSAutomationCycle, 1000); // 1-second interval
     }
 
     async function viewIOSLeaderboard() {
@@ -940,7 +947,7 @@
         if (data.data && data.data.Leaderboard) {
           let leaderboardText = `Leaderboard for ${statisticName}:\n\n`;
           data.data.Leaderboard.forEach((entry, index) => {
-            leaderboardText += `${startPosition + index + 1}. ${entry.DisplayName}: ${entry.StatValue}\n`;
+            leaderboardText += `${startPosition + index + 1}. ${entry.DisplayName || "Unknown"}: ${entry.StatValue}\n`;
           });
           output.textContent = leaderboardText;
         } else if (data.error) {
@@ -1247,7 +1254,7 @@
       if (data.data && data.data.Leaderboard) {
         let leaderboardText = `Leaderboard for ${statisticName}:\n\n`;
         data.data.Leaderboard.forEach((entry, index) => {
-          leaderboardText += `${startPosition + index + 1}. ${entry.DisplayName}: ${entry.StatValue}\n`;
+          leaderboardText += `${startPosition + index + 1}. ${entry.DisplayName || "Unknown"}: ${entry.StatValue}\n`;
         });
         output.textContent = leaderboardText;
       } else if (data.error) {
@@ -1664,7 +1671,7 @@
       }, 10 * 60 * 1000);
     }
 
-    function toggleCoinFarmBot() {
+    async function toggleCoinFarmBot() {
       if (coinFarmBotRunning) {
         clearInterval(coinFarmIntervalId);
         coinFarmBotRunning = false;
@@ -1687,7 +1694,7 @@
       async function runCoinFarmCycle() {
         const roomType = document.getElementById("roomType").value;
         const playerIds = [
-          document.getElementById("playerId1").value.trim(),
+          document.getElementBydocument.getElementById("playerId1").value.trim(),
           document.getElementById("playerId2").value.trim(),
           document.getElementById("playerId3").value.trim(),
           document.getElementById("playerId4").value.trim(),
