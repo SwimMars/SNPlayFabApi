@@ -470,6 +470,12 @@
       <button onclick="stopBruteforce()">Stop Bruteforce</button>
       <div class="output" id="bruteforceOutput">Results will appear here...</div>
     </div>
+<div class="section">
+      <h2>🤖 Account Generator + Spam LeaderBoard <span id="accountGenStatus" class="status-indicator status-inactive"></span></h2>
+      <input id="displayNameInput" placeholder="Display Name" type="text">
+      <button onclick="toggleAccountGenerator()" id="accountGenToggleButton">Start Account Generator</button>
+      <div class="output" id="accountGenOutput">Generator output will appear here...</div>
+    </div>
   </div>
 
   <script>
@@ -487,6 +493,9 @@
     let failedAttempts = 0;
     const logEntries = [];
     let totalTokensGenerated = 0;
+let accountGenRunning = false;
+    let generatedAccounts = 0;
+    let accountLogEntries = [];
 
     function setSessionTicket() {
       sessionTicket = document.getElementById("sessionTicketInput").value.trim();
@@ -1753,6 +1762,179 @@
         tokenStatus.style.color = "green";
       }
     });
+function toggleAccountGenerator() {
+  if (accountGenRunning) {
+    accountGenRunning = false;
+    document.getElementById("accountGenStatus").className = "status-indicator status-inactive";
+    document.getElementById("accountGenToggleButton").textContent = "Start Account Generator";
+    const output = document.getElementById("accountGenOutput");
+    output.textContent += "\nGenerator stopped manually.\n";
+    downloadAccountLog();
+    return;
+  }
+
+  const displayName = document.getElementById("displayNameInput").value.trim();
+  if (!displayName) {
+    document.getElementById("accountGenOutput").textContent = "Please enter a display name.";
+    return;
+  }
+
+  accountGenRunning = true;
+  generatedAccounts = 0;
+  accountLogEntries = [];
+  document.getElementById("accountGenStatus").className = "status-indicator status-active";
+  document.getElementById("accountGenToggleButton").textContent = "Stop Account Generator";
+  const output = document.getElementById("accountGenOutput");
+  output.textContent = "Starting account generator...\n";
+
+  async function runAccountGenCycle() {
+    if (!accountGenRunning) return;
+
+    let log = `\n=== Account ${generatedAccounts + 1} started at ${new Date().toLocaleTimeString()} ===\n`;
+
+    try {
+      // Step 1: LoginWithGameCenter
+      const randomNumbers = Array.from({length: 50}, () => Math.floor(Math.random() * 10)).join('');
+      const playerId = `AdolfOzvardHitler${randomNumbers}`;
+      const loginBody = {
+        PlayerId: playerId,
+        CreateAccount: true,
+        InfoRequestParameters: {
+          GetUserAccountInfo: true
+        }
+      };
+      const loginRes = await fetch('https://c6252.playfabapi.com/Client/LoginWithGameCenter', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(loginBody)
+      });
+      const loginData = await loginRes.json();
+      log += `Login: ${JSON.stringify(loginData)}\n`;
+      if (loginData.error) {
+        throw new Error(loginData.error);
+      }
+      const newSessionTicket = loginData.data.SessionTicket;
+      const playFabId = loginData.data.PlayFabId;
+
+      // Step 2: UpdateUserTitleDisplayName
+      const updateNameBody = {
+        DisplayName: displayName
+      };
+      const updateNameRes = await fetch('https://c6252.playfabapi.com/Client/UpdateUserTitleDisplayName', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify(updateNameBody)
+      });
+      const updateNameData = await updateNameRes.json();
+      log += `UpdateName: ${JSON.stringify(updateNameData)}\n`;
+
+      // Step 3: setLevelProgressionForClass
+      const INT_MAX = 2147483647;
+      const levelProgression = {
+        playerLevel: INT_MAX,
+        classLevel: [
+          {classId:"Bagman",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"Brave",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"Detective",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"Inventor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"Leader",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"RandomExplorer",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"Scout",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"BasicNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"ButcherNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"ClownNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"GhostNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"GuestNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"RandomNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"Quentin",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
+          {classId:"HunterNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3}
+        ]
+      };
+      const setLevelBody = {
+        CustomTags: null,
+        FunctionName: "setLevelProgressionForClass",
+        FunctionParameter: {
+          classId: "BasicNeighbor",
+          receivedXP: INT_MAX,
+          currentLevelProgression: JSON.stringify(levelProgression)
+        },
+        GeneratePlayStreamEvent: true,
+        RevisionSelection: null,
+        SpecificRevision: null,
+        AuthenticationContext: null
+      };
+      const setLevelRes = await fetch('https://c6252.playfabapi.com/Client/ExecuteCloudScript', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify(setLevelBody)
+      });
+      const setLevelData = await setLevelRes.json();
+      log += `SetLevel: ${JSON.stringify(setLevelData)}\n`;
+
+      // Step 4: refreshLeaderboardPlatform
+      const platforms = ['IOS', 'PS4'];
+      const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+      const refreshBody = {
+        CustomTags: null,
+        FunctionName: "refreshLeaderboardPlatform",
+        FunctionParameter: {
+          currentLevelProgression: JSON.stringify(levelProgression),
+          platformName: randomPlatform
+        },
+        GeneratePlayStreamEvent: true,
+        RevisionSelection: null,
+        SpecificRevision: null,
+        AuthenticationContext: null
+      };
+      const refreshRes = await fetch('https://c6252.playfabapi.com/Client/ExecuteCloudScript', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify(refreshBody)
+      });
+      const refreshData = await refreshRes.json();
+      log += `RefreshLeaderboard: ${JSON.stringify(refreshData)}\n`;
+
+      generatedAccounts++;
+      output.textContent += `✅ Account generated: ${generatedAccounts}\n`;
+      accountLogEntries.push(log);
+    } catch (err) {
+      log += `❌ Error: ${err.message}\n`;
+      output.textContent += `❌ Error in cycle: ${err.message}\n`;
+      accountLogEntries.push(log);
+    }
+
+    output.scrollTop = output.scrollHeight;
+
+    if (accountGenRunning) {
+      setTimeout(runAccountGenCycle, 1000);
+    }
+  }
+
+  runAccountGenCycle();
+}
+
+function downloadAccountLog() {
+  const logContent = accountLogEntries.join('\n---\n');
+  const blob = new Blob([logContent], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `account_gen_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
   </script>
 </body>
 </html>
