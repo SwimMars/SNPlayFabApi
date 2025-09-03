@@ -1481,17 +1481,16 @@ async function toggleIOSAutomation() {
           return { error: "Please fill in all fields correctly or provide JSON." };
         }
 
-        currentLevelProgression = {
-          playerLevel,
-          class[{
-            classId,
-            XP,
-            XpToNextLevel,
-            level,
-            availablePerkSlotsCount
-          }]
-        };
-      }
+       currentLevelProgression = {
+  playerLevel,
+  classLevel: [{
+    classId,
+    XP,
+    XpToNextLevel,
+    level,
+    availablePerkSlotsCount
+  }]
+};
 
       const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
         FunctionName: "setLevelProgressionForClass",
