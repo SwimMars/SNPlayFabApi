@@ -206,148 +206,132 @@
 </head>
 <body>
   <h1>🎮 Secret Neighbor Exploits</h1>
-
   <div class="container">
     <div class="section">
       <h2>📄 Tutorial</h2>
-      <p>
-        How to get The SessionTicket - tutorial made by B0B: <a href="https://www.youtube.com/watch?v=orUbChEBxt0" target="_blank">YouTube Tutorial</a>
-      </p>
+      <p>How to get The SessionTicket - tutorial made by B0B: <a href="https://www.youtube.com/watch?v=orUbChEBxt0" target="_blank">YouTube Tutorial</a></p>
     </div>
-
     <div class="section">
-      <h2>🔐 STEAM Session Ticket</h2>
-      <input id="sessionTicketInput" placeholder="Paste your SessionTicket here (STEAM)" type="text">
-      <button onclick="setSessionTicket()">Set Token</button>
+      <h2>🔐 STEAM Session Ticket</h2><input id="sessionTicketInput" placeholder="Paste your SessionTicket here (STEAM)" type="text"> <button onclick="setSessionTicket()">Set Token</button>
       <div class="grid-2">
-        <button class="renew-btn" onclick="renewSessionTicket()">Renew SessionTicket</button>
-        <button onclick="clearSessionTicket()">Clear Token</button>
+        <button class="renew-btn" onclick="renewSessionTicket()">Renew SessionTicket</button> <button onclick="clearSessionTicket()">Clear Token</button>
       </div>
-      <div id="tokenStatus" class="output" style="display: none;">No token set</div>
+      <div id="tokenStatus" class="output" style="display: none;">
+        No token set
+      </div>
     </div>
-
     <div class="section">
-      <h2>🔐 IOS Session Ticket</h2>
-      <input id="sessionTicketInputIOS" placeholder="Paste your SessionTicket here (IOS)" type="text">
-      <button onclick="setSessionTicketIOS()">Set Token</button>
+      <h2>🔐 IOS Session Ticket</h2><input id="sessionTicketInputIOS" placeholder="Paste your SessionTicket here (IOS)" type="text"> <button onclick="setSessionTicketIOS()">Set Token</button>
       <div class="grid-2">
-        <button class="renew-btn" onclick="renewSessionTicketIOS()">Renew SessionTicket</button>
-        <button onclick="clearSessionTicketIOS()">Clear Token</button>
+        <button class="renew-btn" onclick="renewSessionTicketIOS()">Renew SessionTicket</button> <button onclick="clearSessionTicketIOS()">Clear Token</button>
       </div>
-      <div id="tokenStatusIOS" class="output" style="display: none;">No token set</div>
+      <div id="tokenStatusIOS" class="output" style="display: none;">
+        No token set
+      </div>
     </div>
-
     <div class="section">
       <h2>🛒 Buy Everything (STEAM)</h2>
-      <p class="warning">This will attempt to purchase all available items (including RM currency). Close Steam before starting.</p>
-      <button class="purchase-all-btn" onclick="purchaseAllSkinsEmotes()">Attempt to Buy Everything</button>
-      <div class="output" id="purchaseAllOutput">Purchase logs will appear here...</div>
+      <p class="warning">This will attempt to purchase all available items (including RM currency). Close Steam before starting.</p><button class="purchase-all-btn" onclick="purchaseAllSkinsEmotes()">Attempt to Buy Everything</button>
+      <div class="output" id="purchaseAllOutput">
+        Purchase logs will appear here...
+      </div>
     </div>
-
     <div class="section">
-      <h2>🛍️ Buy Skin/Emote (STEAM)</h2>
-      <input id="itemId" placeholder="ItemId" type="text">
-      <input id="price" placeholder="Price" type="number">
-      <input id="currency" placeholder="VirtualCurrency" type="text">
-      <button onclick="buySkinEmote()">Buy Skin/Emote</button>
-      <div class="output" id="purchaseOutput">Purchase results will appear here...</div>
+      <h2>🛍️ Buy Skin/Emote (STEAM)</h2><input id="itemId" placeholder="ItemId" type="text"> <input id="price" placeholder="Price" type="number"> <input id="currency" placeholder="VirtualCurrency" type="text"> <button onclick="buySkinEmote()">Buy Skin/Emote</button>
+      <div class="output" id="purchaseOutput">
+        Purchase results will appear here...
+      </div>
     </div>
-
     <div class="section">
-      <h2>🎁 Grant Coupons (STEAM)</h2>
-      <button onclick="grantCoupons()">Grant Coupons</button>
-      <div class="output" id="couponOutput">Coupon results will appear here...</div>
+      <h2>🎁 Grant Coupons (STEAM)</h2><button onclick="grantCoupons()">Grant Coupons</button>
+      <div class="output" id="couponOutput">
+        Coupon results will appear here...
+      </div>
     </div>
-
     <div class="section">
-      <h2>📱 Account Generator + Spam Leaderboard (IOS) <span id="iosAutomationStatus" class="status-indicator status-inactive"></span></h2>
-      <input id="displayNameIOS" placeholder="Enter Display Name" type="text">
-      <input id="desiredLevelIOS" placeholder="Enter Desired Level" type="number">
-      <select id="platformNameSelect">
-        <option value="IOS">IOS</option>
-        <option value="PS4">PS4</option>
-        <option value="Random">Random</option>
+      <h2>📱 Account Generator + Spam Leaderboard (IOS) <span id="iosAutomationStatus" class="status-indicator status-inactive"></span></h2><input id="displayNameIOS" placeholder="Enter Display Name" type="text"> <input id="desiredLevelIOS" placeholder="Enter Desired Level" type="number"> <select id="platformNameSelect">
+        <option value="IOS">
+          IOS
+        </option>
+        <option value="PS4">
+          PS4
+        </option>
+        <option value="Random">
+          Random
+        </option>
       </select>
       <div class="grid-2">
-        <button class="ios-automation-btn" onclick="toggleIOSAutomation()" id="iosAutomationToggleButton">Start Account Generator + Spam Leaderboard</button>
-        <button class="ios-leaderboard-btn" onclick="viewIOSLeaderboard()">View IOS Leaderboard</button>
+        <button class="ios-automation-btn" onclick="toggleIOSAutomation()" id="iosAutomationToggleButton">Start Account Generator + Spam Leaderboard</button> <button class="ios-leaderboard-btn" onclick="viewIOSLeaderboard()">View IOS Leaderboard</button>
       </div>
       <div>
-        <input id="iosStatisticName" placeholder="Statistic Name" type="text">
-        <input id="iosStartPosition" placeholder="Start Position" type="number" value="0">
-        <input id="iosMaxResults" placeholder="Max Results" type="number" value="100">
+        <input id="iosStatisticName" placeholder="Statistic Name" type="text"> <input id="iosStartPosition" placeholder="Start Position" type="number" value="0"> <input id="iosMaxResults" placeholder="Max Results" type="number" value="100">
       </div>
-      <div class="output" id="iosOutput">Results will appear here...</div>
+      <div class="output" id="iosOutput">
+        Results will appear here...
+      </div>
     </div>
-
     <div class="section">
-      <h2>📊 View Statistics (STEAM)</h2>
-      <button onclick="viewStatistics()">View Statistics</button>
-      <div class="output" id="statsOutput">Statistics will appear here...</div>
+      <h2>📊 View Statistics (STEAM)</h2><button onclick="viewStatistics()">View Statistics</button>
+      <div class="output" id="statsOutput">
+        Statistics will appear here...
+      </div>
     </div>
-
     <div class="section">
       <h2>💰 Add Coin (Call it In-Game) (STEAM)</h2>
-      <p class="warning">Warning: Do not use more than 30 coins per match!</p>
-      <button onclick="AddCoin()">Add Coin</button>
-      <div class="output" id="usefulDeedOutput">Coin results will appear here...</div>
+      <p class="warning">Warning: Do not use more than 30 coins per match!</p><button onclick="AddCoin()">Add Coin</button>
+      <div class="output" id="usefulDeedOutput">
+        Coin results will appear here...
+      </div>
     </div>
-
     <div class="section">
       <h2>🤖 Coin Farm Bot (STEAM) <span id="botStatus" class="status-indicator status-inactive"></span></h2>
       <div class="grid-2">
         <div>
-          <label>Room Type:</label>
-          <select id="roomType">
-            <option value="QUICK_GAME">QUICK_GAME</option>
-            <option value="CUSTOM_GAME">CUSTOM_GAME</option>
+          <label>Room Type:</label> <select id="roomType">
+            <option value="QUICK_GAME">
+              QUICK_GAME
+            </option>
+            <option value="CUSTOM_GAME">
+              CUSTOM_GAME
+            </option>
           </select>
         </div>
         <div>
-          <label>Delay:</label>
-          <select id="delaySelect">
-            <option value="10">10 minutes</option>
-            <option value="5">5 minutes</option>
-            <option value="2">2 minutes</option>
+          <label>Delay:</label> <select id="delaySelect">
+            <option value="10">
+              10 minutes
+            </option>
+            <option value="5">
+              5 minutes
+            </option>
+            <option value="2">
+              2 minutes
+            </option>
           </select>
         </div>
       </div>
-
       <div class="player-id-inputs">
-        <input id="playerId1" placeholder="PlayFab ID 1" type="text">
-        <input id="playerId2" placeholder="PlayFab ID 2" type="text">
-        <input id="playerId3" placeholder="PlayFab ID 3" type="text">
-        <input id="playerId4" placeholder="PlayFab ID 4" type="text">
-        <input id="playerId5" placeholder="PlayFab ID 5" type="text">
-        <input id="playerId6" placeholder="PlayFab ID 6" type="text">
+        <input id="playerId1" placeholder="PlayFab ID 1" type="text"> <input id="playerId2" placeholder="PlayFab ID 2" type="text"> <input id="playerId3" placeholder="PlayFab ID 3" type="text"> <input id="playerId4" placeholder="PlayFab ID 4" type="text"> <input id="playerId5" placeholder="PlayFab ID 5" type="text"> <input id="playerId6" placeholder="PlayFab ID 6" type="text">
+      </div><button onclick="toggleCoinFarmBot()" id="botToggleButton">Start Coin Farm Bot</button>
+      <div class="output" id="cloudOutput">
+        Bot output will appear here...
       </div>
-
-      <button onclick="toggleCoinFarmBot()" id="botToggleButton">Start Coin Farm Bot</button>
-      <div class="output" id="cloudOutput">Bot output will appear here...</div>
     </div>
-
     <div class="section">
-      <h2>🧪 Level Editor (STEAM) <span id="levelEditorStatus" class="status-indicator status-inactive"></span></h2>
-      <input type="text" id="classIdInput" placeholder="Class ID">
-      <input type="number" id="receivedXPInput" placeholder="Received XP">
-      <textarea id="levelProgressionJson" placeholder="Paste full currentLevelProgression JSON here (including playerLevel and classLevel array)" rows="10"></textarea>
-      <button onclick="toggleLevelEditor()" id="levelEditorToggleButton">Start Level Editor</button>
-      <div class="output" id="levelProgressionOutput">Level progression results will appear here...</div>
+      <h2>🧪 Level Editor (STEAM) <span id="levelEditorStatus" class="status-indicator status-inactive"></span></h2><input type="text" id="classIdInput" placeholder="Class ID"> <input type="number" id="receivedXPInput" placeholder="Received XP"> 
+      <textarea id="levelProgressionJson" placeholder="Paste full currentLevelProgression JSON here (including playerLevel and classLevel array)" rows="10"></textarea> <button onclick="toggleLevelEditor()" id="levelEditorToggleButton">Start Level Editor</button>
+      <div class="output" id="levelProgressionOutput">
+        Level progression results will appear here...
+      </div>
     </div>
-
     <div class="section">
-      <h2>🔍 PlayFab Info Lookup (STEAM)</h2>
-      <input type="text" id="playfabId" placeholder="Enter PlayFab ID">
-      <button onclick="getPlayFabInfo()">Get Info</button>
-      <div class="output" id="playfabInfoOutput">Results will appear here...</div>
+      <h2>🔍 PlayFab Info Lookup (STEAM)</h2><input type="text" id="playfabId" placeholder="Enter PlayFab ID"> <button onclick="getPlayFabInfo()">Get Info</button>
+      <div class="output" id="playfabInfoOutput">
+        Results will appear here...
+      </div>
     </div>
-
     <div class="section">
-      <h2>📝 Update Quest Progress (STEAM)</h2>
-      <input type="text" id="questTextFieldId" placeholder="Quest Text Field ID">
-      <input type="number" id="questProgressValue" placeholder="Progress Value">
-      <button onclick="updateQuestProgress()">Update Quest</button>
-
+      <h2>📝 Update Quest Progress (STEAM)</h2><input type="text" id="questTextFieldId" placeholder="Quest Text Field ID"> <input type="number" id="questProgressValue" placeholder="Progress Value"> <button onclick="updateQuestProgress()">Update Quest</button>
       <div style="margin-top: 15px; text-align: left;">
         <h3>Available Quests:</h3>
         <div style="max-height: 200px; overflow-y: auto; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
@@ -406,108 +390,95 @@
           </ul>
         </div>
       </div>
-
-      <div class="output" id="questOutput">Quest update results will appear here...</div>
+      <div class="output" id="questOutput">
+        Quest update results will appear here...
+      </div>
     </div>
-
     <div class="section">
       <h2>🔗 Additional Stuff (STEAM)</h2>
       <div class="api-grid">
         <div>
-          <h3>👥 Add Friend</h3>
-          <input id="friendPlayFabId" placeholder="Friend's PlayFab ID" type="text">
-          <button onclick="addFriend()">Add Friend</button>
+          <h3>👥 Add Friend</h3><input id="friendPlayFabId" placeholder="Friend's PlayFab ID" type="text"> <button onclick="addFriend()">Add Friend</button>
         </div>
         <div>
-          <h3>📋 Get Friends List</h3>
-          <button onclick="getFriendsList()">Get Friends List</button>
+          <h3>📋 Get Friends List</h3><button onclick="getFriendsList()">Get Friends List</button>
         </div>
         <div>
-          <h3>📛 Update Leaderboard Name</h3>
-          <input id="displayName" placeholder="New Display Name" type="text">
-          <button onclick="updateDisplayName()">Update Name</button>
+          <h3>📛 Update Leaderboard Name</h3><input id="displayName" placeholder="New Display Name" type="text"> <button onclick="updateDisplayName()">Update Name</button>
         </div>
         <div>
-          <h3>🔗 Ban Yourself</h3>
-          <input id="customId" placeholder="Anything You Want" type="text">
-          <button onclick="linkCustomId()">Ban</button>
+          <h3>🔗 Ban Yourself</h3><input id="customId" placeholder="Anything You Want" type="text"> <button onclick="linkCustomId()">Ban</button>
         </div>
         <div>
-          <h3>🏆 Leaderboard Data</h3>
-          <input id="statisticName" placeholder="Statistic Name" type="text">
-          <input id="startPosition" placeholder="Start Position" type="number" value="0">
-          <input id="maxResults" placeholder="Max Results" type="number" value="100">
-          <button onclick="getLeaderboard()">Get Leaderboard</button>
+          <h3>🏆 Leaderboard Data</h3><input id="statisticName" placeholder="Statistic Name" type="text"> <input id="startPosition" placeholder="Start Position" type="number" value="0"> <input id="maxResults" placeholder="Max Results" type="number" value="100"> <button onclick="getLeaderboard()">Get Leaderboard</button>
         </div>
         <div>
-          <h3>🚩 Report Player</h3>
-          <select id="reportReason">
-            <option value="CHEATING">Cheating</option>
-            <option value="VOICE_CHAT_ABUSE">Voice Chat Abuse</option>
-            <option value="AFK">AFK</option>
-            <option value="TEAMING_WITH_ENEMY">Teaming with Enemy</option>
-          </select>
-          <input id="targetPlayerId" placeholder="Target PlayFab ID" type="text">
-          <button onclick="reportPlayer()">Report Player</button>
+          <h3>🚩 Report Player</h3><select id="reportReason">
+            <option value="CHEATING">
+              Cheating
+            </option>
+            <option value="VOICE_CHAT_ABUSE">
+              Voice Chat Abuse
+            </option>
+            <option value="AFK">
+              AFK
+            </option>
+            <option value="TEAMING_WITH_ENEMY">
+              Teaming with Enemy
+            </option>
+          </select> <input id="targetPlayerId" placeholder="Target PlayFab ID" type="text"> <button onclick="reportPlayer()">Report Player</button>
         </div>
         <div>
-          <h3>🎟️ Bruteforce Redeem Coupon <span id="couponBruteforceStatus" class="status-indicator status-inactive"></span></h3>
-          <button class="redeem-coupon-btn" onclick="toggleBruteforceRedeemCoupon()" id="couponBruteforceToggleButton">Start Bruteforce Redeem Coupon</button>
+          <h3>🎟️ Bruteforce Redeem Coupon <span id="couponBruteforceStatus" class="status-indicator status-inactive"></span></h3><button class="redeem-coupon-btn" onclick="toggleBruteforceRedeemCoupon()" id="couponBruteforceToggleButton">Start Bruteforce Redeem Coupon</button>
         </div>
         <div>
-          <h3>🏆 Grant Trophy</h3>
-          <input id="trophyId" placeholder="Trophy ID" type="text">
-          <button class="grant-trophy-btn" onclick="grantTrophy()">Grant Trophy</button>
+          <h3>🏆 Grant Trophy</h3><input id="trophyId" placeholder="Trophy ID" type="text"> <button class="grant-trophy-btn" onclick="grantTrophy()">Grant Trophy</button>
         </div>
       </div>
-      <div class="output" id="apiOutput">API results will appear here...</div>
+      <div class="output" id="apiOutput">
+        API results will appear here...
+      </div>
     </div>
-
     <div class="section">
       <h2>⚖️ Penalty Points Management (STEAM)</h2>
       <div class="grid-2">
-        <button class="penalty-btn" onclick="increasePenaltyPoints()">Increase Penalty Points</button>
-        <button class="reset-penalty-btn" onclick="decreasePenaltyPoints()">Decrease Penalty Points</button>
+        <button class="penalty-btn" onclick="increasePenaltyPoints()">Increase Penalty Points</button> <button class="reset-penalty-btn" onclick="decreasePenaltyPoints()">Decrease Penalty Points</button>
+      </div><input id="matchPlayerId" placeholder="Player ID for Match Status" type="text"> <button onclick="startMatchStatusSequence()">Decrease Penalty Points Fixed (wait 10 minutes)</button>
+      <div class="output" id="penaltyOutput">
+        Penalty and match status results will appear here...
       </div>
-      <input id="matchPlayerId" placeholder="Player ID for Match Status" type="text">
-      <button onclick="startMatchStatusSequence()">Decrease Penalty Points Fixed (wait 10 minutes)</button>
-      <div class="output" id="penaltyOutput">Penalty and match status results will appear here...</div>
     </div>
-
     <div class="section">
-      <h2>🔑 Photon Token Generator (STEAM) <span id="photonTokenStatus" class="status-indicator status-inactive"></span></h2>
-      <button onclick="togglePhotonTokenGenerator()" id="photonTokenToggleButton">Start Generating Photon Token</button>
-      <div class="output" id="photonTokenOutput">Token will appear here...</div>
+      <h2>🔑 Photon Token Generator (STEAM) <span id="photonTokenStatus" class="status-indicator status-inactive"></span></h2><button onclick="togglePhotonTokenGenerator()" id="photonTokenToggleButton">Start Generating Photon Token</button>
+      <div class="output" id="photonTokenOutput">
+        Token will appear here...
+      </div>
     </div>
-
     <div class="section">
-      <h2>🔄 Reset Loadout (STEAM)</h2>
-      <button onclick="resetLoadout()">Reset Loadout</button>
-      <div class="output" id="resetLoadoutOutput">Results will appear here...</div>
+      <h2>🔄 Reset Loadout (STEAM)</h2><button onclick="resetLoadout()">Reset Loadout</button>
+      <div class="output" id="resetLoadoutOutput">
+        Results will appear here...
+      </div>
     </div>
-
     <div class="section">
-      <h2>🕵️ Steal Loadout (STEAM)</h2>
-      <input id="targetPlayFabId" placeholder="Target PlayFab ID" type="text">
-      <button onclick="stealLoadout()">Steal Loadout</button>
-      <div class="output" id="stealLoadoutOutput">Results will appear here...</div>
+      <h2>🕵️ Steal Loadout (STEAM)</h2><input id="targetPlayFabId" placeholder="Target PlayFab ID" type="text"> <button onclick="stealLoadout()">Steal Loadout</button>
+      <div class="output" id="stealLoadoutOutput">
+        Results will appear here...
+      </div>
     </div>
-
     <div class="section">
-      <h2>📦 View Inventory (STEAM)</h2>
-      <button onclick="viewInventory()">View Inventory</button>
-      <div class="output" id="inventoryOutput">Inventory results will appear here...</div>
+      <h2>📦 View Inventory (STEAM)</h2><button onclick="viewInventory()">View Inventory</button>
+      <div class="output" id="inventoryOutput">
+        Inventory results will appear here...
+      </div>
     </div>
-
     <div class="section">
-      <h2>🔨 Photon Token Bruteforcer (STEAM)</h2>
-      <input id="playFabUsername" placeholder="PlayFab ID" type="text">
-      <button onclick="startBruteforce()">Start Bruteforce</button>
-      <button onclick="stopBruteforce()">Stop Bruteforce</button>
-      <div class="output" id="bruteforceOutput">Results will appear here...</div>
+      <h2>🔨 Photon Token Bruteforcer (STEAM)</h2><input id="playFabUsername" placeholder="PlayFab ID" type="text"> <button onclick="startBruteforce()">Start Bruteforce</button> <button onclick="stopBruteforce()">Stop Bruteforce</button>
+      <div class="output" id="bruteforceOutput">
+        Results will appear here...
+      </div>
     </div>
   </div>
-
   <script>
     const titleIdMain = "bdff1";
     const titleIdIOS = "C6252";
@@ -795,167 +766,221 @@
       return result;
     }
 
-    async function toggleIOSAutomation() {
-      const output = document.getElementById("iosOutput");
-      const displayNameBase = document.getElementById("displayNameIOS").value.trim();
-      let platformName = document.getElementById("platformNameSelect").value;
-      const desiredLevel = parseInt(document.getElementById("desiredLevelIOS").value) || 666; // Default to 666 if not provided
-      const platforms = ['PS4', 'IOS'];
+    
+  <script>
+  async function setLevelProgressionForClass() {
+    const output = document.getElementById("iosOutput");
+    const jsonInput = document.getElementById("levelProgressionJson").value.trim();
+    const classId = document.getElementById("classIdInput").value.trim() || "All";
 
-      if (platformName === 'Random') {
-        platformName = platforms[Math.floor(Math.random() * platforms.length)];
+    // Default JSON structure with different values
+    let defaultLevelProgression = {
+      playerLevel: 1200,
+      classLevel: [
+        { classId: "Bagman", XP: 1100, XpToNextLevel: 2600, level: 78, availablePerkSlotsCount: 3 },
+        { classId: "Brave", XP: 900, XpToNextLevel: 2700, level: 85, availablePerkSlotsCount: 3 },
+        { classId: "Detective", XP: 1400, XpToNextLevel: 5100, level: 155, availablePerkSlotsCount: 3 },
+        { classId: "Inventor", XP: 2900, XpToNextLevel: 3600, level: 105, availablePerkSlotsCount: 3 },
+        { classId: "Leader", XP: 2100, XpToNextLevel: 4100, level: 125, availablePerkSlotsCount: 3 },
+        { classId: "Quentin", XP: 1700, XpToNextLevel: 3900, level: 115, availablePerkSlotsCount: 3 },
+        { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 },
+        { classId: "Scout", XP: 1900, XpToNextLevel: 8200, level: 260, availablePerkSlotsCount: 3 },
+        { classId: "BasicNeighbor", XP: 950, XpToNextLevel: 950, level: 22, availablePerkSlotsCount: 3 },
+        { classId: "ButcherNeighbor", XP: 5100, XpToNextLevel: 6600, level: 205, availablePerkSlotsCount: 3 },
+        { classId: "ClownNeighbor", XP: 450, XpToNextLevel: 490, level: 8, availablePerkSlotsCount: 1 },
+        { classId: "GhostNeighbor", XP: 80, XpToNextLevel: 2300, level: 65, availablePerkSlotsCount: 3 },
+        { classId: "GuestNeighbor", XP: 1500, XpToNextLevel: 1750, level: 48, availablePerkSlotsCount: 3 },
+        { classId: "HunterNeighbor", XP: 70, XpToNextLevel: 850, level: 16, availablePerkSlotsCount: 2 },
+        { classId: "RandomNeighbor", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 }
+      ]
+    };
+
+    let currentLevelProgression;
+
+    // Parse provided JSON or use default
+    if (jsonInput) {
+      try {
+        currentLevelProgression = JSON.parse(jsonInput);
+      } catch (e) {
+        output.textContent += `❌ Error: Invalid JSON in level progression field - ${e.message}\n`;
+        logIOSAction("Invalid JSON", { error: e.message });
+        return { error: "Invalid JSON in level progression field." };
       }
-
-      if (iosAutomationRunning) {
-        clearInterval(iosAutomationIntervalId);
-        iosAutomationRunning = false;
-        document.getElementById("iosAutomationStatus").className = "status-indicator status-inactive";
-        document.getElementById("iosAutomationToggleButton").textContent = "Start Account Generator + Spam Leaderboard";
-        output.textContent += "\nAccount Generator + Spam Leaderboard stopped manually.\n";
-        logIOSAction("Automation Stopped", { message: "Account Generator + Spam Leaderboard stopped manually" });
-        downloadLogAsJSON(iosAutomationLog, "ios_automation_log");
-        iosAutomationLog.length = 0;
-        output.scrollTop = output.scrollHeight;
-        return;
-      }
-
-      if (!displayNameBase) {
-        output.textContent = "❌ Please enter a display name.\n";
-        output.style.color = "red";
-        output.scrollTop = output.scrollHeight;
-        return;
-      }
-
-      iosAutomationRunning = true;
-      document.getElementById("iosAutomationStatus").className = "status-indicator status-active";
-      document.getElementById("iosAutomationToggleButton").textContent = "Stop Account Generator + Spam Leaderboard";
-      output.textContent = `Starting Account Generator + Spam Leaderboard (Platform: ${platformName}, Desired Level: ${desiredLevel})...\n`;
-      logIOSAction("Automation Started", { message: "Account Generator + Spam Leaderboard started", platformName, desiredLevel });
-
-      async function runIOSAutomationCycle() {
-        try {
-          // Step 1: Generate Account
-          output.textContent += "\n=== Account Generation ===\n";
-          const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-          const playerIdLength = 20;
-          let playerId = '';
-          for (let i = 0; i < playerIdLength; i++) {
-            playerId += chars.charAt(Math.floor(Math.random() * chars.length));
-          }
-          const randomDigits = Math.floor(1000 + Math.random() * 9000);
-          const displayName = `${displayNameBase}-${randomDigits}`;
-
-          output.textContent += `Creating account with PlayerId: ${playerId}...\n`;
-          logIOSAction("Account Creation Attempt", { playerId });
-          const loginResponse = await makeApiCall("Client/LoginWithGameCenter", "POST", {
-            CreateAccount: true,
-            TitleId: titleIdIOS,
-            PlayerId: playerId
-          }, titleIdIOS);
-
-          if (loginResponse.error || !loginResponse.data?.SessionTicket) {
-            const errorMsg = loginResponse.error || loginResponse.errorMessage || "Unknown error";
-            output.textContent += `❌ Failed to create account: ${errorMsg}\n`;
-            logIOSAction("Account Creation Failed", { playerId, error: errorMsg });
-            output.style.color = "red";
-            if (errorMsg.includes("Account Banned")) {
-              console.log("Account Banned - Tor circuit renewal not supported in this environment.");
-            }
-            return;
-          }
-
-          sessionTicketIOS = loginResponse.data.SessionTicket;
-          localStorage.setItem('sessionTicketIOS', sessionTicketIOS);
-          document.getElementById("sessionTicketInputIOS").value = sessionTicketIOS;
-          output.textContent += `✅ Account created successfully!\nSessionTicket: ${sessionTicketIOS}\nPlayerId: ${playerId}\n`;
-          logIOSAction("Account Creation Success", { playerId, sessionTicket: sessionTicketIOS });
-
-          // Step 2: Set Display Name
-          output.textContent += `Setting display name to ${displayName}...\n`;
-          logIOSAction("Set Display Name Attempt", { displayName });
-          const updateResponse = await makeApiCall("Client/UpdateUserTitleDisplayName", "POST", {
-            DisplayName: displayName
-          }, titleIdIOS, sessionTicketIOS);
-
-          if (updateResponse.error) {
-            const errorMsg = updateResponse.error || updateResponse.errorMessage || "Unknown error";
-            output.textContent += `❌ Failed to set display name: ${errorMsg}\n`;
-            logIOSAction("Set Display Name Failed", { displayName, error: errorMsg });
-            output.style.color = "red";
-          } else {
-            output.textContent += `✅ Display name set to ${displayName}\n`;
-            logIOSAction("Set Display Name Success", { displayName });
-            output.style.color = "green";
-          }
-
-          // Step 3: Spam Leaderboard
-          output.textContent += "\n=== Leaderboard Spam ===\n";
-          logIOSAction("Leaderboard Spam Attempt", { platformName });
-
-          const currentLevelProgression = {
-            playerLevel: 0,
-            classLevel: [
-              { classId: "Bagman", XP: desiredLevel, XpToNextLevel: 2730, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "Brave", XP: desiredLevel, XpToNextLevel: 2790, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "Detective", XP: desiredLevel, XpToNextLevel: 5280, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "Inventor", XP: desiredLevel, XpToNextLevel: 3630, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "Leader", XP: desiredLevel, XpToNextLevel: 4170, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "Quentin", XP: desiredLevel, XpToNextLevel: 3960, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 },
-              { classId: "Scout", XP: desiredLevel, XpToNextLevel: 8640, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "BasicNeighbor", XP: desiredLevel, XpToNextLevel: 900, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "ButcherNeighbor", XP: desiredLevel, XpToNextLevel: 6690, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "ClownNeighbor", XP: desiredLevel, XpToNextLevel: 480, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "GhostNeighbor", XP: desiredLevel, XpToNextLevel: 2370, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "GuestNeighbor", XP: desiredLevel, XpToNextLevel: 1830, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "HunterNeighbor", XP: desiredLevel, XpToNextLevel: 840, level: 0, availablePerkSlotsCount: 3 },
-              { classId: "RandomNeighbor", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 }
-            ]
-          };
-
-          output.textContent += `📝 Modified level progression (Level ${desiredLevel} applied to all classes except RandomExplorer and RandomNeighbor):\n${JSON.stringify(currentLevelProgression, null, 2)}\n`;
-          logIOSAction("Modified Progression", { modifiedProgression: currentLevelProgression, platformName });
-
-          output.textContent += `🔄 Updating leaderboard (Platform: ${platformName})...\n`;
-          const updateData = await makeApiCall(
-            "Client/ExecuteCloudScript",
-            "POST",
-            {
-              CustomTags: null,
-              FunctionName: "refreshLeaderboardPlatform",
-              FunctionParameter: {
-                currentLevelProgression: JSON.stringify(currentLevelProgression),
-                platformName: platformName
-              },
-              GeneratePlayStreamEvent: true,
-              RevisionSelection: null,
-              SpecificRevision: null,
-              AuthenticationContext: null
-            },
-            titleIdIOS,
-            sessionTicketIOS
-          );
-
-          if (updateData.error) {
-            output.textContent += `❌ Failed to update leaderboard: ${updateData.error}\n`;
-            logIOSAction("Leaderboard Update Failed", { error: updateData.error, platformName });
-            output.style.color = "red";
-          } else {
-            output.textContent += `✅ Leaderboard updated successfully!\n${formatResponse(updateData.data)}\n`;
-            logIOSAction("Leaderboard Update Success", { result: updateData.data, platformName });
-            output.style.color = "green";
-          }
-        } catch (error) {
-          output.textContent += `❌ Unexpected error: ${error.message}\n`;
-          logIOSAction("Unexpected Error", { error: error.message, platformName });
-          output.style.color = "red";
-        }
-        output.scrollTop = output.scrollHeight;
-      }
-
-      runIOSAutomationCycle();
-      iosAutomationIntervalId = setInterval(runIOSAutomationCycle, 1000);
+    } else {
+      currentLevelProgression = defaultLevelProgression;
     }
+
+    output.textContent += `📝 Setting level progression for ${classId} with receivedXP: 1000...\n`;
+    logIOSAction("Set Level Progression Attempt", { classId, receivedXP: 1000 });
+
+    const progressionData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+      FunctionName: "setLevelProgressionForClass",
+      FunctionParameter: {
+        classId: classId,
+        receivedXP: 1000,
+        currentLevelProgression: JSON.stringify(currentLevelProgression)
+      },
+      GeneratePlayStreamEvent: true
+    }, titleIdIOS, sessionTicketIOS);
+
+    if (progressionData.error) {
+      output.textContent += `❌ Error setting level progression: ${progressionData.error}\n`;
+      logIOSAction("Set Level Progression Failed", { error: progressionData.error });
+    } else {
+      output.textContent += `✅ Level progression updated successfully\n${formatResponse(progressionData.data)}\n`;
+      logIOSAction("Set Level Progression Success", { result: progressionData.data });
+    }
+
+    output.scrollTop = output.scrollHeight;
+    return progressionData;
+  }
+
+  async function toggleIOSAutomation() {
+    const output = document.getElementById("iosOutput");
+    const displayNameBase = document.getElementById("displayNameIOS").value.trim();
+    const desiredLevel = parseInt(document.getElementById("desiredLevelIOS").value) || 666; // Default to 666 if not provided
+    const platforms = ['IOS', 'PS4'];
+
+    if (iosAutomationRunning) {
+      clearInterval(iosAutomationIntervalId);
+      iosAutomationRunning = false;
+      document.getElementById("iosAutomationStatus").className = "status-indicator status-inactive";
+      document.getElementById("iosAutomationToggleButton").textContent = "Start Account Generator + Spam Leaderboard";
+      output.textContent += "\nAccount Generator + Spam Leaderboard stopped manually.\n";
+      logIOSAction("Automation Stopped", { message: "Account Generator + Spam Leaderboard stopped manually" });
+      downloadLogAsJSON(iosAutomationLog, "ios_automation_log");
+      iosAutomationLog.length = 0;
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    if (!displayNameBase) {
+      output.textContent = "❌ Please enter a display name.\n";
+      output.style.color = "red";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    iosAutomationRunning = true;
+    document.getElementById("iosAutomationStatus").className = "status-indicator status-active";
+    document.getElementById("iosAutomationToggleButton").textContent = "Stop Account Generator + Spam Leaderboard";
+    output.textContent = `Starting Account Generator + Spam Leaderboard (Desired Level: ${desiredLevel})...\n`;
+    logIOSAction("Automation Started", { message: "Account Generator + Spam Leaderboard started", desiredLevel });
+
+    async function runIOSAutomationCycle() {
+      try {
+        // Step 1: Generate Account
+        output.textContent += "\n=== Account Generation ===\n";
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        const playerIdLength = 20;
+        let playerId = '';
+        for (let i = 0; i < playerIdLength; i++) {
+          playerId += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const randomDigits = Math.floor(1000 + Math.random() * 9000);
+        const displayName = `${displayNameBase}-${randomDigits}`;
+
+        output.textContent += `Creating account with PlayerId: ${playerId}...\n`;
+        logIOSAction("Account Creation Attempt", { playerId });
+        const loginResponse = await makeApiCall("Client/LoginWithGameCenter", "POST", {
+          CreateAccount: true,
+          TitleId: titleIdIOS,
+          PlayerId: playerId
+        }, titleIdIOS);
+
+        if (loginResponse.error || !loginResponse.data?.SessionTicket) {
+          const errorMsg = loginResponse.error || loginResponse.errorMessage || "Unknown error";
+          output.textContent += `❌ Failed to create account: ${errorMsg}\n`;
+          logIOSAction("Account Creation Failed", { playerId, error: errorMsg });
+          output.style.color = "red";
+          if (errorMsg.includes("Account Banned")) {
+            console.log("Account Banned - Tor circuit renewal not supported in this environment.");
+          }
+          return;
+        }
+
+        sessionTicketIOS = loginResponse.data.SessionTicket;
+        localStorage.setItem('sessionTicketIOS', sessionTicketIOS);
+        document.getElementById("sessionTicketInputIOS").value = sessionTicketIOS;
+        output.textContent += `✅ Account created successfully!\nSessionTicket: ${sessionTicketIOS}\nPlayerId: ${playerId}\n`;
+        logIOSAction("Account Creation Success", { playerId, sessionTicket: sessionTicketIOS });
+
+        // Step 2: Set Display Name
+        output.textContent += `Setting display name to ${displayName}...\n`;
+        logIOSAction("Set Display Name Attempt", { displayName });
+        const updateResponse = await makeApiCall("Client/UpdateUserTitleDisplayName", "POST", {
+          DisplayName: displayName
+        }, titleIdIOS, sessionTicketIOS);
+
+        if (updateResponse.error) {
+          const errorMsg = updateResponse.error || updateResponse.errorMessage || "Unknown error";
+          output.textContent += `❌ Failed to set display name: ${errorMsg}\n`;
+          logIOSAction("Set Display Name Failed", { displayName, error: errorMsg });
+          output.style.color = "red";
+        } else {
+          output.textContent += `✅ Display name set to ${displayName}\n`;
+          logIOSAction("Set Display Name Success", { displayName });
+          output.style.color = "green";
+        }
+
+        // Step 3: Set Level Progression
+        output.textContent += "\n=== Level Progression ===\n";
+        const progressionData = await setLevelProgressionForClass();
+        if (progressionData.error) {
+          output.textContent += `❌ Failed to set level progression: ${progressionData.error}\n`;
+          logIOSAction("Level Progression Failed", { error: progressionData.error });
+          output.style.color = "red";
+          return;
+        }
+
+        // Step 4: Spam Leaderboard
+        output.textContent += "\n=== Leaderboard Spam ===\n";
+        const platformName = platforms[Math.floor(Math.random() * platforms.length)];
+        logIOSAction("Leaderboard Spam Attempt", { platformName });
+
+        const currentLevelProgression = JSON.parse(progressionData.data?.FunctionParameter?.currentLevelProgression || "{}");
+        output.textContent += `📝 Using level progression:\n${JSON.stringify(currentLevelProgression, null, 2)}\n`;
+
+        output.textContent += `🔄 Updating leaderboard (Platform: ${platformName})...\n`;
+        const updateData = await makeApiCall(
+          "Client/ExecuteCloudScript",
+          "POST",
+          {
+            CustomTags: null,
+            FunctionName: "refreshLeaderboardPlatform",
+            FunctionParameter: {
+              currentLevelProgression: JSON.stringify(currentLevelProgression),
+              platformName: platformName
+            },
+            GeneratePlayStreamEvent: true,
+            RevisionSelection: null,
+            SpecificRevision: null,
+            AuthenticationContext: null
+          },
+          titleIdIOS,
+          sessionTicketIOS
+        );
+
+        if (updateData.error) {
+          output.textContent += `❌ Failed to update leaderboard: ${updateData.error}\n`;
+          logIOSAction("Leaderboard Update Failed", { error: updateData.error, platformName });
+          output.style.color = "red";
+        } else {
+          output.textContent += `✅ Leaderboard updated successfully!\n${formatResponse(updateData.data)}\n`;
+          logIOSAction("Leaderboard Update Success", { result: updateData.data, platformName });
+          output.style.color = "green";
+        }
+      } catch (error) {
+        output.textContent += `❌ Unexpected error: ${error.message}\n`;
+        logIOSAction("Unexpected Error", { error: error.message });
+        output.style.color = "red";
+      }
+      output.scrollTop = output.scrollHeight;
+    }
+
+    runIOSAutomationCycle();
+    iosAutomationIntervalId = setInterval(runIOSAutomationCycle, 1000);
+  }
 
     async function viewIOSLeaderboard() {
       const output = document.getElementById("iosOutput");
@@ -2153,6 +2178,6 @@
       fetchPlayerInfo(titleIdIOS, sessionTicketIOS, tokenStatusIOS);
     }
   });
-</script>
+  </script>
 </body>
 </html>
