@@ -761,7 +761,7 @@
           fetchPlayerInfo03(titleIdIOS, sessionTicketIOS, tokenStatus, "IOS");
         } else {
           tokenStatus.textContent = `Failed to renew session ticket: ${data.errorMessage || "Unknown error"}`;
-         、当            tokenStatus.style.color = "red";
+         tokenStatus.style.color = "red";
         }
       } catch (error) {
         tokenStatus.textContent = `Error renewing session ticket: ${error.message}`;
