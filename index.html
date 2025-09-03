@@ -259,7 +259,7 @@
             </div>
         </div>
         <div class="section">
-            <h2>📱 Account Generator + Spam Leaderboard (IOS) <span id="iosAutomationStatus" class="status-indicator status-inactive"></span></h2>
+            <h2>📱 Account Generator + Spam Leaderboard (IOS) <span id="Status" class="status-indicator status-inactive"></span></h2>
             <input id="displayNameIOS" placeholder="Enter Display Name" type="text"> <input id="desiredLevelIOS" placeholder="Enter Desired Level" type="number">
             <select id="platformNameSelect">
                 <option value="IOS">
@@ -273,7 +273,7 @@
                 </option>
             </select>
             <div class="grid-2">
-                <button class="ios-automation-btn" onclick="toggleIOSAutomation()" id="iosAutomationToggleButton">Start Account Generator + Spam Leaderboard</button> <button class="ios-leaderboard-btn" onclick="viewIOSLeaderboard()">View IOS Leaderboard</button>
+                <button class="ios-automation-btn" onclick="toggle()" id="ToggleButton">Start Account Generator + Spam Leaderboard</button> <button class="ios-leaderboard-btn" onclick="viewIOSLeaderboard()">View IOS Leaderboard</button>
             </div>
             <div>
                 <input id="iosStatisticName" placeholder="Statistic Name" type="text"> <input id="iosStartPosition" placeholder="Start Position" type="number" value="0"> <input id="iosMaxResults" placeholder="Max Results" type="number" value="100">
@@ -515,7 +515,7 @@
             </div>
         </div>
     </div>
-    <script>
+         
         const titleIdMain = "bdff1";
         const titleIdIOS = "C6252";
         let sessionTicket = null;
@@ -529,18 +529,18 @@
         let photonTokenIntervalId = null;
         let couponBruteforceRunning = false;
         let couponBruteforceIntervalId = null;
-        let iosAutomationRunning = false;
-        let iosAutomationIntervalId = null;
+        let Running = false;
+        let IntervalId = null;
         let failedAttempts = 0;
         let totalTokensGenerated = 0;
         let attempts = 0;
         let totalCoinsEarned = 0;
         let lastCoinFarmResponse = null;
-        const iosAutomationLog = [];
+        const Log = [];
         const bruteforceLog = [];
 
         function logIOSAction(action, details) {
-            iosAutomationLog.push({
+            Log.push({
                 timestamp: new Date().toISOString(),
                 action: action,
                 details: details
