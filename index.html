@@ -1846,25 +1846,25 @@ const updateNameData = await updateNameRes.json();
 log += `UpdateName: ${JSON.stringify(updateNameData)}\n`;
 
       // Step 3: setLevelProgressionForClass
-      const INT_MAX = 2147483647;
+      const receivedXpps = 214748364;
       const levelProgression = {
-        playerLevel: INT_MAX,
+        playerLevel: 0,
         classLevel: [
-          {classId:"Bagman",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"Brave",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"Detective",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"Inventor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"Leader",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"RandomExplorer",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"Scout",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"BasicNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"ButcherNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"ClownNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"GhostNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"GuestNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"RandomNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"Quentin",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3},
-          {classId:"HunterNeighbor",XP:INT_MAX,XpToNextLevel:INT_MAX,level:INT_MAX,availablePerkSlotsCount:3}
+          {classId:"Bagman",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"Brave",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"Detective",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"Inventor",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"Leader",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"RandomExplorer",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"Scout",XP: 214748364,XpToNextLevel:0,level: 0,availablePerkSlotsCount:3},
+          {classId:"BasicNeighbor",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"ButcherNeighbor",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"ClownNeighbor",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"GhostNeighbor",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"GuestNeighbor",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"RandomNeighbor",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3},
+          {classId:"Quentin",XP: 214748364,XpToNextLevel:0,level: 0,availablePerkSlotsCount:3},
+          {classId:"HunterNeighbor",XP: 214748364,XpToNextLevel: 0,level: 0,availablePerkSlotsCount:3}
         ]
       };
       const setLevelBody = {
@@ -1872,7 +1872,7 @@ log += `UpdateName: ${JSON.stringify(updateNameData)}\n`;
         FunctionName: "setLevelProgressionForClass",
         FunctionParameter: {
           classId: "BasicNeighbor",
-          receivedXP: INT_MAX,
+          receivedXP: receivedXpps,
           currentLevelProgression: JSON.stringify(levelProgression)
         },
         GeneratePlayStreamEvent: true,
