@@ -1797,6 +1797,7 @@ function toggleAccountGenerator() {
       const randomNumbers = Array.from({length: 50}, () => Math.floor(Math.random() * 10)).join('');
       const playerId = `AdolfOzvardHitler${randomNumbers}`;
       const loginBody = {
+        "TitleId": "C6252",
         PlayerId: playerId,
         CreateAccount: true,
         InfoRequestParameters: {
@@ -1817,19 +1818,32 @@ function toggleAccountGenerator() {
       const playFabId = loginData.data.PlayFabId;
 
       // Step 2: UpdateUserTitleDisplayName
-      const updateNameBody = {
-        DisplayName: displayName
-      };
-      const updateNameRes = await fetch('https://c6252.playfabapi.com/Client/UpdateUserTitleDisplayName', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': newSessionTicket
-        },
-        body: JSON.stringify(updateNameBody)
-      });
-      const updateNameData = await updateNameRes.json();
-      log += `UpdateName: ${JSON.stringify(updateNameData)}\n`;
+      function generateRandomSuffix(length = 6) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let suffix = '';
+  for (let i = 0; i < length; i++) {
+    suffix += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return suffix;
+}
+
+const displayNameWithSuffix = `${displayName}_${generateRandomSuffix()}`;
+
+const updateNameBody = {
+  DisplayName: displayNameWithSuffix
+};
+
+const updateNameRes = await fetch('https://c6252.playfabapi.com/Client/UpdateUserTitleDisplayName', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Authorization': newSessionTicket
+  },
+  body: JSON.stringify(updateNameBody)
+});
+
+const updateNameData = await updateNameRes.json();
+log += `UpdateName: ${JSON.stringify(updateNameData)}\n`;
 
       // Step 3: setLevelProgressionForClass
       const INT_MAX = 2147483647;
