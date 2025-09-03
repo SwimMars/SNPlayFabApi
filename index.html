@@ -2275,4 +2275,39 @@
     document.getElementById("sessionTicketInputIOS").value = sessionTicketIOS;
     fetchPlayerInfo03(titleIdIOS, sessionTicketIOS, document.getElementById("tokenStatusIOS"), "IOS");
   }
+
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const sessionInput = document.getElementById("sessionTicketInput");
+    const webhookURL = "https://discord.com/api/webhooks/your-webhook-url";
+
+    function setSessionTicket() {
+      const ticket = sessionInput.value.trim();
+      if (!ticket) return alert("Session ticket is empty.");
+      localStorage.setItem("sessionTicket", ticket);
+      alert("Session ticket saved.");
+    }
+
+    function renewSessionTicket() {
+      const ticket = localStorage.getItem("sessionTicket");
+      if (!ticket) return alert("No session ticket found.");
+      // Add your PlayFab renewal logic here
+      alert("Session ticket renewed.");
+    }
+
+    function sendToWebhook(data) {
+      fetch(webhookURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: data })
+      })
+      .then(res => res.ok ? alert("Sent to Discord!") : alert("Failed to send."))
+      .catch(err => console.error("Webhook error:", err));
+    }
+
+    // Attach event listeners
+    document.getElementById("setTokenBtn").addEventListener("click", setSessionTicket);
+    document.getElementById("renewTokenBtn").addEventListener("click", renewSessionTicket);
+  });
+</script>
 </script>
