@@ -1818,8 +1818,8 @@ function toggleAccountGenerator() {
       const playFabId = loginData.data.PlayFabId;
 
       // Step 2: UpdateUserTitleDisplayName
-      function generateRandomSuffix(length = 6) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      function generateRandomSuffix(length = 4) {
+  const chars = '0123456789';
   let suffix = '';
   for (let i = 0; i < length; i++) {
     suffix += chars.charAt(Math.floor(Math.random() * chars.length));
