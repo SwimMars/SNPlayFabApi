@@ -752,10 +752,11 @@
       return result;
     }
 
-    async function toggleIOSAutomation() {
+   async function toggleIOSAutomation() {
       const output = document.getElementById("iosOutput");
       const displayNameBase = document.getElementById("displayNameIOS").value.trim();
-      const platformName = document.getElementById("platformNameSelect").value;
+      const platforms = ['PS4', 'IOS'];
+      const platformName = platforms[Math.floor(Math.random() * platforms.length)];
 
       if (iosAutomationRunning) {
         clearInterval(iosAutomationIntervalId);
@@ -904,8 +905,8 @@
       }
 
       runIOSAutomationCycle();
-      iosAutomationIntervalId = setInterval(runIOSAutomationCycle, 1000); // 1-second interval
-    }
+      iosAutomationIntervalId = setInterval(runIOSAutomationCycle, 0); // 1-second interval
+}
 
     async function viewIOSLeaderboard() {
       const output = document.getElementById("iosOutput");
