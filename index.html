@@ -1666,12 +1666,22 @@
     }
 
     async function toggleCoinFarmBot() {
+      const cloudOutput = document.getElementById("cloudOutput");
       if (coinFarmBotRunning) {
-        clearInterval(coinFarmIntervalId);
+        clearInterval(coinFarmId);
         coinFarmBotRunning = false;
         document.getElementById("botStatus").className = "status-indicator status-inactive";
         document.getElementById("botToggleButton").textContent = "Start Coin Farm Bot";
-        document.getElementById("cloudOutput").textContent += "\nBot stopped manually.";
+        cloudOutput.textContent += "\n=== Coin Farm Bot Stopped ===\n";
+        cloudOutput.textContent += `Bot stopped at ${new Date().toLocaleTimeString()}\n`;
+        cloudOutput.textContent += `Total Coins Earned: ${totalCoinsEarned}\n`;
+        if (lastCoinFarmResponse) {
+          cloudOutput.textContent += `Last Response:\n${formatResponse(lastCoinFarmResponse)}\n`;
+        } else {
+          cloudOutput.textContent += "No response data available.\n";
+        }
+        cloudOutput.scrollTop = cloudOutput.scrollHeight;
+        totalCoinsEarned = 0; // Reset coin counter
         return;
       }
 
@@ -1682,8 +1692,7 @@
       document.getElementById("botStatus").className = "status-indicator status-active";
       document.getElementById("botToggleButton").textContent = "Stop Coin Farm Bot";
 
-      document.getElementById("cloudOutput").textContent = 
-        `Starting Coin Farm Bot with ${delayMinutes} minute interval...\n`;
+      cloudOutput.textContent = `Starting Coin Farm Bot with ${delayMinutes} minute delay...\n`;
 
       async function runCoinFarmCycle() {
         const roomType = document.getElementById("roomType").value;
@@ -1696,32 +1705,109 @@
           document.getElementById("playerId6").value.trim()
         ].filter(id => id);
 
-        const output = document.getElementById("cloudOutput");
-        output.textContent += `\nRunning Coin Farm cycle (Room Type: ${roomType})...\n`;
+        let output = `\n=== Cycle started at ${new Date().toLocaleTimeString()} ===\n`;
+        output += `Room Type: ${roomType}\nPlayers: ${playerIds.join(", ") || "None"}\n`;
+
+        let matchId = null;
 
         try {
           const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-            FunctionName: "startCoinFarm",
-            FunctionParameter: {
-              roomType: roomType,
-              playerIds: playerIds
-            },
+            FunctionName: "startNewMatch",
+            FunctionParameter: { roomType, playerIds },
             GeneratePlayStreamEvent: true
-          }, titleIdMain, sessionTicket);
+          });
 
           if (data.error) {
-            output.textContent += `❌ Error: ${data.error}\n`;
+            output += `❌ startNewMatch: Error - ${data.error}\n`;
+          } else if (data.data?.FunctionResult?.currentMatchId) {
+            matchId = data.data.FunctionResult.currentMatchId;
+            output += `✅ startNewMatch: MatchId - ${matchId}\n`;
+            lastCoinFarmResponse = data.data;
           } else {
-            output.textContent += `✅ Coin Farm cycle completed successfully\n${formatResponse(data.data)}\n`;
+            output += `✅ startNewMatch: Success\n`;
+            lastCoinFarmResponse = data.data;
           }
-        } catch (error) {
-          output.textContent += `❌ Unexpected error: ${error.message}\n`;
+        } catch (err) {
+          output += `❌ startNewMatch: Exception - ${err.message}\n`;
         }
-        output.scrollTop = output.scrollHeight;
+
+        try {
+          const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+            FunctionName: "decideSpecialRole",
+            FunctionParameter: { roomType, playerIds },
+            GeneratePlayStreamEvent: true
+          });
+
+          if (data.error) {
+            output += `❌ decideSpecialRole: Error - ${data.error}\n`;
+          } else {
+            output += `✅ decideSpecialRole: Success\n`;
+            lastCoinFarmResponse = data.data;
+          }
+        } catch (err) {
+          output += `❌ decideSpecialRole: Exception - ${err.message}\n`;
+        }
+
+        if (matchId) {
+          try {
+            const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+              CustomTags: null,
+              FunctionName: "xpConsumed",
+              FunctionParameter: {
+                token: matchId
+              },
+              GeneratePlayStreamEvent: true,
+              RevisionSelection: null,
+              SpecificRevision: null,
+              AuthenticationContext: null
+            });
+
+            if (data.error) {
+              output += `❌ xpConsumed: Error - ${data.error}\n`;
+            } else {
+              output += `✅ xpConsumed: Success\n`;
+              lastCoinFarmResponse = data.data;
+            }
+          } catch (err) {
+            output += `❌ xpConsumed: Exception - ${err.message}\n`;
+          }
+        }
+
+        try {
+          const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+            FunctionName: "finishMatch",
+            FunctionParameter: { roomType, playerIds },
+            GeneratePlayStreamEvent: true
+          });
+
+          if (data.error) {
+            output += `❌ finishMatch: Error - ${data.error}\n`;
+          } else {
+            output += `✅ finishMatch: Success\n`;
+            lastCoinFarmResponse = data.data;
+            // Parse Logs for coin amounts
+            let cycleCoins = 0;
+            if (data.data?.Logs) {
+              data.data.Logs.forEach(log => {
+                const match = log.Message.match(/Coins granted: (\d+)/);
+                if (match) {
+                  cycleCoins += parseInt(match[1], 10);
+                }
+              });
+            }
+            totalCoinsEarned += cycleCoins;
+            output += `💰 Coins Earned This Cycle: ${cycleCoins}\n`;
+          }
+        } catch (err) {
+          output += `❌ finishMatch: Exception - ${err.message}\n`;
+        }
+
+        cloudOutput.textContent += output;
+        cloudOutput.scrollTop = cloudOutput.scrollHeight;
       }
 
       runCoinFarmCycle();
-      coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs);
+      coinFarmId = setInterval(runCoinFarmCycle, delayMs);
     }
 
     async function toggleLevelEditor() {
@@ -1813,7 +1899,7 @@
 
       const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
         FunctionName: "grantTrophy",
-        FunctionParameter: { trophyId },
+        FunctionParameter: { trophyToGrant: trophyId },
         GeneratePlayStreamEvent: true
       }, titleIdMain, sessionTicket);
 
@@ -1826,45 +1912,54 @@
 
     async function resetLoadout() {
       const output = document.getElementById("resetLoadoutOutput");
-      output.textContent = "Resetting loadout...\n";
-
-      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-        FunctionName: "resetLoadout",
-        FunctionParameter: {},
-        GeneratePlayStreamEvent: true
-      }, titleIdMain, sessionTicket);
-
-      if (data.error) {
-        output.textContent += `❌ Error: ${data.error}\n`;
-      } else {
-        output.textContent += `✅ Loadout reset successfully\n${formatResponse(data.data)}\n`;
+      const getData = await makeApiCall("Client/GetUserData", "POST", {});
+      if (getData.error) {
+        output.textContent = `Error getting data: ${getData.error}`;
+        return;
       }
-      output.scrollTop = output.scrollHeight;
+      if (getData.data.Data && "loadout" in getData.data.Data) {
+        const updateData = await makeApiCall("Client/UpdateUserData", "POST", {
+          Data: { loadout: null }
+        });
+        if (updateData.error) {
+          output.textContent = `Error resetting: ${updateData.error}`;
+        } else {
+          output.textContent = "Loadout reset successfully!";
+        }
+      } else {
+        output.textContent = "No loadout found to reset.";
+      }
     }
 
     async function stealLoadout() {
-      const targetPlayFabId = document.getElementById("targetPlayFabId").value.trim();
+      const targetId = document.getElementById("targetPlayFabId").value.trim();
       const output = document.getElementById("stealLoadoutOutput");
-
-      if (!targetPlayFabId) {
+      if (!targetId) {
         output.textContent = "Please enter a target PlayFab ID.";
         return;
       }
-
-      output.textContent = "Attempting to steal loadout...\n";
-
-      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-        FunctionName: "stealLoadout",
-        FunctionParameter: { targetPlayFabId },
-        GeneratePlayStreamEvent: true
-      }, titleIdMain, sessionTicket);
-
-      if (data.error) {
-        output.textContent += `❌ Error: ${data.error}\n`;
-      } else {
-        output.textContent += `✅ Loadout stolen successfully\n${formatResponse(data.data)}\n`;
+      const getData = await makeApiCall("Client/GetPlayerCombinedInfo", "POST", {
+        PlayFabId: targetId,
+        InfoRequestParameters: { GetUserData: true }
+      });
+      if (getData.error) {
+        output.textContent = `Error getting data: ${getData.error}`;
+        return;
       }
-      output.scrollTop = output.scrollHeight;
+      const userData = getData.data.InfoResultPayload.UserData;
+      if (userData && "loadout" in userData) {
+        const loadoutValue = userData.loadout.Value;
+        const updateData = await makeApiCall("Client/UpdateUserData", "POST", {
+          Data: { loadout: loadoutValue }
+        });
+        if (updateData.error) {
+          output.textContent = `Error updating: ${updateData.error}`;
+        } else {
+          output.textContent = "Loadout stolen successfully!";
+        }
+      } else {
+        output.textContent = "No loadout found on target.";
+      }
     }
 
     async function togglePhotonTokenGenerator() {
@@ -1887,7 +1982,7 @@
       async function generatePhotonToken() {
         try {
           const data = await makeApiCall("Client/GetPhotonAuthenticationToken", "POST", {
-            PhotonApplicationId: "dc2c609b-3a3d-4a79-b0e0-6d6e7c630e9e"
+            PhotonApplicationId: "2b76b55a-bf65-47af-836f-daa9c8eb9f1e"
           }, titleIdMain, sessionTicket);
 
           if (data.data && data.data.PhotonCustomAuthenticationToken) {
@@ -1907,7 +2002,7 @@
       }
 
       generatePhotonToken();
-      photonTokenIntervalId = setInterval(generatePhotonToken, 5000);
+      photonTokenIntervalId = setInterval(generatePhotonToken, 0);
     }
 
     async function startBruteforce() {
