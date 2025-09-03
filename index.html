@@ -1790,6 +1790,31 @@ function toggleAccountGenerator() {
   const output = document.getElementById("accountGenOutput");
   output.textContent = "Starting account generator...\n";
 
+ function toggleAccountGenerator() {
+  if (accountGenRunning) {
+    accountGenRunning = false;
+    document.getElementById("accountGenStatus").className = "status-indicator status-inactive";
+    document.getElementById("accountGenToggleButton").textContent = "Start Account Generator";
+    const output = document.getElementById("accountGenOutput");
+    output.textContent += "\nGenerator stopped manually.\n";
+    downloadAccountLog();
+    return;
+  }
+
+  const displayName = document.getElementById("displayNameInput").value.trim();
+  if (!displayName) {
+    document.getElementById("accountGenOutput").textContent = "Please enter a display name.";
+    return;
+  }
+
+  accountGenRunning = true;
+  generatedAccounts = 0;
+  accountLogEntries = [];
+  document.getElementById("accountGenStatus").className = "status-indicator status-active";
+  document.getElementById("accountGenToggleButton").textContent = "Stop Account Generator";
+  const output = document.getElementById("accountGenOutput");
+  output.textContent = "Starting account generator...\n";
+
   async function runAccountGenCycle() {
     if (!accountGenRunning) return;
 
@@ -1848,7 +1873,70 @@ function toggleAccountGenerator() {
         throw new Error(updateNameData.error);
       }
 
-      // Step 3: ExecuteCloudScript (fetchInfo)
+      // Step 3: GetTitleData
+      const titleDataRes = await fetch('https://c6252.playfabapi.com/Client/GetTitleData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify({})
+      });
+      const titleData = await titleDataRes.json();
+      log += `GetTitleData: ${JSON.stringify(titleData)}\n`;
+      if (titleData.error) {
+        throw new Error(titleData.error);
+      }
+
+      // Step 4: GetUserData
+      const userDataRes = await fetch('https://c6252.playfabapi.com/Client/GetUserData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify({})
+      });
+      const userData = await userDataRes.json();
+      log += `GetUserData: ${JSON.stringify(userData)}\n`;
+      if (userData.error) {
+        throw new Error(userData.error);
+      }
+
+      // Step 5: GetCatalogItems
+      const catalogItemsBody = {
+        CatalogVersion: "Ingame"
+      };
+      const catalogItemsRes = await fetch('https://c6252.playfabapi.com/Client/GetCatalogItems', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify(catalogItemsBody)
+      });
+      const catalogItemsData = await catalogItemsRes.json();
+      log += `GetCatalogItems: ${JSON.stringify(catalogItemsData)}\n`;
+      if (catalogItemsData.error) {
+        throw new Error(catalogItemsData.error);
+      }
+
+      // Step 6: GetUserInventory
+      const inventoryRes = await fetch('https://bdff1.playfabapi.com/Client/GetUserInventory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify({})
+      });
+      const inventoryData = await inventoryRes.json();
+      log += `GetUserInventory: ${JSON.stringify(inventoryData)}\n`;
+      if (inventoryData.error) {
+        throw new Error(inventoryData.error);
+      }
+
+      // Step 7: ExecuteCloudScript (fetchInfo)
       const fetchInfoBody = {
         CustomTags: null,
         FunctionName: "fetchInfo",
@@ -1875,7 +1963,7 @@ function toggleAccountGenerator() {
         throw new Error(fetchInfoData.error);
       }
 
-      // Step 4: applyLicenseAgreement
+      // Step 8: applyLicenseAgreement
       const licenseBody = {
         CustomTags: null,
         FunctionName: "applyLicenseAgreement",
@@ -1899,7 +1987,7 @@ function toggleAccountGenerator() {
         throw new Error(licenseData.error);
       }
 
-      // Step 5: setLevelProgressionForClass
+      // Step 9: setLevelProgressionForClass
       const receivedXpps = 1;
       const levelProgression = {
         playerLevel: 9990,
@@ -1948,7 +2036,7 @@ function toggleAccountGenerator() {
         throw new Error(setLevelData.error);
       }
 
-      // Step 6: refreshLeaderboardPlatform
+      // Step 10: refreshLeaderboardPlatform
       const platforms = ['IOS', 'PS4'];
       const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
       const refreshBody = {
