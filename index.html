@@ -1013,6 +1013,7 @@ let accountGenRunning = false;
       const XpToNextLevel = parseInt(document.getElementById("xpToNextLevelInput").value);
       const level = parseInt(document.getElementById("levelInput").value);
       const availablePerkSlotsCount = Math.min(parseInt(document.getElementById("perkSlotsInput").value), 3);
+      const playerLevel = parseInt(document.getElementById("playerLevelInput").value);
     
 
       if (!classId || isNaN(receivedXP) || isNaN(XP) || isNaN(XpToNextLevel) || 
@@ -1021,7 +1022,7 @@ let accountGenRunning = false;
       }
 
       const currentLevelProgression = {
-        ,
+        playerLevel,
         classLevel: [{
           classId,
           XP,
@@ -1030,6 +1031,7 @@ let accountGenRunning = false;
           availablePerkSlotsCount
         }]
       };
+
 
       const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
         FunctionName: "setLevelProgressionForClass",
