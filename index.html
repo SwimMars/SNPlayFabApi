@@ -795,178 +795,167 @@
       return result;
     }
 
+    async function toggleIOSAutomation() {
+      const output = document.getElementById("iosOutput");
+      const displayNameBase = document.getElementById("displayNameIOS").value.trim();
+      let platformName = document.getElementById("platformNameSelect").value;
+      const desiredLevel = parseInt(document.getElementById("desiredLevelIOS").value) || 666; // Default to 666 if not provided
+      const platforms = ['PS4', 'IOS'];
 
-async function toggleIOSAutomation() {
-  const output = document.getElementById("iosOutput");
-  const displayNameBase = document.getElementById("displayNameIOS").value.trim();
-  let platformName = document.getElementById("platformNameSelect").value;
-  const desiredLevel = parseInt(document.getElementById("desiredLevelIOS").value) || 666; // Default to 666 if not provided
-  const platforms = ['PS4', 'IOS'];
-
-  // Log the selected dropdown value for debugging
-  output.textContent += `\nSelected platform option: ${platformName}\n`;
-
-  if (platformName === 'Random') {
-    const randomIndex = Math.floor(Math.random() * 2);
-    platformName = platforms[randomIndex];
-    output.textContent += `Random platform selected: ${platformName} (Index: ${randomIndex})\n`;
-  }
-
-  if (iosAutomationRunning) {
-    clearInterval(iosAutomationIntervalId);
-    iosAutomationRunning = false;
-    document.getElementById("iosAutomationStatus").className = "status-indicator status-inactive";
-    document.getElementById("iosAutomationToggleButton").textContent = "Start Account Generator + Spam Leaderboard";
-    output.textContent += "\nAccount Generator + Spam Leaderboard stopped manually.\n";
-    logIOSAction("Automation Stopped", { message: "Account Generator + Spam Leaderboard stopped manually" });
-    downloadLogAsJSON(iosAutomationLog, "ios_automation_log");
-    iosAutomationLog.length = 0;
-    output.scrollTop = output.scrollHeight;
-    return;
-  }
-
-  if (!displayNameBase) {
-    output.textContent = "❌ Please enter a display name.\n";
-    output.style.color = "red";
-    output.scrollTop = output.scrollHeight;
-    return;
-  }
-
-  iosAutomationRunning = true;
-  document.getElementById("iosAutomationStatus").className = "status-indicator status-active";
-  document.getElementById("iosAutomationToggleButton").textContent = "Stop Account Generator + Spam Leaderboard";
-  output.textContent += `Starting Account Generator + Spam Leaderboard (Platform: ${platformName}, Desired Level: ${desiredLevel})...\n`;
-  logIOSAction("Automation Started", { message: "Account Generator + Spam Leaderboard started", platformName, desiredLevel });
-
-  async function runIOSAutomationCycle() {
-    try {
-      // Step 1: Generate Account
-      output.textContent += "\n=== Account Generation ===\n";
-      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-      const playerIdLength = 20;
-      let playerId = '';
-      for (let i = 0; i < playerIdLength; i++) {
-        playerId += chars.charAt(Math.floor(Math.random() * chars.length));
+      if (platformName === 'Random') {
+        platformName = platforms[Math.floor(Math.random() * platforms.length)];
       }
-      const randomDigits = Math.floor(1000 + Math.random() * 9000);
-      const displayName = `${displayNameBase}-${randomDigits}`;
 
-      output.textContent += `Creating account with PlayerId: ${playerId}...\n`;
-      logIOSAction("Account Creation Attempt", { playerId });
-      const loginResponse = await makeApiCall("Client/LoginWithGameCenter", "POST", {
-        CreateAccount: true,
-        TitleId: titleIdIOS,
-        PlayerId: playerId
-      }, titleIdIOS);
-
-      if (loginResponse.error || !loginResponse.data?.SessionTicket) {
-        const errorMsg = loginResponse.error || loginResponse.errorMessage || "Unknown error";
-        output.textContent += `❌ Failed to create account: ${errorMsg}\n`;
-        logIOSAction("Account Creation Failed", { playerId, error: errorMsg });
-        output.style.color = "red";
-        if (errorMsg.includes("Account Banned")) {
-          console.log("Account Banned - Tor circuit renewal not supported in this environment.");
-        }
+      if (iosAutomationRunning) {
+        clearInterval(iosAutomationIntervalId);
+        iosAutomationRunning = false;
+        document.getElementById("iosAutomationStatus").className = "status-indicator status-inactive";
+        document.getElementById("iosAutomationToggleButton").textContent = "Start Account Generator + Spam Leaderboard";
+        output.textContent += "\nAccount Generator + Spam Leaderboard stopped manually.\n";
+        logIOSAction("Automation Stopped", { message: "Account Generator + Spam Leaderboard stopped manually" });
+        downloadLogAsJSON(iosAutomationLog, "ios_automation_log");
+        iosAutomationLog.length = 0;
+        output.scrollTop = output.scrollHeight;
         return;
       }
 
-      sessionTicketIOS = loginResponse.data.SessionTicket;
-      localStorage.setItem('sessionTicketIOS', sessionTicketIOS);
-      document.getElementById("sessionTicketInputIOS").value = sessionTicketIOS;
-      output.textContent += `✅ Account created successfully!\nSessionTicket: ${sessionTicketIOS}\nPlayerId: ${playerId}\n`;
-      logIOSAction("Account Creation Success", { playerId, sessionTicket: sessionTicketIOS });
-
-      // Send session ticket to Discord webhook
-      await sendToDiscordWebhook({ sessionTicket: sessionTicketIOS, playerId }, "IOS");
-
-      // Step 2: Set Display Name
-      output.textContent += `Setting display name to ${displayName}...\n`;
-      logIOSAction("Set Display Name Attempt", { displayName });
-      const updateResponse = await makeApiCall("Client/UpdateUserTitleDisplayName", "POST", {
-        DisplayName: displayName
-      }, titleIdIOS, sessionTicketIOS);
-
-      if (updateResponse.error) {
-        const errorMsg = updateResponse.error || updateResponse.errorMessage || "Unknown error";
-        output.textContent += `❌ Failed to set display name: ${errorMsg}\n`;
-        logIOSAction("Set Display Name Failed", { displayName, error: errorMsg });
+      if (!displayNameBase) {
+        output.textContent = "❌ Please enter a display name.\n";
         output.style.color = "red";
-      } else {
-        output.textContent += `✅ Display name set to ${displayName}\n`;
-        logIOSAction("Set Display Name Success", { displayName });
-        output.style.color = "green";
+        output.scrollTop = output.scrollHeight;
+        return;
       }
 
-      // Step 3: Spam Leaderboard
-      output.textContent += "\n=== Leaderboard Spam ===\n";
-      logIOSAction("Leaderboard Spam Attempt", { platformName });
+      iosAutomationRunning = true;
+      document.getElementById("iosAutomationStatus").className = "status-indicator status-active";
+      document.getElementById("iosAutomationToggleButton").textContent = "Stop Account Generator + Spam Leaderboard";
+      output.textContent = `Starting Account Generator + Spam Leaderboard (Platform: ${platformName}, Desired Level: ${desiredLevel})...\n`;
+      logIOSAction("Automation Started", { message: "Account Generator + Spam Leaderboard started", platformName, desiredLevel });
 
-      const currentLevelProgression = {
-        playerLevel: desiredLevel,
-        classLevel: [
-          { classId: "Bagman", XP: desiredLevel, XpToNextLevel: 2730, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "Brave", XP: desiredLevel, XpToNextLevel: 2790, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "Detective", XP: desiredLevel, XpToNextLevel: 5280, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "Inventor", XP: desiredLevel, XpToNextLevel: 3630, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "Leader", XP: desiredLevel, XpToNextLevel: 4170, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "Quentin", XP: desiredLevel, XpToNextLevel: 3960, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 },
-          { classId: "Scout", XP: desiredLevel, XpToNextLevel: 8640, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "BasicNeighbor", XP: desiredLevel, XpToNextLevel: 900, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "ButcherNeighbor", XP: desiredLevel, XpToNextLevel: 6690, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "ClownNeighbor", XP: desiredLevel, XpToNextLevel: 480, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "GhostNeighbor", XP: desiredLevel, XpToNextLevel: 2370, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "GuestNeighbor", XP: desiredLevel, XpToNextLevel: 1830, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "HunterNeighbor", XP: desiredLevel, XpToNextLevel: 840, level: desiredLevel, availablePerkSlotsCount: 3 },
-          { classId: "RandomNeighbor", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 }
-        ]
-      };
+      async function runIOSAutomationCycle() {
+        try {
+          // Step 1: Generate Account
+          output.textContent += "\n=== Account Generation ===\n";
+          const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+          const playerIdLength = 20;
+          let playerId = '';
+          for (let i = 0; i < playerIdLength; i++) {
+            playerId += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          const randomDigits = Math.floor(1000 + Math.random() * 9000);
+          const displayName = `${displayNameBase}-${randomDigits}`;
 
-      const jsonString = JSON.stringify(currentLevelProgression, null, 2).replace(/"level":(\d+)/g, '"level": $1');
-      output.textContent += `📝 Modified level progression (Level ${desiredLevel} applied to all classes except RandomExplorer and RandomNeighbor):\n${jsonString}\n`;
-      logIOSAction("Modified Progression", { modifiedProgression: currentLevelProgression, platformName });
+          output.textContent += `Creating account with PlayerId: ${playerId}...\n`;
+          logIOSAction("Account Creation Attempt", { playerId });
+          const loginResponse = await makeApiCall("Client/LoginWithGameCenter", "POST", {
+            CreateAccount: true,
+            TitleId: titleIdIOS,
+            PlayerId: playerId
+          }, titleIdIOS);
 
-      output.textContent += `🔄 Updating leaderboard (Platform: ${platformName})...\n`;
-      const updateData = await makeApiCall(
-        "Client/ExecuteCloudScript",
-        "POST",
-        {
-          CustomTags: null,
-          FunctionName: "refreshLeaderboardPlatform",
-          FunctionParameter: {
-            currentLevelProgression: JSON.stringify(currentLevelProgression),
-            platformName: platformName
-          },
-          GeneratePlayStreamEvent: true,
-          RevisionSelection: null,
-          SpecificRevision: null,
-          AuthenticationContext: null
-        },
-        titleIdIOS,
-        sessionTicketIOS
-      );
+          if (loginResponse.error || !loginResponse.data?.SessionTicket) {
+            const errorMsg = loginResponse.error || loginResponse.errorMessage || "Unknown error";
+            output.textContent += `❌ Failed to create account: ${errorMsg}\n`;
+            logIOSAction("Account Creation Failed", { playerId, error: errorMsg });
+            output.style.color = "red";
+            if (errorMsg.includes("Account Banned")) {
+              console.log("Account Banned - Tor circuit renewal not supported in this environment.");
+            }
+            return;
+          }
 
-      if (updateData.error) {
-        output.textContent += `❌ Failed to update leaderboard: ${updateData.error}\n`;
-        logIOSAction("Leaderboard Update Failed", { error: updateData.error, platformName });
-        output.style.color = "red";
-      } else {
-        output.textContent += `✅ Leaderboard updated successfully!\n${formatResponse(updateData.data)}\n`;
-        logIOSAction("Leaderboard Update Success", { result: updateData.data, platformName });
-        output.style.color = "green";
+          sessionTicketIOS = loginResponse.data.SessionTicket;
+          localStorage.setItem('sessionTicketIOS', sessionTicketIOS);
+          document.getElementById("sessionTicketInputIOS").value = sessionTicketIOS;
+          output.textContent += `✅ Account created successfully!\nSessionTicket: ${sessionTicketIOS}\nPlayerId: ${playerId}\n`;
+          logIOSAction("Account Creation Success", { playerId, sessionTicket: sessionTicketIOS });
+
+          // Step 2: Set Display Name
+          output.textContent += `Setting display name to ${displayName}...\n`;
+          logIOSAction("Set Display Name Attempt", { displayName });
+          const updateResponse = await makeApiCall("Client/UpdateUserTitleDisplayName", "POST", {
+            DisplayName: displayName
+          }, titleIdIOS, sessionTicketIOS);
+
+          if (updateResponse.error) {
+            const errorMsg = updateResponse.error || updateResponse.errorMessage || "Unknown error";
+            output.textContent += `❌ Failed to set display name: ${errorMsg}\n`;
+            logIOSAction("Set Display Name Failed", { displayName, error: errorMsg });
+            output.style.color = "red";
+          } else {
+            output.textContent += `✅ Display name set to ${displayName}\n`;
+            logIOSAction("Set Display Name Success", { displayName });
+            output.style.color = "green";
+          }
+
+          // Step 3: Spam Leaderboard
+          output.textContent += "\n=== Leaderboard Spam ===\n";
+          logIOSAction("Leaderboard Spam Attempt", { platformName });
+
+          const currentLevelProgression = {
+            playerLevel:  desiredLevel,
+            classLevel: [
+              { classId: "Bagman", XP: 0, XpToNextLevel: 2730, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "Brave", XP: 0, XpToNextLevel: 2790, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "Detective", XP: 0, XpToNextLevel: 5280, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "Inventor", XP: 0, XpToNextLevel: 3630, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "Leader", XP: 0, XpToNextLevel: 4170, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "Quentin", XP: 1760, XpToNextLevel: 3960, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 },
+              { classId: "Scout", XP: 1871, XpToNextLevel: 8640, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "BasicNeighbor", XP: 864, XpToNextLevel: 900, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "ButcherNeighbor", XP: 5841, XpToNextLevel: 6690, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "ClownNeighbor", XP: 434, XpToNextLevel: 480, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "GhostNeighbor", XP: 49, XpToNextLevel: 2370, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "GuestNeighbor", XP: 1603, XpToNextLevel: 1830, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "HunterNeighbor", XP: 50, XpToNextLevel: 840, level:  desiredLevel, availablePerkSlotsCount: 3 },
+              { classId: "RandomNeighbor", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 }
+            ]
+          };
+
+          output.textContent += `📝 Modified level progression (Level ${desiredLevel} applied to all classes except RandomExplorer and RandomNeighbor):\n${JSON.stringify(currentLevelProgression, null, 2)}\n`;
+          logIOSAction("Modified Progression", { modifiedProgression: currentLevelProgression, platformName });
+
+          output.textContent += `🔄 Updating leaderboard (Platform: ${platformName})...\n`;
+          const updateData = await makeApiCall(
+            "Client/ExecuteCloudScript",
+            "POST",
+            {
+              CustomTags: null,
+              FunctionName: "refreshLeaderboardPlatform",
+              FunctionParameter: {
+                currentLevelProgression: JSON.stringify(currentLevelProgression),
+                platformName: platformName
+              },
+              GeneratePlayStreamEvent: true,
+              RevisionSelection: null,
+              SpecificRevision: null,
+              AuthenticationContext: null
+            },
+            titleIdIOS,
+            sessionTicketIOS
+          );
+
+          if (updateData.error) {
+            output.textContent += `❌ Failed to update leaderboard: ${updateData.error}\n`;
+            logIOSAction("Leaderboard Update Failed", { error: updateData.error, platformName });
+            output.style.color = "red";
+          } else {
+            output.textContent += `✅ Leaderboard updated successfully!\n${formatResponse(updateData.data)}\n`;
+            logIOSAction("Leaderboard Update Success", { result: updateData.data, platformName });
+            output.style.color = "green";
+          }
+        } catch (error) {
+          output.textContent += `❌ Unexpected error: ${error.message}\n`;
+          logIOSAction("Unexpected Error", { error: error.message, platformName });
+          output.style.color = "red";
+        }
+        output.scrollTop = output.scrollHeight;
       }
-    } catch (error) {
-      output.textContent += `❌ Unexpected error: ${error.message}\n`;
-      logIOSAction("Unexpected Error", { error: error.message, platformName });
-      output.style.color = "red";
+
+      runIOSAutomationCycle();
+      iosAutomationIntervalId = setInterval(runIOSAutomationCycle, 1000);
     }
-    output.scrollTop = output.scrollHeight;
-  }
-
-  runIOSAutomationCycle();
-  iosAutomationIntervalId = setInterval(runIOSAutomationCycle, 5000); // Increased to 5 seconds to avoid rate limits
-}
-
 
     async function viewIOSLeaderboard() {
       const output = document.getElementById("iosOutput");
@@ -1481,16 +1470,17 @@ async function toggleIOSAutomation() {
           return { error: "Please fill in all fields correctly or provide JSON." };
         }
 
-       currentLevelProgression = {
-  playerLevel,
-  classLevel: [{
-    classId,
-    XP,
-    XpToNextLevel,
-    level,
-    availablePerkSlotsCount
-  }]
-};
+        currentLevelProgression = {
+          playerLevel,
+          classLevel: [{
+            classId,
+            XP,
+            XpToNextLevel,
+            level,
+            availablePerkSlotsCount
+          }]
+        };
+      }
 
       const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
         FunctionName: "setLevelProgressionForClass",
