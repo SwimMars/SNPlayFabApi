@@ -1790,31 +1790,6 @@ function toggleAccountGenerator() {
   const output = document.getElementById("accountGenOutput");
   output.textContent = "Starting account generator...\n";
 
- function toggleAccountGenerator() {
-  if (accountGenRunning) {
-    accountGenRunning = false;
-    document.getElementById("accountGenStatus").className = "status-indicator status-inactive";
-    document.getElementById("accountGenToggleButton").textContent = "Start Account Generator";
-    const output = document.getElementById("accountGenOutput");
-    output.textContent += "\nGenerator stopped manually.\n";
-    downloadAccountLog();
-    return;
-  }
-
-  const displayName = document.getElementById("displayNameInput").value.trim();
-  if (!displayName) {
-    document.getElementById("accountGenOutput").textContent = "Please enter a display name.";
-    return;
-  }
-
-  accountGenRunning = true;
-  generatedAccounts = 0;
-  accountLogEntries = [];
-  document.getElementById("accountGenStatus").className = "status-indicator status-active";
-  document.getElementById("accountGenToggleButton").textContent = "Stop Account Generator";
-  const output = document.getElementById("accountGenOutput");
-  output.textContent = "Starting account generator...\n";
-
   async function runAccountGenCycle() {
     if (!accountGenRunning) return;
 
