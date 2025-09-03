@@ -2277,37 +2277,44 @@
   }
 
     <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const sessionInput = document.getElementById("sessionTicketInput");
-    const webhookURL = "https://discord.com/api/webhooks/your-webhook-url";
+    document.addEventListener("DOMContentLoaded", () => {
+      window.setSessionTicket = function () { /* your code */ };
+      window.setSessionTicketIOS = function () { /* your code */ };
+      window.purchaseAllSkinsEmotes = async function () { /* your code */ };
+      window.buySkinEmote = async function () { /* your code */ };
+      window.grantCoupons = async function () { /* your code */ };
+      window.toggleIOSAutomation = async function () { /* your code */ };
+      window.viewIOSLeaderboard = async function () { /* your code */ };
+      window.clearSessionTicketIOS = function () { /* your code */ };
+      window.renewSessionTicketIOS = async function () { /* your code */ };
+      window.renewSessionTicket = async function () { /* your code */ };
+      window.clearSessionTicket = function () { /* your code */ };
+      window.viewStatistics = async function () { /* your code */ };
+      window.AddCoin = async function () { /* your code */ };
+      window.toggleCoinFarmBot = async function () { /* your code */ };
+      window.toggleLevelEditor = async function () { /* your code */ };
+      window.getPlayFabInfo = async function () { /* your code */ };
+      window.updateQuestProgress = async function () { /* your code */ };
+      window.addFriend = async function () { /* your code */ };
+      window.getFriendsList = async function () { /* your code */ };
+      window.updateDisplayName = async function () { /* your code */ };
+      window.linkCustomId = async function () { /* your code */ };
+      window.getLeaderboard = async function () { /* your code */ };
+      window.toggleBruteforceRedeemCoupon = async function () { /* your code */ };
+      window.reportPlayer = async function () { /* your code */ };
+      window.grantTrophy = async function () { /* your code */ };
+      window.increasePenaltyPoints = async function () { /* your code */ };
+      window.decreasePenaltyPoints = async function () { /* your code */ };
+      window.startMatchStatusSequence = async function () { /* your code */ };
+      window.togglePhotonTokenGenerator = async function () { /* your code */ };
+      window.resetLoadout = async function () { /* your code */ };
+      window.stealLoadout = async function () { /* your code */ };
+      window.viewInventory = async function () { /* your code */ };
+      window.startBruteforce = async function () { /* your code */ };
+      window.stopBruteforce = async function () { /* your code */ };
+    });
+  </script>
 
-    function setSessionTicket() {
-      const ticket = sessionInput.value.trim();
-      if (!ticket) return alert("Session ticket is empty.");
-      localStorage.setItem("sessionTicket", ticket);
-      alert("Session ticket saved.");
-    }
+</body>
+</html>
 
-    function renewSessionTicket() {
-      const ticket = localStorage.getItem("sessionTicket");
-      if (!ticket) return alert("No session ticket found.");
-      // Add your PlayFab renewal logic here
-      alert("Session ticket renewed.");
-    }
-
-    function sendToWebhook(data) {
-      fetch(webhookURL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: data })
-      })
-      .then(res => res.ok ? alert("Sent to Discord!") : alert("Failed to send."))
-      .catch(err => console.error("Webhook error:", err));
-    }
-
-    // Attach event listeners
-    document.getElementById("setTokenBtn").addEventListener("click", setSessionTicket);
-    document.getElementById("renewTokenBtn").addEventListener("click", renewSessionTicket);
-  });
-</script>
-</script>
