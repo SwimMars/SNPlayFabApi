@@ -268,7 +268,7 @@
         <option value="PS4">PS4</option>
       </select>
       <div class="grid-2">
-        <button class="ios-automation-btn" onclick="toggleIOSAutomation()" id="iosAutomationToggleButton">Start IOS Automation</button>
+        <button class="ios-automation-btn" onclick="Automation()" id="iosAutomationToggleButton">Start IOS Automation</button>
         <button class="ios-leaderboard-btn" onclick="viewIOSLeaderboard()">View IOS Leaderboard</button>
       </div>
       <div>
@@ -752,11 +752,15 @@
       return result;
     }
 
-   async function toggleIOSAutomation() {
+  async function toggleIOSAutomation() {
       const output = document.getElementById("iosOutput");
       const displayNameBase = document.getElementById("displayNameIOS").value.trim();
+      let platformName = document.getElementById("platformNameSelect").value;
       const platforms = ['PS4', 'IOS'];
-      const platformName = platforms[Math.floor(Math.random() * platforms.length)];
+
+      if (platformName === 'Random') {
+        platformName = platforms[Math.floor(Math.random() * platforms.length)];
+      }
 
       if (iosAutomationRunning) {
         clearInterval(iosAutomationIntervalId);
