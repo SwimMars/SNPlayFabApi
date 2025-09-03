@@ -1721,8 +1721,7 @@
         output.scrollTop = output.scrollHeight;
       }, 10 * 60 * 1000);
     }
-
-  <script>
+<script>
   async function toggleCoinFarmBot() {
     const cloudOutput = document.getElementById("cloudOutput");
     if (coinFarmBotRunning) {
@@ -2119,7 +2118,7 @@
     }
 
     attemptBruteforce();
-    setInterval(attemptBruteforce, 0);
+    setInterval(attemptBruteforce, 5000);
   }
 
   function stopBruteforce() {
@@ -2155,6 +2154,5 @@
     }
   });
 </script>
-
-
-    async function toggleCoin
+</body>
+</html>
