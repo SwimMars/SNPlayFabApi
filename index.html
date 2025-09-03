@@ -1822,55 +1822,78 @@ function toggleAccountGenerator() {
 
       // Step 2: UpdateUserTitleDisplayName
       function generateRandomSuffix(length = 4) {
-  const chars = '0123456789';
-  let suffix = '';
-  for (let i = 0; i < length; i++) {
-    suffix += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return suffix;
-}
+        const chars = '0123456789';
+        let suffix = '';
+        for (let i = 0; i < length; i++) {
+          suffix += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return suffix;
+      }
 
-const displayNameWithSuffix = `${displayName}_${generateRandomSuffix()}`;
+      const displayNameWithSuffix = `${displayName}_${generateRandomSuffix()}`;
+      const updateNameBody = {
+        DisplayName: displayNameWithSuffix
+      };
+      const updateNameRes = await fetch('https://c6252.playfabapi.com/Client/UpdateUserTitleDisplayName', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify(updateNameBody)
+      });
+      const updateNameData = await updateNameRes.json();
+      log += `UpdateName: ${JSON.stringify(updateNameData)}\n`;
+      if (updateNameData.error) {
+        throw new Error(updateNameData.error);
+      }
 
-const updateNameBody = {
-  DisplayName: displayNameWithSuffix
-};
+      // Step 3: applyLicenseAgreement
+      const licenseBody = {
+        CustomTags: null,
+        FunctionName: "applyLicenseAgreement",
+        FunctionParameter: {},
+        GeneratePlayStreamEvent: true,
+        RevisionSelection: null,
+        SpecificRevision: null,
+        AuthenticationContext: null
+      };
+      const licenseRes = await fetch('https://c6252.playfabapi.com/Client/ExecuteCloudScript', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify(licenseBody)
+      });
+      const licenseData = await licenseRes.json();
+      log += `ApplyLicenseAgreement: ${JSON.stringify(licenseData)}\n`;
+      if (licenseData.error) {
+        throw new Error(licenseData.error);
+      }
 
-const updateNameRes = await fetch('https://c6252.playfabapi.com/Client/UpdateUserTitleDisplayName', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Authorization': newSessionTicket
-  },
-  body: JSON.stringify(updateNameBody)
-});
-
-const updateNameData = await updateNameRes.json();
-log += `UpdateName: ${JSON.stringify(updateNameData)}\n`;
-
-      // Step 3: setLevelProgressionForClass
-     const receivedXpps = 1;
-
-const levelProgression = {
-  playerLevel: 9990,
-  classLevel: [
-    { classId: "Bagman", XP: 959, XpToNextLevel: 2730, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "Brave", XP: 503, XpToNextLevel: 2790, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "Detective", XP: 1304, XpToNextLevel: 5280, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "Inventor", XP: 3196, XpToNextLevel: 3630, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "Leader", XP: 2403, XpToNextLevel: 4170, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "Scout", XP: 12333, XpToNextLevel: 21720, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "BasicNeighbor", XP: 864, XpToNextLevel: 900, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "ButcherNeighbor", XP: 5841, XpToNextLevel: 6690, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "ClownNeighbor", XP: 434, XpToNextLevel: 480, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "GhostNeighbor", XP: 49, XpToNextLevel: 2370, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "GuestNeighbor", XP: 1603, XpToNextLevel: 1830, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "RandomNeighbor", XP: 12333, XpToNextLevel: 21720, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "Quentin", XP: 50, XpToNextLevel: 840, level: 666, availablePerkSlotsCount: 3 },
-    { classId: "HunterNeighbor", XP: 0, XpToNextLevel: 300, level: 666, availablePerkSlotsCount: 3 }
-  ]
-};
+      // Step 4: setLevelProgressionForClass
+      const receivedXpps = 1;
+      const levelProgression = {
+        playerLevel: 9990,
+        classLevel: [
+          { classId: "Bagman", XP: 959, XpToNextLevel: 2730, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "Brave", XP: 503, XpToNextLevel: 2790, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "Detective", XP: 1304, XpToNextLevel: 5280, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "Inventor", XP: 3196, XpToNextLevel: 3630, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "Leader", XP: 2403, XpToNextLevel: 4170, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "Scout", XP: 12333, XpToNextLevel: 21720, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "BasicNeighbor", XP: 864, XpToNextLevel: 900, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "ButcherNeighbor", XP: 5841, XpToNextLevel: 6690, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "ClownNeighbor", XP: 434, XpToNextLevel: 480, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "GhostNeighbor", XP: 49, XpToNextLevel: 2370, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "GuestNeighbor", XP: 1603, XpToNextLevel: 1830, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "RandomNeighbor", XP: 12333, XpToNextLevel: 21720, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "Quentin", XP: 50, XpToNextLevel: 840, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "HunterNeighbor", XP: 0, XpToNextLevel: 300, level: 666, availablePerkSlotsCount: 3 }
+        ]
+      };
       const setLevelBody = {
         CustomTags: null,
         FunctionName: "setLevelProgressionForClass",
@@ -1894,8 +1917,11 @@ const levelProgression = {
       });
       const setLevelData = await setLevelRes.json();
       log += `SetLevel: ${JSON.stringify(setLevelData)}\n`;
+      if (setLevelData.error) {
+        throw new Error(setLevelData.error);
+      }
 
-      // Step 4: refreshLeaderboardPlatform
+      // Step 5: refreshLeaderboardPlatform
       const platforms = ['IOS', 'PS4'];
       const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
       const refreshBody = {
@@ -1920,6 +1946,9 @@ const levelProgression = {
       });
       const refreshData = await refreshRes.json();
       log += `RefreshLeaderboard: ${JSON.stringify(refreshData)}\n`;
+      if (refreshData.error) {
+        throw new Error(refreshData.error);
+      }
 
       generatedAccounts++;
       output.textContent += `✅ Account generated: ${generatedAccounts}\n`;
