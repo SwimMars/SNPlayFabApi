@@ -2120,17 +2120,29 @@ function toggleAccountGenerator() {
       // Extract level progression from setLevelProgressionForClass response, if available
       let updatedLevelProgression = levelProgression;
       if (setLevelData.data && setLevelData.data.FunctionResult && setLevelData.data.FunctionResult.levelProgression) {
-        updatedLevelProgression = setLevelData.data.FunctionResult.levelProgression;
+        const serverResponse = setLevelData.data.FunctionResult.levelProgression;
+        updatedLevelProgression = typeof serverResponse === 'string' ? JSON.parse(serverResponse) : serverResponse;
       }
 
       // Step 8: refreshLeaderboardPlatform
       const platforms = ['IOS', 'PS4'];
       const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+      let levelProgressionString;
+      if (typeof updatedLevelProgression === 'string') {
+        try {
+          JSON.parse(updatedLevelProgression);
+          levelProgressionString = updatedLevelProgression;
+        } catch (err) {
+          throw new Error(`Invalid JSON in updatedLevelProgression: ${err.message}`);
+        }
+      } else {
+        levelProgressionString = JSON.stringify(updatedLevelProgression);
+      }
       const refreshBody = {
         CustomTags: null,
         FunctionName: "refreshLeaderboardPlatform",
         FunctionParameter: {
-          currentLevelProgression: JSON.stringify(updatedLevelProgression),
+          currentLevelProgression: levelProgressionString,
           platformName: randomPlatform
         },
         GeneratePlayStreamEvent: true,
