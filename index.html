@@ -1850,7 +1850,7 @@ function toggleAccountGenerator() {
 
       // Step 3: GetUserData
       const getUserDataBody = {
-        PlayFabId: 'A8BF447B410EC770'
+        PlayFabId: playFabId
       };
       const userDataRes = await fetch('https://c6252.playfabapi.com/Client/GetUserData', {
         method: 'POST',
@@ -2048,7 +2048,27 @@ function toggleAccountGenerator() {
         throw new Error(finishData.error);
       }
 
-      // Step 6: setLevelProgressionForClass
+      // Step 6: PurchaseItem
+      const purchaseItemBody = {
+        ItemId: "Neighbor_Bundle_TRDS",
+        VirtualCurrency: "FE",
+        Price: "0"
+      };
+      const purchaseRes = await fetch('https://c6252.playfabapi.com/Client/PurchaseItem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify(purchaseItemBody)
+      });
+      const purchaseData = await purchaseRes.json();
+      log += `PurchaseItem: ${JSON.stringify(purchaseData)}\n`;
+      if (purchaseData.error) {
+        throw new Error(purchaseData.error);
+      }
+
+      // Step 7: setLevelProgressionForClass
       const receivedXpps = 1;
       const levelProgression = {
         playerLevel: 9990,
@@ -2097,7 +2117,7 @@ function toggleAccountGenerator() {
         throw new Error(setLevelData.error);
       }
 
-      // Step 7: refreshLeaderboardPlatform
+      // Step 8: refreshLeaderboardPlatform
       const platforms = ['IOS', 'PS4'];
       const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
       const refreshBody = {
