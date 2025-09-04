@@ -1848,6 +1848,48 @@ function toggleAccountGenerator() {
         throw new Error(updateNameData.error);
       }
 
+      // Step 3: GetUserData
+      const getUserDataBody = {
+        PlayFabId: playFabId
+      };
+      const userDataRes = await fetch('https://c6252.playfabapi.com/Client/GetUserData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify(getUserDataBody)
+      });
+      const userData = await userDataRes.json();
+      log += `GetUserData: ${JSON.stringify(userData)}\n`;
+      if (userData.error) {
+        throw new Error(userData.error);
+      }
+      const loadoutValue = userData.data.Data.loadout?.Value;
+      if (!loadoutValue) {
+        throw new Error("No loadout value found in GetUserData response");
+      }
+
+      // Step 4: UpdateUserData
+      const updateUserDataBody = {
+        Data: {
+          loadout: loadoutValue
+        }
+      };
+      const updateUserDataRes = await fetch('https://c6252.playfabapi.com/Client/UpdateUserData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': newSessionTicket
+        },
+        body: JSON.stringify(updateUserDataBody)
+      });
+      const updateUserData = await updateUserDataRes.json();
+      log += `UpdateUserData: ${JSON.stringify(updateUserData)}\n`;
+      if (updateUserData.error) {
+        throw new Error(updateUserData.error);
+      }
+
       // Get Leaderboard for random player IDs
       const ps4Stats = [
         "LeaderBoard_AccountLevelPS4",
@@ -1925,7 +1967,7 @@ function toggleAccountGenerator() {
 
       const playerIds = [playFabId, ...randomPlayerIds];
 
-      // Step 3: startNewMatch
+      // Step 5: startNewMatch
       const startMatchBody = {
         CustomTags: null,
         FunctionName: "startNewMatch",
@@ -2006,7 +2048,7 @@ function toggleAccountGenerator() {
         throw new Error(finishData.error);
       }
 
-      // Step 4: setLevelProgressionForClass
+      // Step 6: setLevelProgressionForClass
       const receivedXpps = 1;
       const levelProgression = {
         playerLevel: 9990,
@@ -2055,7 +2097,7 @@ function toggleAccountGenerator() {
         throw new Error(setLevelData.error);
       }
 
-      // Step 5: refreshLeaderboardPlatform
+      // Step 7: refreshLeaderboardPlatform
       const platforms = ['IOS', 'PS4'];
       const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
       const refreshBody = {
