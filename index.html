@@ -2135,8 +2135,8 @@ function toggleAccountGenerator() {
           updatedLevelProgression = typeof serverResponse === 'string' ? JSON.parse(serverResponse) : serverResponse;
         }
 
-        // Add a 500ms delay between API calls
-        await delay(500);
+        // Add a 1000ms delay between API calls
+        await delay(1000);
       }
 
       // Step 8: refreshLeaderboardPlatform
