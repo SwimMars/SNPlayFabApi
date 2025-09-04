@@ -2184,8 +2184,8 @@ function toggleAccountGenerator() {
       
       let updatedLevelProgression = levelProgression;
       
-      // Update only the first valid class with receivedXP = 9999999
-      const classId = validClasses[0]; // Use the first valid class (Bagman)
+      // Randomly select a classId from validClasses
+      const classId = validClasses[Math.floor(Math.random() * validClasses.length)];
       const setLevelBody = {
         CustomTags: null,
         FunctionName: "setLevelProgressionForClass",
@@ -2276,6 +2276,19 @@ function toggleAccountGenerator() {
   }
 
   runAccountGenCycle();
+}
+
+function downloadAccountLog() {
+  const logContent = accountLogEntries.join('\n---\n');
+  const blob = new Blob([logContent], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `account_gen_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function downloadAccountLog() {
