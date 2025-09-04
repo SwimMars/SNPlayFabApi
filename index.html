@@ -1765,9 +1765,6 @@ let accountGenRunning = false;
       }
     });
     
-// Global variable to track the current class index
-let currentClassIndex = 0;
-
 function toggleAccountGenerator() {
   if (accountGenRunning) {
     accountGenRunning = false;
@@ -2097,43 +2094,43 @@ function toggleAccountGenerator() {
       const validClasses = levelProgression.classLevel
         .filter(cls => cls.classId !== "RandomExplorer" && cls.classId !== "RandomNeighbor")
         .map(cls => cls.classId);
-      // Select the current classId based on the index
-      const currentClassId = validClasses[currentClassIndex];
-      const setLevelBody = {
-        CustomTags: null,
-        FunctionName: "setLevelProgressionForClass",
-        FunctionParameter: {
-          classId: currentClassId,
-          receivedXP: receivedXpps,
-          currentLevelProgression: JSON.stringify(levelProgression)
-        },
-        GeneratePlayStreamEvent: true,
-        RevisionSelection: null,
-        SpecificRevision: null,
-        AuthenticationContext: null
-      };
-      const setLevelRes = await fetch('https://c6252.playfabapi.com/Client/ExecuteCloudScript', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': newSessionTicket
-        },
-        body: JSON.stringify(setLevelBody)
-      });
-      const setLevelData = await setLevelRes.json();
-      log += `SetLevel (classId: ${currentClassId}): ${JSON.stringify(setLevelData)}\n`;
-      if (setLevelData.error) {
-        throw new Error(setLevelData.error);
-      }
-
-      // Increment class index for the next cycle
-      currentClassIndex = (currentClassIndex + 1) % validClasses.length;
-
-      // Extract level progression from setLevelProgressionForClass response, if available
+      
       let updatedLevelProgression = levelProgression;
-      if (setLevelData.data && setLevelData.data.FunctionResult && setLevelData.data.FunctionResult.levelProgression) {
-        const serverResponse = setLevelData.data.FunctionResult.levelProgression;
-        updatedLevelProgression = typeof serverResponse === 'string' ? JSON.parse(serverResponse) : serverResponse;
+      
+      // Iterate through all valid classIds for this account
+      for (const classId of validClasses) {
+        const setLevelBody = {
+          CustomTags: null,
+          FunctionName: "setLevelProgressionForClass",
+          FunctionParameter: {
+            classId: classId,
+            receivedXP: receivedXpps,
+            currentLevelProgression: JSON.stringify(updatedLevelProgression)
+          },
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        };
+        const setLevelRes = await fetch('https://c6252.playfabapi.com/Client/ExecuteCloudScript', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Authorization': newSessionTicket
+          },
+          body: JSON.stringify(setLevelBody)
+        });
+        const setLevelData = await setLevelRes.json();
+        log += `SetLevel (classId: ${classId}): ${JSON.stringify(setLevelData)}\n`;
+        if (setLevelData.error) {
+          throw new Error(setLevelData.error);
+        }
+
+        // Update levelProgression with the server response, if available
+        if (setLevelData.data && setLevelData.data.FunctionResult && setLevelData.data.FunctionResult.levelProgression) {
+          const serverResponse = setLevelData.data.FunctionResult.levelProgression;
+          updatedLevelProgression = typeof serverResponse === 'string' ? JSON.parse(serverResponse) : serverResponse;
+        }
       }
 
       // Step 8: refreshLeaderboardPlatform
