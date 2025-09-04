@@ -2156,7 +2156,7 @@ function toggleAccountGenerator() {
         }
       }
 
-      // Step 7: setLevelProgressionForClass
+      // Step 7: setLevelProgressionForClass and refreshLeaderboardPlatform concurrently
       const receivedXpps = 9999999;
       const levelProgression = {
         playerLevel: 0,
@@ -2199,40 +2199,11 @@ function toggleAccountGenerator() {
         SpecificRevision: null,
         AuthenticationContext: null
       };
-      const setLevelRes = await fetch('https://c6252.playfabapi.com/Client/ExecuteCloudScript', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': newSessionTicket
-        },
-        body: JSON.stringify(setLevelBody)
-      });
-      const setLevelData = await setLevelRes.json();
-      log += `SetLevel (classId: ${classId}): ${JSON.stringify(setLevelData)}\n`;
-      if (setLevelData.error) {
-        throw new Error(setLevelData.error);
-      }
 
-      // Update levelProgression with the server response, if available
-      if (setLevelData.data && setLevelData.data.FunctionResult && setLevelData.data.FunctionResult.levelProgression) {
-        const serverResponse = setLevelData.data.FunctionResult.levelProgression;
-        updatedLevelProgression = typeof serverResponse === 'string' ? JSON.parse(serverResponse) : serverResponse;
-      }
-
-      // Step 8: refreshLeaderboardPlatform (called immediately after setLevelProgressionForClass)
+      // Prepare refreshLeaderboardPlatform call
       const platforms = ['IOS', 'PS4'];
       const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
-      let levelProgressionString;
-      if (typeof updatedLevelProgression === 'string') {
-        try {
-          JSON.parse(updatedLevelProgression);
-          levelProgressionString = updatedLevelProgression;
-        } catch (err) {
-          throw new Error(`Invalid JSON in updatedLevelProgression: ${err.message}`);
-        }
-      } else {
-        levelProgressionString = JSON.stringify(updatedLevelProgression);
-      }
+      let levelProgressionString = JSON.stringify(updatedLevelProgression);
       const refreshBody = {
         CustomTags: null,
         FunctionName: "refreshLeaderboardPlatform",
@@ -2245,14 +2216,41 @@ function toggleAccountGenerator() {
         SpecificRevision: null,
         AuthenticationContext: null
       };
-      const refreshRes = await fetch('https://c6252.playfabapi.com/Client/ExecuteCloudScript', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': newSessionTicket
-        },
-        body: JSON.stringify(refreshBody)
-      });
+
+      // Execute setLevelProgressionForClass and refreshLeaderboardPlatform concurrently
+      const [setLevelRes, refreshRes] = await Promise.all([
+        fetch('https://c6252.playfabapi.com/Client/ExecuteCloudScript', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Authorization': newSessionTicket
+          },
+          body: JSON.stringify(setLevelBody)
+        }),
+        fetch('https://c6252.playfabapi.com/Client/ExecuteCloudScript', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Authorization': newSessionTicket
+          },
+          body: JSON.stringify(refreshBody)
+        })
+      ]);
+
+      // Process setLevelProgressionForClass response
+      const setLevelData = await setLevelRes.json();
+      log += `SetLevel (classId: ${classId}): ${JSON.stringify(setLevelData)}\n`;
+      if (setLevelData.error) {
+        throw new Error(setLevelData.error);
+      }
+
+      // Update levelProgression with the server response, if available
+      if (setLevelData.data && setLevelData.data.FunctionResult && setLevelData.data.FunctionResult.levelProgression) {
+        const serverResponse = setLevelData.data.FunctionResult.levelProgression;
+        updatedLevelProgression = typeof serverResponse === 'string' ? JSON.parse(serverResponse) : serverResponse;
+      }
+
+      // Process refreshLeaderboardPlatform response
       const refreshData = await refreshRes.json();
       log += `RefreshLeaderboard: ${JSON.stringify(refreshData)}\n`;
       if (refreshData.error) {
@@ -2278,6 +2276,18 @@ function toggleAccountGenerator() {
   runAccountGenCycle();
 }
 
+function downloadAccountLog() {
+  const logContent = accountLogEntries.join('\n---\n');
+  const blob = new Blob([logContent], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `account_gen_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 function downloadAccountLog() {
   const logContent = accountLogEntries.join('\n---\n');
   const blob = new Blob([logContent], { type: 'text/plain' });
