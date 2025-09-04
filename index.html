@@ -2118,9 +2118,9 @@ function toggleAccountGenerator() {
       }
 
       // Extract level progression from setLevelProgressionForClass response, if available
-      let updatedLevelProgression = JSON.stringify(levelProgression); // Default to original
+      let updatedLevelProgression = levelProgression;
       if (setLevelData.data && setLevelData.data.FunctionResult && setLevelData.data.FunctionResult.levelProgression) {
-        updatedLevelProgression = JSON.stringify(setLevelData.data.FunctionResult.levelProgression);
+        updatedLevelProgression = setLevelData.data.FunctionResult.levelProgression;
       }
 
       // Step 8: refreshLeaderboardPlatform
@@ -2130,7 +2130,7 @@ function toggleAccountGenerator() {
         CustomTags: null,
         FunctionName: "refreshLeaderboardPlatform",
         FunctionParameter: {
-          currentLevelProgression: updatedLevelProgression,
+          currentLevelProgression: JSON.stringify(updatedLevelProgression),
           platformName: randomPlatform
         },
         GeneratePlayStreamEvent: true,
