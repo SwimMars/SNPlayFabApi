@@ -1850,7 +1850,7 @@ function toggleAccountGenerator() {
 
       // Step 3: GetUserData
       const getUserDataBody = {
-        PlayFabId: 'A8BF447B410EC770'
+        PlayFabId: playFabId
       };
       const userDataRes = await fetch('https://c6252.playfabapi.com/Client/GetUserData', {
         method: 'POST',
@@ -2069,7 +2069,7 @@ function toggleAccountGenerator() {
       }
 
       // Step 7: setLevelProgressionForClass
-      const receivedXpps = 9999999;
+      const receivedXpps = 1;
       const levelProgression = {
         playerLevel: 9990,
         classLevel: [
@@ -2078,16 +2078,16 @@ function toggleAccountGenerator() {
           { classId: "Detective", XP: 1304, XpToNextLevel: 5280, level: 666, availablePerkSlotsCount: 3 },
           { classId: "Inventor", XP: 3196, XpToNextLevel: 3630, level: 666, availablePerkSlotsCount: 3 },
           { classId: "Leader", XP: 2403, XpToNextLevel: 4170, level: 666, availablePerkSlotsCount: 3 },
-          { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 },
+          { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 666, availablePerkSlotsCount: 3 },
           { classId: "Scout", XP: 12333, XpToNextLevel: 21720, level: 666, availablePerkSlotsCount: 3 },
           { classId: "BasicNeighbor", XP: 864, XpToNextLevel: 900, level: 666, availablePerkSlotsCount: 3 },
           { classId: "ButcherNeighbor", XP: 5841, XpToNextLevel: 6690, level: 666, availablePerkSlotsCount: 3 },
           { classId: "ClownNeighbor", XP: 434, XpToNextLevel: 480, level: 666, availablePerkSlotsCount: 3 },
           { classId: "GhostNeighbor", XP: 49, XpToNextLevel: 2370, level: 666, availablePerkSlotsCount: 3 },
           { classId: "GuestNeighbor", XP: 1603, XpToNextLevel: 1830, level: 666, availablePerkSlotsCount: 3 },
-          { classId: "RandomNeighbor", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 },
-          { classId: "Quentin", XP: 12333, XpToNextLevel: 840, level: 666, availablePerkSlotsCount: 3 },
-          { classId: "HunterNeighbor", XP: 12333, XpToNextLevel: 300, level: 666, availablePerkSlotsCount: 3 }
+          { classId: "RandomNeighbor", XP: 12333, XpToNextLevel: 21720, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "Quentin", XP: 50, XpToNextLevel: 840, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "HunterNeighbor", XP: 0, XpToNextLevel: 300, level: 666, availablePerkSlotsCount: 3 }
         ]
       };
       const setLevelBody = {
@@ -2117,6 +2117,12 @@ function toggleAccountGenerator() {
         throw new Error(setLevelData.error);
       }
 
+      // Extract level progression from setLevelProgressionForClass response, if available
+      let updatedLevelProgression = JSON.stringify(levelProgression); // Default to original
+      if (setLevelData.data && setLevelData.data.FunctionResult && setLevelData.data.FunctionResult.levelProgression) {
+        updatedLevelProgression = JSON.stringify(setLevelData.data.FunctionResult.levelProgression);
+      }
+
       // Step 8: refreshLeaderboardPlatform
       const platforms = ['IOS', 'PS4'];
       const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
@@ -2124,7 +2130,7 @@ function toggleAccountGenerator() {
         CustomTags: null,
         FunctionName: "refreshLeaderboardPlatform",
         FunctionParameter: {
-          currentLevelProgression: JSON.stringify(levelProgression),
+          currentLevelProgression: updatedLevelProgression,
           platformName: randomPlatform
         },
         GeneratePlayStreamEvent: true,
