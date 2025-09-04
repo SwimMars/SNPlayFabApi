@@ -1765,6 +1765,9 @@ let accountGenRunning = false;
       }
     });
     
+// Global variable to track the current class index
+let currentClassIndex = 0;
+
 function toggleAccountGenerator() {
   if (accountGenRunning) {
     accountGenRunning = false;
@@ -2069,7 +2072,7 @@ function toggleAccountGenerator() {
       }
 
       // Step 7: setLevelProgressionForClass
-      const receivedXpps = 9999999;
+      const receivedXpps = 1;
       const levelProgression = {
         playerLevel: 9990,
         classLevel: [
@@ -2078,23 +2081,29 @@ function toggleAccountGenerator() {
           { classId: "Detective", XP: 1304, XpToNextLevel: 5280, level: 666, availablePerkSlotsCount: 3 },
           { classId: "Inventor", XP: 3196, XpToNextLevel: 3630, level: 666, availablePerkSlotsCount: 3 },
           { classId: "Leader", XP: 2403, XpToNextLevel: 4170, level: 666, availablePerkSlotsCount: 3 },
-          { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 },
+          { classId: "RandomExplorer", XP: 0, XpToNextLevel: 300, level: 666, availablePerkSlotsCount: 3 },
           { classId: "Scout", XP: 12333, XpToNextLevel: 21720, level: 666, availablePerkSlotsCount: 3 },
           { classId: "BasicNeighbor", XP: 864, XpToNextLevel: 900, level: 666, availablePerkSlotsCount: 3 },
           { classId: "ButcherNeighbor", XP: 5841, XpToNextLevel: 6690, level: 666, availablePerkSlotsCount: 3 },
           { classId: "ClownNeighbor", XP: 434, XpToNextLevel: 480, level: 666, availablePerkSlotsCount: 3 },
           { classId: "GhostNeighbor", XP: 49, XpToNextLevel: 2370, level: 666, availablePerkSlotsCount: 3 },
           { classId: "GuestNeighbor", XP: 1603, XpToNextLevel: 1830, level: 666, availablePerkSlotsCount: 3 },
-          { classId: "RandomNeighbor", XP: 0, XpToNextLevel: 300, level: 0, availablePerkSlotsCount: 0 },
-          { classId: "Quentin", XP: 12333, XpToNextLevel: 840, level: 666, availablePerkSlotsCount: 3 },
-          { classId: "HunterNeighbor", XP: 12333, XpToNextLevel: 300, level: 666, availablePerkSlotsCount: 3 }
+          { classId: "RandomNeighbor", XP: 12333, XpToNextLevel: 21720, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "Quentin", XP: 50, XpToNextLevel: 840, level: 666, availablePerkSlotsCount: 3 },
+          { classId: "HunterNeighbor", XP: 0, XpToNextLevel: 300, level: 666, availablePerkSlotsCount: 3 }
         ]
       };
+      // Filter out RandomExplorer and RandomNeighbor
+      const validClasses = levelProgression.classLevel
+        .filter(cls => cls.classId !== "RandomExplorer" && cls.classId !== "RandomNeighbor")
+        .map(cls => cls.classId);
+      // Select the current classId based on the index
+      const currentClassId = validClasses[currentClassIndex];
       const setLevelBody = {
         CustomTags: null,
         FunctionName: "setLevelProgressionForClass",
         FunctionParameter: {
-          classId: "BasicNeighbor",
+          classId: currentClassId,
           receivedXP: receivedXpps,
           currentLevelProgression: JSON.stringify(levelProgression)
         },
@@ -2112,10 +2121,13 @@ function toggleAccountGenerator() {
         body: JSON.stringify(setLevelBody)
       });
       const setLevelData = await setLevelRes.json();
-      log += `SetLevel: ${JSON.stringify(setLevelData)}\n`;
+      log += `SetLevel (classId: ${currentClassId}): ${JSON.stringify(setLevelData)}\n`;
       if (setLevelData.error) {
         throw new Error(setLevelData.error);
       }
+
+      // Increment class index for the next cycle
+      currentClassIndex = (currentClassIndex + 1) % validClasses.length;
 
       // Extract level progression from setLevelProgressionForClass response, if available
       let updatedLevelProgression = levelProgression;
