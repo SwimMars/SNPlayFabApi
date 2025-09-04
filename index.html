@@ -1790,6 +1790,9 @@ function toggleAccountGenerator() {
   const output = document.getElementById("accountGenOutput");
   output.textContent = "Starting account generator...\n";
 
+  // Utility function to add delay
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
   async function runAccountGenCycle() {
     if (!accountGenRunning) return;
 
@@ -2097,7 +2100,7 @@ function toggleAccountGenerator() {
       
       let updatedLevelProgression = levelProgression;
       
-      // Iterate through all valid classIds for this account
+      // Iterate through all valid classIds for this account with a delay
       for (const classId of validClasses) {
         const setLevelBody = {
           CustomTags: null,
@@ -2131,6 +2134,9 @@ function toggleAccountGenerator() {
           const serverResponse = setLevelData.data.FunctionResult.levelProgression;
           updatedLevelProgression = typeof serverResponse === 'string' ? JSON.parse(serverResponse) : serverResponse;
         }
+
+        // Add a 500ms delay between API calls
+        await delay(500);
       }
 
       // Step 8: refreshLeaderboardPlatform
