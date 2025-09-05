@@ -1044,8 +1044,8 @@ async function submitLevelProgression() {
       return { error: getLevelData.error || "No FunctionResult in response" };
     }
 
-    const currentLevelProgression = getLevelData.data.FunctionResult.currentLevelProgression || {};
-    output.textContent += `✅ getLevelProgression: Success - Retrieved progression: ${JSON.stringify(currentLevelProgression, null, 2)}\n`;
+    const levelProgression = getLevelData.data.FunctionResult.levelProgression || {};
+    output.textContent += `✅ getLevelProgression: Success - Retrieved progression: ${JSON.stringify(levelProgression, null, 2)}\n`;
 
     // Fetch random player IDs from leaderboard
     output.textContent += "Fetching leaderboard for player IDs...\n";
@@ -1298,7 +1298,7 @@ async function submitLevelProgression() {
       FunctionParameter: {
         classId: randomClassId,
         receivedXP: randomXP,
-        currentLevelProgression: currentLevelProgression
+        levelProgression: levelProgression
       },
       GeneratePlayStreamEvent: true,
       RevisionSelection: null,
@@ -1312,7 +1312,7 @@ async function submitLevelProgression() {
       return { error: setLevelData.error || "No FunctionResult in response" };
     }
 
-    const updatedLevelProgression = setLevelData.data.FunctionResult.currentLevelProgression || currentLevelProgression;
+    const updatedLevelProgression = setLevelData.data.FunctionResult.levelProgression || levelProgression;
     output.textContent += `✅ setLevelProgressionForClass: Success - Updated progression: ${JSON.stringify(updatedLevelProgression, null, 2)}\n`;
 
     // Step 9: Refresh Leaderboard Platform
@@ -1321,7 +1321,7 @@ async function submitLevelProgression() {
       CustomTags: null,
       FunctionName: "refreshLeaderboardPlatform",
       FunctionParameter: {
-        currentLevelProgression: updatedLevelProgression,
+        levelProgression: updatedLevelProgression,
         platformName: "STEAM"
       },
       GeneratePlayStreamEvent: true,
