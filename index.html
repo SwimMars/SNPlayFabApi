@@ -999,7 +999,7 @@ let accountGenRunning = false;
       }
     }
 
-   let isLevelProgressionRunning = false; // Flag to prevent concurrent runs
+ let isLevelProgressionRunning = false; // Flag to prevent concurrent runs
 
 async function submitLevelProgression() {
   if (isLevelProgressionRunning) {
@@ -1298,7 +1298,7 @@ async function submitLevelProgression() {
       FunctionParameter: {
         classId: randomClassId,
         receivedXP: randomXP,
-        levelProgression: levelProgression
+        currentLevelProgression: levelProgression
       },
       GeneratePlayStreamEvent: true,
       RevisionSelection: null,
@@ -1321,7 +1321,7 @@ async function submitLevelProgression() {
       CustomTags: null,
       FunctionName: "refreshLeaderboardPlatform",
       FunctionParameter: {
-        levelProgression: updatedLevelProgression,
+        currentLevelProgression: updatedLevelProgression,
         platformName: "STEAM"
       },
       GeneratePlayStreamEvent: true,
