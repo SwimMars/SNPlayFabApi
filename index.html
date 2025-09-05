@@ -1006,44 +1006,352 @@ let accountGenRunning = false;
       }
     }
 
-    async function submitLevelProgression() {
-      const classId = document.getElementById("classIdInput").value.trim();
-      const receivedXP = parseInt(document.getElementById("receivedXPInput").value);
-      const XP = parseInt(document.getElementById("xpInput").value);
-      const XpToNextLevel = parseInt(document.getElementById("xpToNextLevelInput").value);
-      const level = parseInt(document.getElementById("levelInput").value);
-      const availablePerkSlotsCount = Math.min(parseInt(document.getElementById("perkSlotsInput").value), 3);
-      const playerLevel = parseInt(document.getElementById("playerLevelInput").value);
-    
+   async function submitLevelProgression() {
+      const output = document.getElementById("levelProgressionOutput");
+      output.textContent += `\n=== Level Progression Cycle started at ${new Date().toLocaleTimeString()} ===\n`;
 
-      if (!classId || isNaN(receivedXP) || isNaN(XP) || isNaN(XpToNextLevel) || 
-          isNaN(level) || isNaN(availablePerkSlotsCount) || isNaN()) {
-        return { error: "Please fill in all fields correctly." };
+      if (!sessionTicket) {
+        output.textContent += "❌ Please set your SessionTicket first.\n";
+        return { error: "No session ticket set" };
       }
 
-      const currentLevelProgression = {
-        playerLevel,
-        classLevel: [{
-          classId,
-          XP,
-          XpToNextLevel,
-          level,
-          availablePerkSlotsCount
-        }]
-      };
+      try {
+        // Step 0: Get Level Progression
+        output.textContent += "Fetching level progression...\n";
+        const getLevelData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "getLevelProgression",
+          FunctionParameter: null,
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        });
 
+        if (getLevelData.error) {
+          output.textContent += `❌ getLevelProgression: Error - ${getLevelData.error}\n`;
+          return { error: getLevelData.error };
+        }
+        const currentLevelProgression = getLevelData.data.FunctionResult?.currentLevelProgression || {};
+        output.textContent += "✅ getLevelProgression: Success\n";
 
-      const data = await makeApiCall("Client/ExecuteCloudScript", "POST", {
-        FunctionName: "setLevelProgressionForClass",
-        FunctionParameter: {
-          classId,
-          receivedXP,
-          currentLevelProgression: JSON.stringify(currentLevelProgression)
-        },
-        GeneratePlayStreamEvent: true
-      });
+        // Fetch random player IDs from leaderboard
+        output.textContent += "Fetching leaderboard for player IDs...\n";
+        const statisticNames = [
+          "LeaderBoard_AccountLevelSTEAM",
+          "LeaderBoard_BagmanSTEAM",
+          "LeaderBoard_BraveSTEAM",
+          "LeaderBoard_DetectiveSTEAM",
+          "LeaderBoard_InventorSTEAM",
+          "LeaderBoard_LeaderSTEAM",
+          "LeaderBoard_QuentinSTEAM",
+          "LeaderBoard_ScoutSTEAM",
+          "LeaderBoard_BasicNeighborSTEAM",
+          "LeaderBoard_ButcherNeighborSTEAM",
+          "LeaderBoard_ClownNeighborSTEAM",
+          "LeaderBoard_GuestNeighborSTEAM",
+          "LeaderBoard_HunterNeighborSTEAM"
+        ];
+        const randomStatistic = statisticNames[Math.floor(Math.random() * statisticNames.length)];
+        const leaderboardData = await makeApiCall("Client/GetLeaderboard", "POST", {
+          StatisticName: randomStatistic,
+          StartPosition: 0,
+          MaxResultsCount: 100
+        });
 
-      return data;
+        if (leaderboardData.error || !leaderboardData.data.Leaderboard) {
+          output.textContent += `❌ GetLeaderboard: Error - ${leaderboardData.error || "No leaderboard data"}\n`;
+          return { error: leaderboardData.error || "No leaderboard data" };
+        }
+
+        const playerEntries = leaderboardData.data.Leaderboard;
+        const randomPlayerIds = [];
+        const usedIndices = new Set();
+        while (randomPlayerIds.length < 5 && usedIndices.size < playerEntries.length) {
+          const idx = Math.floor(Math.random() * playerEntries.length);
+          if (!usedIndices.has(idx)) {
+            usedIndices.add(idx);
+            randomPlayerIds.push(playerEntries[idx].PlayFabId);
+          }
+        }
+
+        if (randomPlayerIds.length < 5) {
+          output.textContent += "❌ Not enough unique player IDs found in leaderboard\n";
+          return { error: "Not enough unique player IDs" };
+        }
+
+        const playerIds = [sessionTicket.split('\n')[0], ...randomPlayerIds];
+
+        // Step 1: Start New Match
+        output.textContent += "Starting new match...\n";
+        const startMatchData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "startNewMatch",
+          FunctionParameter: {
+            roomType: "CUSTOM_GAME",
+            playerIds: playerIds
+          },
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        });
+
+        if (startMatchData.error) {
+          output.textContent += `❌ startNewMatch: Error - ${startMatchData.error}\n`;
+          return { error: startMatchData.error };
+        }
+        output.textContent += `✅ startNewMatch: Success (MatchId: ${startMatchData.data.FunctionResult?.currentMatchId || "N/A"})\n`;
+
+        // Step 2: Get XP Multiplier
+        output.textContent += "Getting XP multiplier...\n";
+        const xpMultiplierData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "getXpMultiplier",
+          FunctionParameter: {
+            playerCount: 6
+          },
+          GeneratePlayStreamEvent: false,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        });
+
+        if (xpMultiplierData.error) {
+          output.textContent += `❌ getXpMultiplier: Error - ${xpMultiplierData.error}\n`;
+          return { error: xpMultiplierData.error };
+        }
+        output.textContent += "✅ getXpMultiplier: Success\n";
+
+        // Step 3: Check PopCorn Event
+        output.textContent += "Checking PopCorn event...\n";
+        const popCornData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "checkPopCornEvent",
+          FunctionParameter: null,
+          GeneratePlayStreamEvent: false,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        });
+
+        if (popCornData.error) {
+          output.textContent += `❌ checkPopCornEvent: Error - ${popCornData.error}\n`;
+          return { error: popCornData.error };
+        }
+        output.textContent += "✅ checkPopCornEvent: Success\n";
+
+        // Step 4: Decide Special Role
+        output.textContent += "Deciding special role...\n";
+        const decideRoleData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "decideSpecialRole",
+          FunctionParameter: {
+            roomType: "CUSTOM_GAME",
+            playerIds: playerIds
+          },
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        });
+
+        if (decideRoleData.error) {
+          output.textContent += `❌ decideSpecialRole: Error - ${decideRoleData.error}\n`;
+          return { error: decideRoleData.error };
+        }
+        output.textContent += "✅ decideSpecialRole: Success\n";
+
+        // Random delay between 3-15 minutes
+        const delayMinutes = Math.floor(Math.random() * (15 - 3 + 1)) + 3;
+        const delayMs = delayMinutes * 60 * 1000;
+        output.textContent += `Waiting ${delayMinutes} minutes...\n`;
+
+        // Random usefulDeed calls during the delay
+        const usefulDeedInterval = setInterval(async () => {
+          if (!levelEditorRunning) {
+            clearInterval(usefulDeedInterval);
+            return;
+          }
+          output.textContent += "Calling usefulDeed...\n";
+          const usefulDeedData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+            CustomTags: null,
+            FunctionName: "usefulDeed",
+            FunctionParameter: null,
+            GeneratePlayStreamEvent: null,
+            RevisionSelection: null,
+            SpecificRevision: null,
+            AuthenticationContext: null
+          });
+
+          output.textContent += usefulDeedData.error 
+            ? `❌ usefulDeed: Error - ${usefulDeedData.error}\n`
+            : "✅ usefulDeed: Success\n";
+          output.scrollTop = output.scrollHeight;
+        }, Math.random() * (delayMs / 2)); // Random intervals during delay
+
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        clearInterval(usefulDeedInterval);
+
+        // Step 5: Write Player Event (Match Statistics)
+        output.textContent += "Writing match statistics...\n";
+        const matchStatsData = await makeApiCall("Client/WritePlayerEvent", "POST", {
+          Body: {
+            Data: {
+              activeExplorers: ["Scout", "Leader", "Detective", "Bagman", "Inventor", "Brave"],
+              activeNeighbors: ["GhostNeighbor", "ButcherNeighbor", "BasicNeighbor", "HunterNeighbor", "ClownNeighbor", "GuestNeighbor"],
+              activeNeighbor: "BasicNeighbor",
+              gameMode: "CUSTOM_GAME",
+              mapName: "#1: The Neighbor Case",
+              playersCount: 6,
+              lowPriority: false,
+              playersLeaveMatchCount: 0,
+              locksUnlocked: 6,
+              explorersMissingCount: 0,
+              victoryType: "CHILD_VICTORY",
+              timeLeft: 4
+            }
+          },
+          CustomTags: null,
+          EventName: "MatchStatistics",
+          Timestamp: null,
+          AuthenticationContext: null
+        });
+
+        if (matchStatsData.error) {
+          output.textContent += `❌ MatchStatistics: Error - ${matchStatsData.error}\n`;
+          return { error: matchStatsData.error };
+        }
+        output.textContent += "✅ MatchStatistics: Success\n";
+
+        // Step 6: Finish Match
+        output.textContent += "Finishing match...\n";
+        const finishMatchData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "finishMatch",
+          FunctionParameter: {
+            roomType: "CUSTOM_GAME",
+            playerIds: playerIds
+          },
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        });
+
+        if (finishMatchData.error) {
+          output.textContent += `❌ finishMatch: Error - ${finishMatchData.error}\n`;
+          return { error: finishMatchData.error };
+        }
+        output.textContent += "✅ finishMatch: Success\n";
+
+        // Step 7: Get Last Match Result
+        output.textContent += "Getting last match result...\n";
+        const lastMatchData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "getLastMatchResult",
+          FunctionParameter: null,
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        });
+
+        if (lastMatchData.error) {
+          output.textContent += `❌ getLastMatchResult: Error - ${lastMatchData.error}\n`;
+          return { error: lastMatchData.error };
+        }
+        output.textContent += "✅ getLastMatchResult: Success\n";
+
+        // Step 8: Set Level Progression for Class
+        const classIds = ["Scout", "Leader", "Detective", "Bagman", "Inventor", "Brave", 
+                          "GhostNeighbor", "ButcherNeighbor", "BasicNeighbor", "HunterNeighbor", 
+                          "ClownNeighbor", "GuestNeighbor"];
+        const randomClassId = classIds.filter(id => id !== "RandomExplorer" && id !== "RandomNeighbor")[Math.floor(Math.random() * classIds.length)];
+        const randomXP = Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000;
+
+        output.textContent += `Setting level progression for class ${randomClassId} with ${randomXP} XP...\n`;
+        const setLevelData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "setLevelProgressionForClass",
+          FunctionParameter: {
+            classId: randomClassId,
+            receivedXP: randomXP,
+            currentLevelProgression: currentLevelProgression
+          },
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        });
+
+        if (setLevelData.error) {
+          output.textContent += `❌ setLevelProgressionForClass: Error - ${setLevelData.error}\n`;
+          return { error: setLevelData.error };
+        }
+        const updatedLevelProgression = setLevelData.data.FunctionResult?.currentLevelProgression || currentLevelProgression;
+        output.textContent += "✅ setLevelProgressionForClass: Success\n";
+
+        // Step 9: Refresh Leaderboard Platform
+        output.textContent += "Refreshing leaderboard platform...\n";
+        const refreshLeaderboardData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "refreshLeaderboardPlatform",
+          FunctionParameter: {
+            currentLevelProgression: updatedLevelProgression,
+            platformName: "STEAM"
+          },
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        });
+
+        if (refreshLeaderboardData.error) {
+          output.textContent += `❌ refreshLeaderboardPlatform: Error - ${refreshLeaderboardData.error}\n`;
+          return { error: refreshLeaderboardData.error };
+        }
+        output.textContent += "✅ refreshLeaderboardPlatform: Success\n";
+
+        // Step 10: Get User Inventory
+        output.textContent += "Fetching user inventory...\n";
+        const inventoryData = await makeApiCall("Client/GetUserInventory", "POST", {});
+        if (inventoryData.error) {
+          output.textContent += `❌ GetUserInventory: Error - ${inventoryData.error}\n`;
+          return { error: inventoryData.error };
+        }
+        output.textContent += `✅ GetUserInventory: Success (Items: ${inventoryData.data.Inventory?.length || 0})\n`;
+
+        // Step 11: Fetch Info
+        output.textContent += "Fetching additional info...\n";
+        const fetchInfoData = await makeApiCall("Client/ExecuteCloudScript", "POST", {
+          CustomTags: null,
+          FunctionName: "fetchInfo",
+          FunctionParameter: {
+            ids: ["PUNISHMENT", "GAMES_COUNT", "SEASON_AND_EVENT"],
+            args: ""
+          },
+          GeneratePlayStreamEvent: true,
+          RevisionSelection: null,
+          SpecificRevision: null,
+          AuthenticationContext: null
+        });
+
+        if (fetchInfoData.error) {
+          output.textContent += `❌ fetchInfo: Error - ${fetchInfoData.error}\n`;
+          return { error: fetchInfoData.error };
+        }
+        output.textContent += "✅ fetchInfo: Success\n";
+
+        output.textContent += "✅ Level Progression Cycle completed successfully\n";
+        output.scrollTop = output.scrollHeight;
+        return { success: true };
+
+      } catch (err) {
+        output.textContent += `❌ Unexpected error: ${err.message}\n`;
+        output.scrollTop = output.scrollHeight;
+        return { error: err.message };
+      }
     }
 
     async function getPlayFabInfo() {
@@ -1402,12 +1710,14 @@ let accountGenRunning = false;
     }
 
     function toggleLevelEditor() {
+      const output = document.getElementById("levelProgressionOutput");
       if (levelEditorRunning) {
         clearInterval(levelEditorIntervalId);
         levelEditorRunning = false;
         document.getElementById("levelEditorStatus").className = "status-indicator status-inactive";
         document.getElementById("levelEditorToggleButton").textContent = "Start Level Editor";
-        document.getElementById("levelProgressionOutput").textContent += "\nLevel editor stopped manually.";
+        output.textContent += `\nLevel editor stopped manually at ${new Date().toLocaleTimeString()}.\n`;
+        output.scrollTop = output.scrollHeight;
         return;
       }
 
@@ -1415,27 +1725,25 @@ let accountGenRunning = false;
       document.getElementById("levelEditorStatus").className = "status-indicator status-active";
       document.getElementById("levelEditorToggleButton").textContent = "Stop Level Editor";
 
-      document.getElementById("levelProgressionOutput").textContent = 
-        `Starting Level Editor...\n`;
+      output.textContent += `Starting Level Editor...\n`;
 
       async function runLevelEditorCycle() {
-        let output = `\n=== Cycle started at ${new Date().toLocaleTimeString()} ===\n`;
+        let outputText = `\n=== Cycle started at ${new Date().toLocaleTimeString()} ===\n`;
 
         try {
           const data = await submitLevelProgression();
 
           if (data.error) {
-            output += `❌ setLevelProgressionForClass: Error - ${data.error}\n`;
+            outputText += `❌ setLevelProgressionForClass: Error - ${data.error}\n`;
           } else {
-            output += `✅ setLevelProgressionForClass: Success\n`;
+            outputText += `✅ setLevelProgressionForClass: Success\n`;
           }
         } catch (err) {
-          output += `❌ setLevelProgressionForClass: Exception - ${err.message}\n`;
+          outputText += `❌ setLevelProgressionForClass: Exception - ${err.message}\n`;
         }
 
-        const levelOutput = document.getElementById("levelProgressionOutput");
-        levelOutput.textContent += output;
-        levelOutput.scrollTop = levelOutput.scrollHeight;
+        output.textContent += outputText;
+        output.scrollTop = output.scrollHeight;
       }
 
       runLevelEditorCycle();
