@@ -1038,13 +1038,14 @@ async function submitLevelProgression() {
       AuthenticationContext: null
     });
 
-    if (getLevelData.error) {
-      output.textContent += `❌ getLevelProgression: Error - ${getLevelData.error}\n`;
+    if (getLevelData.error || !getLevelData.data?.FunctionResult) {
+      output.textContent += `❌ getLevelProgression: Error - ${getLevelData.error || "No FunctionResult in response"}\n`;
       isLevelProgressionRunning = false;
-      return { error: getLevelData.error };
+      return { error: getLevelData.error || "No FunctionResult in response" };
     }
-    const currentLevelProgression = getLevelData.data.FunctionResult?.currentLevelProgression || {};
-    output.textContent += "✅ getLevelProgression: Success\n";
+
+    const currentLevelProgression = getLevelData.data.FunctionResult.currentLevelProgression || {};
+    output.textContent += `✅ getLevelProgression: Success - Retrieved progression: ${JSON.stringify(currentLevelProgression, null, 2)}\n`;
 
     // Fetch random player IDs from leaderboard
     output.textContent += "Fetching leaderboard for player IDs...\n";
@@ -1305,13 +1306,14 @@ async function submitLevelProgression() {
       AuthenticationContext: null
     });
 
-    if (setLevelData.error) {
-      output.textContent += `❌ setLevelProgressionForClass: Error - ${setLevelData.error}\n`;
+    if (setLevelData.error || !setLevelData.data?.FunctionResult) {
+      output.textContent += `❌ setLevelProgressionForClass: Error - ${setLevelData.error || "No FunctionResult in response"}\n`;
       isLevelProgressionRunning = false;
-      return { error: setLevelData.error };
+      return { error: setLevelData.error || "No FunctionResult in response" };
     }
-    const updatedLevelProgression = setLevelData.data.FunctionResult?.currentLevelProgression || currentLevelProgression;
-    output.textContent += "✅ setLevelProgressionForClass: Success\n";
+
+    const updatedLevelProgression = setLevelData.data.FunctionResult.currentLevelProgression || currentLevelProgression;
+    output.textContent += `✅ setLevelProgressionForClass: Success - Updated progression: ${JSON.stringify(updatedLevelProgression, null, 2)}\n`;
 
     // Step 9: Refresh Leaderboard Platform
     output.textContent += "Refreshing leaderboard platform...\n";
@@ -1378,6 +1380,57 @@ async function submitLevelProgression() {
     isLevelProgressionRunning = false;
     return { error: err.message };
   }
+}
+
+function toggleLevelEditor() {
+  const output = document.getElementById("levelProgressionOutput");
+  if (levelEditorRunning) {
+    clearTimeout(levelEditorIntervalId);
+    levelEditorRunning = false;
+    document.getElementById("levelEditorStatus").className = "status-indicator status-inactive";
+    document.getElementById("levelEditorToggleButton").textContent = "Start Level Editor";
+    output.textContent += `\nLevel editor stopped manually at ${new Date().toLocaleTimeString('en-US', { timeZone: 'Europe/Paris' })}.\n`;
+    output.scrollTop = output.scrollHeight;
+    return;
+  }
+
+  levelEditorRunning = true;
+  document.getElementById("levelEditorStatus").className = "status-indicator status-active";
+  document.getElementById("levelEditorToggleButton").textContent = "Stop Level Editor";
+
+  output.textContent += `Starting Level Editor...\n`;
+
+  async function runLevelEditorCycle() {
+    if (!levelEditorRunning) return;
+
+    let outputText = `\n=== Cycle started at ${new Date().toLocaleTimeString('en-US', { timeZone: 'Europe/Paris' })} ===\n`;
+
+    try {
+      const data = await submitLevelProgression();
+
+      if (data.error) {
+        outputText += `❌ Level progression cycle: Error - ${data.error}\n`;
+      } else {
+        outputText += `✅ Level progression cycle: Success\n`;
+      }
+    } catch (err) {
+      outputText += `❌ Level progression cycle: Exception - ${err.message}\n`;
+    }
+
+    output.textContent += outputText;
+    output.scrollTop = output.scrollHeight;
+
+    // Schedule next cycle after completion, respecting the random delay
+    if (levelEditorRunning) {
+      const delayMinutes = Math.floor(Math.random() * (15 - 3 + 1)) + 3;
+      const delayMs = delayMinutes * 60 * 1000;
+      output.textContent += `Scheduling next cycle in ${delayMinutes} minutes...\n`;
+      output.scrollTop = output.scrollHeight;
+      levelEditorIntervalId = setTimeout(runLevelEditorCycle, delayMs);
+    }
+  }
+
+  runLevelEditorCycle();
 }
     async function getPlayFabInfo() {
       const playfabId = document.getElementById("playfabId").value.trim();
